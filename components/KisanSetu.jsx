@@ -505,47 +505,6 @@ function calcIncentives(driver){
 
 
 // ─── Incentive calculation (capped at TOTAL_BUDGET) ───────────────────────
-function calcIncentives(driver){
-  const ac    = driver?.acresCompleted||0;
-  const jobs  = driver?.completedJobs||0;
-  const cr    = driver?.completionRate||0;    // 0-100%
-  const rating= driver?.rating||5;
-  const totalAc = DEMO_DRIVERS.reduce((s,d)=>s+d.ac,0)+ac||1;
-
-  // 1. Milestone pool: per-driver share of milestone bonuses
-  const reached = MILESTONES.filter(m=>ac>=m.acres);
-  const milestoneEarned = Math.min(
-    reached.reduce((s,m)=>s+m.bonus,0),
-    POOL_MILESTONE / TOTAL_DRIVERS * 3  // cap per driver
-  );
-
-  // 2. Performance pool: weighted by acres×completionRate×rating
-  const perfScore = ac * (cr/100) * (rating/5);
-  const totalPerf = DEMO_DRIVERS.reduce((s,d)=>s+d.ac*(d.cr/100)*(d.rating/5),0)+perfScore||1;
-  const perfEarned = Math.min(
-    (perfScore/totalPerf)*POOL_PERFORMANCE,
-    POOL_PERFORMANCE/TOTAL_DRIVERS*4
-  );
-
-  // 3. Leaderboard pool: top 20 drivers split
-  const rank = DEMO_DRIVERS.filter(d=>d.ac>ac).length+1;
-  let lbEarned = 0;
-  if(rank<=20){
-    const shares=[12,10,8,7,6,5.5,5,4.5,4,3.5,3,2.5,2,1.8,1.6,1.4,1.2,1,0.8,0.7];
-    lbEarned = (shares[rank-1]/100)*POOL_LEADERBOARD;
-  }
-
-  const total = milestoneEarned+perfEarned+lbEarned;
-  // HARD CAP: never exceed total budget share
-  const hardCap = TOTAL_BUDGET/TOTAL_DRIVERS*3;
-  return {
-    milestone: Math.round(Math.min(milestoneEarned, hardCap)),
-    performance: Math.round(Math.min(perfEarned, hardCap)),
-    leaderboard: Math.round(Math.min(lbEarned, hardCap)),
-    total: Math.round(Math.min(total, hardCap)),
-    rank, perfScore: Math.round(perfScore*10)/10, nextMilestone: MILESTONES.find(m=>ac<m.acres)||null,
-  };
-}
 
 
 // ─── Styles ───────────────────────────────────────────────────────────────
