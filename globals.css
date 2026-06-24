@@ -1,0 +1,5 @@
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;font-family:"Segoe UI",system-ui,sans-serif;background:#f8fafc;overflow-x:hidden}
+#__next{max-width:480px;margin:0 auto;min-height:100vh}
+::-webkit-scrollbar{display:none}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
