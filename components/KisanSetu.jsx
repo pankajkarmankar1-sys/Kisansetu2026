@@ -1,4 +1,8 @@
 "use client";
+import Home from "./Home";
+import OTPLogin from "./OTPLogin";
+import CustomerRegistration from "./CustomerRegistration";
+import DriverRegistration from "./DriverRegistration";
 import { useState, useRef, useEffect } from "react";
 
 // ─── Supabase Client ──────────────────────────────────────────────────────
