@@ -1,7 +1,4 @@
 "use client";
-import OTPLogin from "./OTPLogin";          // DELETE
-import CustomerRegistration from "./CustomerRegistration"; // DELETE
-import DriverRegistration from "./DriverRegistration";     // DELETE
 import { useState, useRef, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 
