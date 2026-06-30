@@ -1,13 +1,19 @@
 "use client";
-import OTPLogin from "./OTPLogin";
-import CustomerRegistration from "./CustomerRegistration";
-import DriverRegistration from "./DriverRegistration";
+import OTPLogin from "./OTPLogin";          // DELETE
+import CustomerRegistration from "./CustomerRegistration"; // DELETE
+import DriverRegistration from "./DriverRegistration";     // DELETE
 import { useState, useRef, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPA_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supa = createClient(SUPA_URL, SUPA_KEY);
+const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://dzzxapuektnamgabdxlq.supabase.co";
+const SUPA_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6enhhcHVla3RuYW1nYWJkeGxxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3NDY3MTQsImV4cCI6MjA5NzMyMjcxNH0.j1X9GrQDaFIfEoKyIdauzb-m1_v51pkN6nVcJeob-fM";
+let supa;
+try {
+  supa = createClient(SUPA_URL, SUPA_KEY);
+} catch (e) {
+  console.error("Supabase init failed:", e);
+  supa = { auth: { signInWithOtp: async()=>({error:{message:"Supabase not configured"}}), verifyOtp: async()=>({error:{message:"Supabase not configured"}}) }, from: ()=>({ upsert: async()=>({error:null}), select: ()=>({eq:()=>({maybeSingle: async()=>({data:null})})}) }) };
+}
 
 // ─── Supabase Auth Helpers ────────────────────────────────────────────────
 async function sbSendOTP(phone){
