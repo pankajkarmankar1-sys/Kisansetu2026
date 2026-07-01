@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
-import { sbGetAllBookings } from "../../lib/database";
-
+import React, { useState } from "react";
+import ServiceSelection from "./booking/ServiceSelection";
+import PaymentSummary from "./booking/PaymentSummary";
+import DateSelection from "./booking/DateSelection";
+import BookingSuccess from "./booking/BookingSuccess";
 export default function MyBookings({ phone }) {
   const [bookings, setBookings] = useState([]);
 
