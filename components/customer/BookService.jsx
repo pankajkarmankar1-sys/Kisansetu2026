@@ -40,8 +40,18 @@ export default function BookService({
           setAcres={setAcres}
           paymentDone={paymentDone}
           setPaymentDone={setPaymentDone}
-          next={() => setStep("date")}
+          next={() => setStep("Payment")}
           back={back}
+          {step === "payment" && (
+  <PaymentSummary
+    selectedService={selectedService}
+    acres={acres}
+    paymentDone={paymentDone}
+    setPaymentDone={setPaymentDone}
+    next={() => setStep("date")}
+    back={() => setStep("service")}
+  />
+)}
         />
       )}
 
