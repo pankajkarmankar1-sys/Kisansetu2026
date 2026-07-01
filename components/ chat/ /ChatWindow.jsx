@@ -1,24 +1,83 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ChatList from "./ChatList";
 import MessageInput from "./MessageInput";
 
-export default function ChatWindow() {
+import {
+  sendMessage,
+  getMessages,
+  subscribeMessages,
+} from "../../lib/chat";
+
+export default function ChatWindow({
+  booking,
+  user,
+  receiver,
+}) {
 
   const [messages, setMessages] = useState([]);
 
-  function sendMessage(text) {
+  useEffect(() => {
+
+    if (!booking?.id) return;
+
+    loadMessages();
+
+    const channel = subscribeMessages(
+      booking.id,
+      () => {
+        loadMessages();
+      }
+    );
+
+    return () => {
+      channel.unsubscribe();
+    };
+
+  }, [booking]);
+
+  async function loadMessages() {
+
+    try {
+
+      const data = await getMessages(
+        booking.id
+      );
+
+      setMessages(data || []);
+
+    } catch (err) {
+
+      console.error(err);
+
+    }
+
+  }
+
+  async function handleSend(text) {
 
     if (!text) return;
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        text,
-        sender: "customer",
-        time: new Date().toLocaleTimeString(),
-      },
-    ]);
+    try {
+
+      await sendMessage({
+
+        booking_id: booking.id,
+
+        sender_id: user?.id,
+
+        sender_type: user?.role,
+
+        receiver_id: receiver?.id,
+
+        message: text,
+
+      });
+
+    } catch (err) {
+
+      console.error(err);
+
+    }
 
   }
 
@@ -35,9 +94,13 @@ export default function ChatWindow() {
 
       <h2>💬 Chat</h2>
 
-      <ChatList messages={messages} />
+      <ChatList
+        messages={messages}
+      />
 
-      <MessageInput onSend={sendMessage} />
+      <MessageInput
+        onSend={handleSend}
+      />
 
     </div>
 
