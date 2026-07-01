@@ -1,10 +1,5 @@
-import React, { useState } from "react";
-import ServiceSelection from "./booking/ServiceSelection";
-import PaymentSummary from "./booking/PaymentSummary";
-import DateSelection from "./booking/DateSelection";
-import BookingSuccess from "./booking/BookingSuccess";
-import React from "react";
-import DriverBookingCard from "./DriverBookingCard";
+import React, { useState, useEffect } from "react";
+import DriverBookingCard from "./DriverBookingCard";";
 export default function MyBookings({ phone }) {
   const [bookings, setBookings] = useState([]);
 
@@ -35,14 +30,10 @@ export default function MyBookings({ phone }) {
       )}
 
       {bookings.map((b) => (
-        <div
-          key={b.id}
-          style={{
-            border: "1px solid #ddd",
-            borderRadius: 10,
-            padding: 15,
-            marginBottom: 15,
-          }}
+        <DriverBookingCard
+  key={b.id}
+  booking={b}
+/>
         >
           <h3>{b.service_name}</h3>
 
