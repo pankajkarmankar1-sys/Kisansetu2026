@@ -2,108 +2,108 @@ import React, { useEffect, useState } from "react";
 import ChatList from "./ChatList";
 import MessageInput from "./MessageInput";
 
-import {
-  sendMessage,
-  getMessages,
-  subscribeMessages,
-} from "../../lib/chat";
+import { supabase } from "../../lib/supabase";
 
-export default function ChatWindow({
-  booking,
-  user,
-  receiver,
-}) {
+export default function ChatWindow({ bookingId, user }) {
 
   const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-
-    if (!booking?.id) return;
-
-    loadMessages();
-
-    const channel = subscribeMessages(
-      booking.id,
-      () => {
-        loadMessages();
-      }
-    );
-
-    return () => {
-      channel.unsubscribe();
-    };
-
-  }, [booking]);
-
+  // -------------------------
+  // LOAD OLD MESSAGES
+  // -------------------------
   async function loadMessages() {
 
-    try {
+    const { data, error } = await supabase
+      .from("messages")
+      .select("*")
+      .eq("booking_id", bookingId)
+      .order("created_at", { ascending: true });
 
-      const data = await getMessages(
-        booking.id
-      );
+    if (!error) setMessages(data || []);
 
-      setMessages(data || []);
-
-    } catch (err) {
-
-      console.error(err);
-
-    }
-
+    setLoading(false);
   }
 
-  async function handleSend(text) {
+  // -------------------------
+  // SEND MESSAGE
+  // -------------------------
+  async function sendMessage(text) {
 
     if (!text) return;
 
-    try {
+    const newMsg = {
+      booking_id: bookingId,
+      sender: user?.role || "customer",
+      sender_id: user?.id,
+      text,
+      created_at: new Date().toISOString(),
+    };
 
-      await sendMessage({
+    const { error } = await supabase
+      .from("messages")
+      .insert([newMsg]);
 
-        booking_id: booking.id,
-
-        sender_id: user?.id,
-
-        sender_type: user?.role,
-
-        receiver_id: receiver?.id,
-
-        message: text,
-
-      });
-
-    } catch (err) {
-
-      console.error(err);
-
-    }
+    if (error) console.log(error);
 
   }
 
-  return (
+  // -------------------------
+  // REALTIME LISTENER
+  // -------------------------
+  useEffect(() => {
 
+    loadMessages();
+
+    const channel = supabase
+      .channel("chat-" + bookingId)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "messages",
+          filter: `booking_id=eq.${bookingId}`,
+        },
+        (payload) => {
+
+          const newMsg = payload.new;
+
+          setMessages((prev) => [...prev, newMsg]);
+
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+
+  }, [bookingId]);
+
+  // -------------------------
+  // UI
+  // -------------------------
+  return (
     <div
       style={{
         border: "1px solid #ddd",
         borderRadius: 12,
-        background: "#fff",
         padding: 15,
+        background: "#fff",
       }}
     >
 
-      <h2>💬 Chat</h2>
+      <h2>💬 Live Chat</h2>
 
-      <ChatList
-        messages={messages}
-      />
+      {loading ? (
+        <p>Loading chat...</p>
+      ) : (
+        <ChatList messages={messages} />
+      )}
 
-      <MessageInput
-        onSend={handleSend}
-      />
+      <MessageInput onSend={sendMessage} />
 
     </div>
-
   );
-
 }
