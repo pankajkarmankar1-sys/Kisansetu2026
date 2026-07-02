@@ -610,12 +610,13 @@ function App(){
     DB.bookings.push(nb);
     setBks(DB.bookings.filter(x=>x.ph===user.phone));
     setDft(nb);
-    // Supabase sync
-    sbSaveBooking(nb).catch(()=>{});
     // Auto-assign tractor
-    autoAssign(nb);
-    go("ok");
-  };
+autoAssign(nb);
+
+// Save final booking to Supabase (with assigned driver if available)
+sbSaveBooking(nb).catch(console.error);
+
+go("ok");
 
   // Driver login
   const onDriverLogin=ph=>{
