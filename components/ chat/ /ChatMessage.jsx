@@ -1,18 +1,15 @@
 import React from "react";
 
 export default function ChatMessage({ message }) {
-
-  const isCustomer = message?.sender === "customer";
+  const isCustomer = message?.sender_type === "customer";
 
   return (
-
     <div
       style={{
         marginBottom: 10,
         textAlign: isCustomer ? "right" : "left",
       }}
     >
-
       <div
         style={{
           display: "inline-block",
@@ -24,19 +21,29 @@ export default function ChatMessage({ message }) {
           wordBreak: "break-word",
         }}
       >
+        {message?.message}
 
-        {message?.text}
+        {message?.image_url && (
+          <div style={{ marginTop: 8 }}>
+            <img
+              src={message.image_url}
+              alt="Chat"
+              style={{
+                maxWidth: 220,
+                borderRadius: 8,
+              }}
+            />
+          </div>
+        )}
 
         <br />
 
-        <small>
-          {message?.time || message?.created_at || ""}
+        <small style={{ opacity: 0.7 }}>
+          {message?.created_at
+            ? new Date(message.created_at).toLocaleString("en-IN")
+            : ""}
         </small>
-
       </div>
-
     </div>
-
   );
-
 }
