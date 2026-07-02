@@ -1847,107 +1847,269 @@ function History({bks,nav,tryBook,openChat}){return(
 );}
 
 // ═══ CHAT ══════════════════════════════════════════════════════════════════
-function Chat({booking,user,role,back}){
+function Chat({ booking, user, role, back }) {
   const [msgs, setMsgs] = useState([]);
-  const [txt,setTxt]=useState("");
+  const [txt, setTxt] = useState("");
+
   useEffect(() => {
-  if (!booking?.id) return;
+    if (!booking?.id) return;
 
-  loadMessages();
+    loadMessages();
 
-  const channel = supa
-    .channel("chat-" + booking.id)
-    .on(
-      "postgres_changes",
-      {
-        event: "*",
-        schema: "public",
-        table: "messages",
-        filter: `booking_id=eq.${booking.id}`,
-      },
-      () => {
-        loadMessages();
-      }
-    )
-    .subscribe();
+    const channel = supa
+      .channel("chat-" + booking.id)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "messages",
+          filter: `booking_id=eq.${booking.id}`,
+        },
+        () => {
+          loadMessages();
+        }
+      )
+      .subscribe();
 
-  return () => {
-    supa.removeChannel(channel);
-  };
-}, [booking?.id]);
+    return () => {
+      supa.removeChannel(channel);
+    };
+  }, [booking?.id]);
 
-async function loadMessages() {
-  const { data, error } = await supa
-    .from("messages")
-    .select("*")
-    .eq("booking_id", booking.id)
-    .order("created_at", { ascending: true });
+  async function loadMessages() {
+    const { data, error } = await supa
+      .from("messages")
+      .select("*")
+      .eq("booking_id", booking.id)
+      .order("created_at", { ascending: true });
 
-  if (!error) {
-    setMsgs(data || []);
+    if (!error) {
+      setMsgs(data || []);
+    }
   }
-}
-  const send = async () => {
-  if (!txt.trim()) return;
 
-  const { error } = await supa
-    .from("messages")
-    .insert([
+  const send = async () => {
+    if (!txt.trim()) return;
+
+    const { error } = await supa.from("messages").insert([
       {
         booking_id: booking.id,
         sender: role,
         sender_id: user?.phone || user?.id,
         text: txt,
+        image_url: null,
+        is_read: false,
+        created_at: new Date().toISOString(),
       },
     ]);
 
-  if (error) {
-    console.error(error);
-    return;
-  }
+    if (error) {
+      console.error(error);
+      return;
+    }
 
-  setTxt("");
-};
-  
-    
-  
-  return(
-    <div style={{background:"#f0faf0",minHeight:"100vh",display:"flex",flexDirection:"column"}}>
-      <div style={{...S.hdr,background:"linear-gradient(135deg,#1565c0,#0d47a1)",paddingBottom:16}}>
-        <button style={S.bkb} onClick={back}>← Back</button>
-        <h1 style={{fontSize:18,fontWeight:900,position:"relative",zIndex:1}}>💬 Chat — Booking #{booking?.id}</h1>
-        <p style={{opacity:.8,fontSize:13,marginTop:3,position:"relative",zIndex:1}}>{booking?.serviceNameHi} • {fd(booking?.date)}</p>
+    setTxt("");
+  };
+
+  return (
+    <div
+      style={{
+        background: "#f0faf0",
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <div
+        style={{
+          ...S.hdr,
+          background: "linear-gradient(135deg,#1565c0,#0d47a1)",
+          paddingBottom: 16,
+        }}
+      >
+        <button style={S.bkb} onClick={back}>
+          ← Back
+        </button>
+
+        <h1
+          style={{
+            fontSize: 18,
+            fontWeight: 900,
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          💬 Chat — Booking #{booking?.id}
+        </h1>
+
+        <p
+          style={{
+            opacity: 0.8,
+            fontSize: 13,
+            marginTop: 3,
+          }}
+        >
+          {booking?.serviceNameHi} • {fd(booking?.date)}
+        </p>
       </div>
-      {/* Call buttons */}
-      <div style={{padding:"12px 15px",background:"#fff",borderBottom:"1px solid #e0e0e0",display:"flex",gap:10}}>
-        <button style={{flex:1,background:"#4caf50",color:"#fff",border:"none",borderRadius:10,padding:"10px",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:14}}>📞 {role==="driver"?"Call Customer":"Call Driver"}</button>
-        <button style={{flex:1,background:"#25D366",color:"#fff",border:"none",borderRadius:10,padding:"10px",fontWeight:700,cursor:"pointer",fontFamily:"inherit",fontSize:14}}>💬 WhatsApp</button>
+
+      <div
+        style={{
+          padding: "12px 15px",
+          background: "#fff",
+          borderBottom: "1px solid #e0e0e0",
+          display: "flex",
+          gap: 10,
+        }}
+      >
+        <button
+          style={{
+            flex: 1,
+            background: "#4caf50",
+            color: "#fff",
+            border: "none",
+            borderRadius: 10,
+            padding: 10,
+            fontWeight: 700,
+          }}
+        >
+          📞 {role === "driver" ? "Call Customer" : "Call Driver"}
+        </button>
+
+        <button
+          style={{
+            flex: 1,
+            background: "#25D366",
+            color: "#fff",
+            border: "none",
+            borderRadius: 10,
+            padding: 10,
+            fontWeight: 700,
+          }}
+        >
+          💬 WhatsApp
+        </button>
       </div>
-      {/* Messages */}
-      <div style={{flex:1,padding:"12px 15px",overflowY:"auto",display:"flex",flexDirection:"column",gap:8,minHeight:300}}>
-        {msgs.length===0&&<div style={{textAlign:"center",padding:"40px 0",color:"#9ab5a3"}}>
-          <p style={{fontSize:32}}>💬</p>
-          <p style={{fontSize:14,marginTop:8}}>Chat शुरू करें</p>
-        </div>}
-        {msgs.map(m=>(
-          <div key={m.id} style={{display:"flex",justifyContent:m.sender===role?"flex-end":"flex-start"
-            <div style={{background:m.from===role?"#2d8a4e":"#fff",color:m.from===role?"#fff":"#1a3d2a",padding:"9px 13px",borderRadius:m.from===role?"16px 16px 4px 16px":"16px 16px 16px 4px",maxWidth:"75%",boxShadow:"0 1px 4px rgba(0,0,0,.1)"}}>
-              <p style={{fontSize:11,opacity:.75,marginBottom:3,fontWeight:600}}>{m.name}</p>
-              <p style={{fontSize:14,lineHeight:1.4}}>{m.text}</p>
-              <p style={{fontSize:10,opacity:.65,marginTop:4,textAlign:"right"}}>{m.time}</p>
-            </div>
+
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: 15,
+        }}
+      >
+        {msgs.length === 0 ? (
+          <div
+            style={{
+              textAlign: "center",
+              color: "#888",
+              marginTop: 40,
+            }}
+          >
+            No messages yet.
           </div>
-        ))}
+        ) : (
+          msgs.map((m) => (
+            <div
+              key={m.id}
+              style={{
+                display: "flex",
+                justifyContent:
+                  m.sender === role ? "flex-end" : "flex-start",
+                marginBottom: 10,
+              }}
+            >
+              <div
+                style={{
+                  background:
+                    m.sender === role ? "#2d8a4e" : "#ffffff",
+                  color:
+                    m.sender === role ? "#ffffff" : "#000000",
+                  padding: "10px 14px",
+                  borderRadius: 10,
+                  maxWidth: "75%",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 11,
+                    opacity: 0.7,
+                  }}
+                >
+                  {m.sender === "driver"
+                    ? "🚜 Driver"
+                    : "👨‍🌾 Customer"}
+                </div>
+
+                <div style={{ marginTop: 4 }}>
+                  {m.text}
+                </div>
+
+                <div
+                  style={{
+                    fontSize: 10,
+                    opacity: 0.6,
+                    marginTop: 5,
+                    textAlign: "right",
+                  }}
+                >
+                  {m.created_at
+                    ? new Date(m.created_at).toLocaleTimeString(
+                        "en-IN",
+                        {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }
+                      )
+                    : ""}
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
-      {/* Input */}
-      <div style={{padding:"12px 15px",background:m.sender===role?"#2d8a4e":"#fff",
-color:m.sender===role?"#fff":"#1a3d2a",
-borderRadius:m.sender===role?"16px 16px 4px 16px":"16px 16px 16px 4px",>Send</button>
+
+      <div
+        style={{
+          display: "flex",
+          gap: 10,
+          padding: 15,
+          background: "#fff",
+          borderTop: "1px solid #ddd",
+        }}
+      >
+        <input
+          value={txt}
+          onChange={(e) => setTxt(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") send();
+          }}
+          placeholder="Message लिखें..."
+          style={{
+            ...S.inp,
+            flex: 1,
+            marginBottom: 0,
+          }}
+        />
+
+        <button
+          onClick={send}
+          style={{
+            background: "#2d8a4e",
+            color: "#fff",
+            border: "none",
+            borderRadius: 10,
+            padding: "0 20px",
+            fontWeight: 700,
+          }}
+        >
+          Send
+        </button>
       </div>
     </div>
   );
 }
-
 // ═══ DRIVER LOGIN ══════════════════════════════════════════════════════════
 function DriverLogin({onLogin,back}){
   const [step,ss]=useState("ph");
