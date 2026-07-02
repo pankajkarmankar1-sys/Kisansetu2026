@@ -1888,8 +1888,27 @@ function Chat({ booking, user, role, back }) {
       setMsgs(data || []);
     }
   }
+  
 
-  const send = async () => {
+  const send = async () => {function callUser() {
+  const phone =
+    role === "driver"
+      ? booking?.customer_phone
+      : booking?.driver_phone;
+
+  if (phone) {
+    window.location.href = `tel:${phone}`;
+  }
+}function whatsappUser() {
+  const phone =
+    role === "driver"
+      ? booking?.customer_phone
+      : booking?.driver_phone;
+
+  if (phone) {
+    window.open(`https://wa.me/91${phone}`, "_blank");
+  }
+  }
     if (!txt.trim()) return;
 
     const { error } = await supa.from("messages").insert([
@@ -2094,22 +2113,32 @@ function Chat({ booking, user, role, back }) {
         />
 
         <button
-          onClick={send}
-          style={{
-            background: "#2d8a4e",
-            color: "#fff",
-            border: "none",
-            borderRadius: 10,
-            padding: "0 20px",
-            fontWeight: 700,
-          }}
-        >
-          Send
-        </button>
-      </div>
-    </div>
-  );
-}
+  onClick={callUser}
+  style={{
+    flex: 1,
+    background: "#4caf50",
+    color: "#fff",
+    border: "none",
+    borderRadius: 10,
+    padding: 10,
+    fontWeight: 700,
+  }}
+>
+  📞 {role === "driver" ? "Call Customer" : "Call Driver"}
+</button><button
+  onClick={whatsappUser}
+  style={{
+    flex: 1,
+    background: "#25D366",
+    color: "#fff",
+    border: "none",
+    borderRadius: 10,
+    padding: 10,
+    fontWeight: 700,
+  }}
+>
+  💬 WhatsApp
+</button>
 // ═══ DRIVER LOGIN ══════════════════════════════════════════════════════════
 function DriverLogin({onLogin,back}){
   const [step,ss]=useState("ph");
