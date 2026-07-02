@@ -144,7 +144,7 @@ const ADMIN_PWD="kisan2025";
 // FLEET DISPATCH & SCHEDULING ENGINE
 // ═══════════════════════════════════════════════════════════════════════════
 
-// ── Tractor statuses ───────────────────────────────────────────────────────
+// ──  statuses ───────────────────────────────────────────────────────
 const TRACTOR_STATUS = {
   AVAILABLE:   "Available",
   BUSY:        "Busy",
@@ -164,9 +164,6 @@ function registerTractor(driver) {
     driverPhone:   driver.phone,
     driverName:    driver.name,
     status:        TRACTOR_STATUS.AVAILABLE,
-    dailyCapacity: 20,   // default 20 acres/day
-    pendingAcres:  0,
-    activeAcres:   0,
     completedAcres:driver.acresCompleted || 0,
     assignedJobs:  [],
     completedJobs: 0,
@@ -234,7 +231,7 @@ function autoAssign(booking) {
   const tractor = tractors[0];
   const acres = parseFloat(booking.acres) || 1;
   const reserved = reserveSchedule(tractor.id, booking.date, acres);
-
+ 
   // Update booking
   const idx = DB.bookings.findIndex(b => b.id === booking.id);
   if (idx >= 0) {
@@ -366,8 +363,6 @@ function processWaitList() {
 function fleetSummary() {
   syncFleet();
   const all = Object.values(DB.fleet);
-  const totalCap    = all.reduce((s, t) => s + (t.dailyCapacity || 20), 0);
-  const usedCap     = all.reduce((s, t) => s + t.pendingAcres, 0);
   const completedAc = all.reduce((s, t) => s + t.completedAcres, 0);
   return {
     total:       all.length,
