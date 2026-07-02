@@ -1878,19 +1878,7 @@ function Chat({ booking, user, role, back }) {
   }, [booking?.id]);
 
   async function loadMessages() {
-    const { data, error } = await supa
-      .from("messages")
-      .select("*")
-      .eq("booking_id", booking.id)
-      .order("created_at", { ascending: true });
-
-    if (!error) {
-      setMsgs(data || []);
-    }
-  }
-  
-
- {function callUser() {
+    function callUser() {
   const phone =
     role === "driver"
       ? booking?.customer_phone
@@ -1899,8 +1887,9 @@ function Chat({ booking, user, role, back }) {
   if (phone) {
     window.location.href = `tel:${phone}`;
   }
-}function whatsappUser() {
-  const phone =
+}
+
+function whatsappUser() {   const phone =
     role === "driver"
       ? booking?.customer_phone
       : booking?.driver_phone;
@@ -1908,10 +1897,14 @@ function Chat({ booking, user, role, back }) {
   if (phone) {
     window.open(`https://wa.me/91${phone}`, "_blank");
   }
-  }
-    if (!txt.trim()) return;
+}
 
-    const { error } = await supa.from("messages").insert([
+const send = async () => {
+  if (!txt.trim()) return;
+
+  const { error } = await supa
+    .from("messages")
+    .insert([
       {
         booking_id: booking.id,
         sender: role,
@@ -1919,12 +1912,16 @@ function Chat({ booking, user, role, back }) {
         text: txt,
         image_url: null,
         is_read: false,
-        created_at: new Date().toISOString(),
       },
     ]);
 
-    if (error) {
-      console.error(error);
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  setTxt("");
+};
       return;
     }
 
