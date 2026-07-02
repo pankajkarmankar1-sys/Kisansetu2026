@@ -394,7 +394,6 @@ const TOTAL_BUDGET     = 22500000;   // ₹2.25 Crore hard cap
 const POOL_MILESTONE   = 11250000;   // ₹1.125 Crore
 const POOL_PERFORMANCE = 7500000;    // ₹75 Lakh
 const POOL_LEADERBOARD = 3750000;    // ₹37.5 Lakh
-const TOTAL_DRIVERS    = 100;
 // NOTE: No fixed acre target — total acres are dynamic (could be 2.5L, 3L, 4L+)
 
 // Milestone tiers — based on individual driver's own completed acres
@@ -449,10 +448,15 @@ function calcIncentives(driver){
     .map(d=>({ac:d.acresCompleted||0,cr:d.completionRate||100,rating:d.rating||5}));
 
   // ── Combine DB drivers + drivers for pool calculations
-  const allDrivers = [
-    ...DEMO_DRIVERS.map(d=>({ac:d.ac,cr:d.cr,rating:d.rating})),
-    ...dbDrivers,
-  ];
+  const allDrivers = dbDrivers.length
+  ? dbDrivers
+  : [
+      {
+        ac,
+        cr,
+        rating,
+      },
+    ];
   const totalCompanyAc = allDrivers.reduce((s,d)=>s+d.ac,0)+ac||1;
 
   // ── 1. MILESTONE POOL ──────────────────────────────────────────────────
