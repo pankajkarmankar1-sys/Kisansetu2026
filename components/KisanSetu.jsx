@@ -1887,11 +1887,30 @@ async function loadMessages() {
     setMsgs(data || []);
   }
 }
-  const send=()=>{
-    if(!txt.trim())return;
-    const m={id:gid(),from:role,name:user?.name||"User",text:txt,time:new Date().toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"})};
+  const send = async () => {
+  if (!txt.trim()) return;
+
+  const { error } = await supa
+    .from("messages")
+    .insert([
+      {
+        booking_id: booking.id,
+        sender: role,
+        sender_id: user?.phone || user?.id,
+        text: txt,
+      },
+    ]);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  setTxt("");
+};
+  
     
-  };
+  
   return(
     <div style={{background:"#f0faf0",minHeight:"100vh",display:"flex",flexDirection:"column"}}>
       <div style={{...S.hdr,background:"linear-gradient(135deg,#1565c0,#0d47a1)",paddingBottom:16}}>
@@ -1911,7 +1930,7 @@ async function loadMessages() {
           <p style={{fontSize:14,marginTop:8}}>Chat शुरू करें</p>
         </div>}
         {msgs.map(m=>(
-          <div key={m.id} style={{display:"flex",justifyContent:m.from===role?"flex-end":"flex-start"}}>
+          <div key={m.id} style={{display:"flex",justifyContent:m.sender===role?"flex-end":"flex-start"
             <div style={{background:m.from===role?"#2d8a4e":"#fff",color:m.from===role?"#fff":"#1a3d2a",padding:"9px 13px",borderRadius:m.from===role?"16px 16px 4px 16px":"16px 16px 16px 4px",maxWidth:"75%",boxShadow:"0 1px 4px rgba(0,0,0,.1)"}}>
               <p style={{fontSize:11,opacity:.75,marginBottom:3,fontWeight:600}}>{m.name}</p>
               <p style={{fontSize:14,lineHeight:1.4}}>{m.text}</p>
@@ -1921,9 +1940,9 @@ async function loadMessages() {
         ))}
       </div>
       {/* Input */}
-      <div style={{padding:"12px 15px",background:"#fff",borderTop:"1px solid #e0e0e0",display:"flex",gap:10,alignItems:"center"}}>
-        <input style={{...S.inp,flex:1,padding:"11px 14px",marginBottom:0}} placeholder="Message लिखें..." value={txt} onChange={e=>setTxt(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()}/>
-        <button onClick={send} style={{background:"#2d8a4e",color:"#fff",border:"none",borderRadius:10,padding:"11px 16px",cursor:"pointer",fontWeight:800,fontFamily:"inherit",fontSize:16}}>Send</button>
+      <div style={{padding:"12px 15px",background:m.sender===role?"#2d8a4e":"#fff",
+color:m.sender===role?"#fff":"#1a3d2a",
+borderRadius:m.sender===role?"16px 16px 4px 16px":"16px 16px 16px 4px",>Send</button>
       </div>
     </div>
   );
