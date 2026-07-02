@@ -1848,14 +1848,49 @@ function History({bks,nav,tryBook,openChat}){return(
 
 // ═══ CHAT ══════════════════════════════════════════════════════════════════
 function Chat({booking,user,role,back}){
-  const [msgs,setMsgs]=useState(DB.chats[booking?.id]||[]);
+  const [msgs, setMsgs] = useState([]);
   const [txt,setTxt]=useState("");
+  useEffect(() => {
+  if (!booking?.id) return;
+
+  loadMessages();
+
+  const channel = supa
+    .channel("chat-" + booking.id)
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "messages",
+        filter: `booking_id=eq.${booking.id}`,
+      },
+      () => {
+        loadMessages();
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supa.removeChannel(channel);
+  };
+}, [booking?.id]);
+
+async function loadMessages() {
+  const { data, error } = await supa
+    .from("messages")
+    .select("*")
+    .eq("booking_id", booking.id)
+    .order("created_at", { ascending: true });
+
+  if (!error) {
+    setMsgs(data || []);
+  }
+}
   const send=()=>{
     if(!txt.trim())return;
     const m={id:gid(),from:role,name:user?.name||"User",text:txt,time:new Date().toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"})};
-    const updated=[...msgs,m];
-    DB.chats[booking?.id]=updated;
-    setMsgs(updated);setTxt("");
+    
   };
   return(
     <div style={{background:"#f0faf0",minHeight:"100vh",display:"flex",flexDirection:"column"}}>
