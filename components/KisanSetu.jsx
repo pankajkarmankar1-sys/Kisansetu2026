@@ -2122,8 +2122,10 @@ const send = async () => {
     fontWeight: 700,
   }}
 >
-  📞 {role === "driver" ? "Call Customer" : "Call Driver"}
-</button><button
+📞 {role === "driver" ? "Call Customer" : "Call Driver"}
+</button>
+
+<button
   onClick={whatsappUser}
   style={{
     flex: 1,
