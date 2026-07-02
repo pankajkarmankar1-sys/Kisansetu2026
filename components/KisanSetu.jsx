@@ -792,53 +792,43 @@ function FF({label,ico,type="text",val,onChange,err,ph}){
     {err&&<p style={{color:"#EF4444",fontSize:12,marginTop:4}}>⚠️ {err}</p>}
   </div>);
 }
-
+  
 // ─── Upload ───────────────────────────────────────────────────────────────
-function Upload({label,ico,val,err,onPick,onRm,preview}){
-  const [loading,setL]=useState(false);
-  const pick=t=>{setL(true);setTimeout(()=>{setL(false);onPick(t);},1400);};
-  return(
-    <div style={{marginBottom:18}}>
-      <label style={S.lbl}>{ico} {label}</label>
-      {loading&&(
-        <div style={{border:"2px solid #9fd4af",borderRadius:12,padding:"20px",background:"#f6fef8",textAlign:"center"}}>
-          <div style={{fontSize:30,marginBottom:8,display:"inline-block",animation:"sp 1s linear infinite"}}>🔄</div>
-          <p style={{fontWeight:700,color:"#2d8a4e",fontSize:13}}>Upload हो रहा है...</p>
-          <div style={{marginTop:10,background:"#c8e6c9",borderRadius:999,height:6,overflow:"hidden"}}>
-            <div style={{height:"100%",background:"#2d8a4e",borderRadius:999,animation:"pw 1.4s linear forwards"}}/>
-          </div>
-        </div>
-      )}
-      {!loading&&val&&(
-        <div>
-          {preview}
-          <div style={{display:"flex",gap:8,marginTop:8,alignItems:"center"}}>
-            <div style={{flex:1,background:"#F0FDF4",borderRadius:12,padding:"10px 14px",border:"1px solid #BBF7D0"}}><p style={{fontWeight:700,color:"#16A34A",fontSize:13}}>✅ Upload सफल! ({val})</p></div>
-            <button onClick={onRm} style={{background:"#ffcdd2",border:"none",borderRadius:12,padding:"9px 12px",cursor:"pointer",fontWeight:700,color:"#c62828",fontFamily:"inherit"}}>🗑️</button>
-          </div>
-          {err&&<p style={{color:"#EF4444",fontSize:12,marginTop:4}}>⚠️ {err}</p>}
-        </div>
-      )}
-      {!loading&&!val&&(
-        <div style={{border:"1.5px dashed #86EFAC",borderRadius:16,overflow:"hidden",background:"#FAFFFE"}}>
-          <div style={{background:"#e8f5e9",padding:"9px 12px",textAlign:"center",borderBottom:"1px solid #c8e6c9"}}>
-            <p style={{fontSize:13,fontWeight:700,color:"#1a6b38"}}>👇 Koi bhi button dabao</p>
-          </div>
-          <div style={{display:"flex"}}>
-            <button onClick={()=>pick("Camera")} style={UB(true)}><span style={{fontSize:32}}>📷</span><span style={{fontSize:13,fontWeight:700,color:"#1a3d2a"}}>Camera</span><span style={{fontSize:11,color:"#7a9e8a"}}>Photo lo</span></button>
-            <button onClick={()=>pick("Gallery")} style={UB(true)}><span style={{fontSize:32}}>🖼️</span><span style={{fontSize:13,fontWeight:700,color:"#1a3d2a"}}>Gallery</span><span style={{fontSize:11,color:"#7a9e8a"}}>Select karo</span></button>
-            <button onClick={()=>pick("PDF")} style={UB(false)}><span style={{fontSize:32}}>📄</span><span style={{fontSize:13,fontWeight:700,color:"#1a3d2a"}}>PDF</span><span style={{fontSize:11,color:"#7a9e8a"}}>Upload karo</span></button>
-          </div>
-          <div style={{background:"#fffde7",padding:"5px 12px",borderTop:"1px solid #ffe082",textAlign:"center"}}>
-            <p style={{fontSize:11,color:"#8a6000"}}>👆 Tap → document preview dikhega ✅</p>
-          </div>
-        </div>
-      )}
-      {!val&&!loading&&err&&<p style={{color:"#EF4444",fontSize:12,marginTop:4}}>⚠️ {err}</p>}
-    </div>
-  );
-}
 
+<Upload
+  label="Aadhaar Front"
+  ico="🪪"
+  val={aadhaarFront}
+  onPick={setAadhaarFront}
+  onRm={()=>setAadhaarFront(null)}
+  preview={
+    aadhaarFront?.type?.startsWith("image/")
+      ? <img src={URL.createObjectURL(aadhaarFront)} style={{width:"100%",borderRadius:12}}/>
+      : <div style={S.card}>📄 {aadhaarFront?.name}</div>
+  }
+/><Upload
+  label="Aadhaar Back"
+  ico="🪪"
+  val={aadhaarBack}
+  onPick={setAadhaarBack}
+  onRm={()=>setAadhaarBack(null)}
+  preview={
+    aadhaarBack?.type?.startsWith("image/")
+      ? <img src={URL.createObjectURL(aadhaarBack)} style={{width:"100%",borderRadius:12}}/>
+      : <div style={S.card}>📄 {aadhaarBack?.name}</div>
+  }
+/><Upload
+  label="7/12 Document"
+  ico="🌾"
+  val={sat712}
+  onPick={setSat712}
+  onRm={()=>setSat712(null)}
+  preview={
+    sat712?.type?.startsWith("image/")
+      ? <img src={URL.createObjectURL(sat712)} style={{width:"100%",borderRadius:12}}/>
+      : <div style={S.card}>📄 {sat712?.name}</div>
+  }
+/>
 // ─── Document Preview Cards ───────────────────────────────────────────────
 function AadCard({name}){return(
   <div style={{borderRadius:14,overflow:"hidden",border:"2px solid #90caf9",marginBottom:4}}>
