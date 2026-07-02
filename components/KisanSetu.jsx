@@ -1890,7 +1890,7 @@ function Chat({ booking, user, role, back }) {
   }
   
 
-  const send = async () => {function callUser() {
+ {function callUser() {
   const phone =
     role === "driver"
       ? booking?.customer_phone
@@ -1940,6 +1940,7 @@ function Chat({ booking, user, role, back }) {
         flexDirection: "column",
       }}
     >
+      const send = async () =>
       <div
         style={{
           ...S.hdr,
