@@ -194,7 +194,7 @@ function getAvailableTractors(customerVillage) {
     const bMatch = b.village === customerVillage ? 0 : 1;
     if (aMatch !== bMatch) return aMatch - bMatch;
     // Secondary: fewest pending acres (load balancing)
-    return a.pendingAcres - b.pendingAcres;
+   return a.driverName.localeCompare(b.driverName); 
   });
 }
 
@@ -202,7 +202,7 @@ function getAvailableTractors(customerVillage) {
 function reserveSchedule(tractorId, startDate, acres) {
   const t = DB.fleet[tractorId];
   if (!t) return [];
-  const cap = t.dailyCapacity || 20;
+
   const daysNeeded = Math.ceil(acres / cap);
   const reserved = [];
   let d = startDate ? new Date(startDate) : new Date();
@@ -304,7 +304,7 @@ function handleBreakdown(tractorId, reason = "Breakdown") {
       DB.bookings[idx].driverName      = newTractor.driverName;
       DB.bookings[idx].assignmentStatus = "transferred";
       DB.bookings[idx].transferHistory  = [...(DB.bookings[idx].transferHistory||[]), transfer];
-      newTractor.pendingAcres += parseFloat(job.acres) || 0;
+      
       newTractor.assignedJobs.push(job.id);
     } else if (idx >= 0) {
       DB.bookings[idx].assignmentStatus = "waiting";
@@ -325,7 +325,7 @@ function manualReassign(bookingId, newTractorId) {
   // Free old tractor
   if (booking.tractorId && DB.fleet[booking.tractorId]) {
     const old = DB.fleet[booking.tractorId];
-    old.pendingAcres = Math.max(0, old.pendingAcres - (parseFloat(booking.acres) || 0));
+  
     old.assignedJobs = old.assignedJobs.filter(id => id !== bookingId);
   }
   // Assign new
@@ -340,7 +340,7 @@ function manualReassign(bookingId, newTractorId) {
     DB.bookings[idx].assignmentStatus = "reassigned";
     DB.bookings[idx].assignedAt       = new Date().toISOString();
   }
-  newT.pendingAcres += parseFloat(booking.acres) || 0;
+
   newT.assignedJobs.push(bookingId);
   return true;
 }
@@ -359,23 +359,19 @@ function processWaitList() {
   DB.waitList.push(...remaining);
 }
 
-// ── Fleet capacity summary ────────────────────────────────────────────────
 function fleetSummary() {
   syncFleet();
   const all = Object.values(DB.fleet);
-  const completedAc = all.reduce((s, t) => s + t.completedAcres, 0);
+  const completedAc = all.reduce((s, t) => s + (t.completedAcres || 0), 0);
+
   return {
-    total:       all.length,
-    available:   all.filter(t => t.status === TRACTOR_STATUS.AVAILABLE).length,
-    busy:        all.filter(t => t.status === TRACTOR_STATUS.BUSY).length,
+    total: all.length,
+    available: all.filter(t => t.status === TRACTOR_STATUS.AVAILABLE).length,
+    busy: all.filter(t => t.status === TRACTOR_STATUS.BUSY).length,
     maintenance: all.filter(t => t.status === TRACTOR_STATUS.MAINTENANCE).length,
-    breakdown:   all.filter(t => t.status === TRACTOR_STATUS.BREAKDOWN).length,
-    totalCap,
-    usedCap: Math.round(usedCap),
-    freeCap:     Math.max(0, Math.round(totalCap - usedCap)),
-    utilPct:     totalCap > 0 ? Math.round((usedCap / totalCap) * 100) : 0,
+    breakdown: all.filter(t => t.status === TRACTOR_STATUS.BREAKDOWN).length,
     completedAc: Math.round(completedAc),
-    waiting:     DB.waitList.length,
+    waiting: DB.waitList.length,
   };
 }
 
@@ -417,8 +413,8 @@ const MILESTONE_TIERS = [
 const driverMilestonePool = POOL_MILESTONE / TOTAL_DRIVERS;
 const MILESTONES = MILESTONE_TIERS.map(t=>({...t, bonus: Math.round((t.pct/100)*POOL_MILESTONE)}));
 
-// Demo leaderboard data (100 drivers, variable acres)
-const DEMO_DRIVERS = [
+// Demo leaderboard data ( drivers, variable acres)
+const _DRIVERS = [
   {name:"Ramesh Kumar",   ph:"d01",village:"Durgapur",   ac:5200,rating:4.8,jobs:62,cr:97},
   {name:"Suresh Patil",   ph:"d02",village:"Nagpur",     ac:4900,rating:4.7,jobs:58,cr:95},
   {name:"Anil Shinde",    ph:"d03",village:"Wardha",     ac:4700,rating:4.9,jobs:55,cr:98},
@@ -432,7 +428,7 @@ const DEMO_DRIVERS = [
   {name:"Kiran Bhosale",  ph:"d11",village:"Buldhana",   ac:2500,rating:4.7,jobs:30,cr:93},
   {name:"Sanjay Gaikwad", ph:"d12",village:"Hingoli",    ac:2200,rating:4.8,jobs:26,cr:95},
 ];
-for(let i=13;i<=100;i++) DEMO_DRIVERS.push({
+for(let i=13;i<=;i++) _DRIVERS.push({
   name:`Driver ${i}`,ph:`d${i}`,village:"Various",
   ac:Math.max(20,2000-i*18),
   rating:parseFloat((4.0+Math.random()*0.9).toFixed(1)),
@@ -452,7 +448,7 @@ function calcIncentives(driver){
     .filter(d=>d.acresCompleted>0)
     .map(d=>({ac:d.acresCompleted||0,cr:d.completionRate||100,rating:d.rating||5}));
 
-  // ── Combine DB drivers + demo drivers for pool calculations
+  // ── Combine DB drivers + drivers for pool calculations
   const allDrivers = [
     ...DEMO_DRIVERS.map(d=>({ac:d.ac,cr:d.cr,rating:d.rating})),
     ...dbDrivers,
