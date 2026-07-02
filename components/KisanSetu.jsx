@@ -828,44 +828,139 @@ function FF({label,ico,type="text",val,onChange,err,ph}){
       ? <img src={URL.createObjectURL(sat712)} style={{width:"100%",borderRadius:12}}/>
       : <div style={S.card}>📄 {sat712?.name}</div>
   }
-/>
-// ─── Document Preview Cards ───────────────────────────────────────────────
-function AadCard({name}){return(
-  <div style={{borderRadius:14,overflow:"hidden",border:"2px solid #90caf9",marginBottom:4}}>
-    <div style={{background:"linear-gradient(135deg,#1a237e,#283593)",padding:"8px 12px",display:"flex",alignItems:"center",gap:8}}>
-      <div style={{width:24,height:24,borderRadius:"50%",background:"#ff9800",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,flexShrink:0}}>🇮🇳</div>
-      <p style={{color:"#fff",fontSize:11,fontWeight:800,flex:1}}>GOVT OF INDIA • भारत सरकार</p>
-      <p style={{color:"#90caf9",fontSize:11,fontWeight:800}}>आधार</p>
-    </div>
-    <div style={{background:"#fff",padding:"10px 12px",display:"flex",gap:10,alignItems:"center"}}>
-      <div style={{width:52,height:64,borderRadius:12,background:"linear-gradient(135deg,#e3f2fd,#bbdefb)",border:"2px solid #90caf9",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,flexShrink:0}}>👨‍🌾</div>
-      <div>
-        <p style={{fontSize:13,fontWeight:900,color:"#1a237e"}}>{(name||"Pankaj Raut").toUpperCase()}</p>
-        <p style={{fontSize:11,color:"#555",marginTop:2}}>DOB: 15/08/1990 | Male</p>
-        <p style={{fontSize:11,color:"#555"}}>Chandrapur, Maharashtra</p>
-        <div style={{marginTop:5,background:"#e8f5e9",borderRadius:6,padding:"3px 8px",display:"inline-block"}}>
-          <p style={{fontSize:13,fontWeight:900,color:"#1a3d2a",letterSpacing:3}}>XXXX XXXX 4782</p>
-        </div>
-      </div>
-    </div>
-  </div>
-);}
+/>// ─── Document Preview Cards ───────────────────────────────────────────────
 
-function SatCard({vil,acres}){return(
-  <div style={{borderRadius:14,overflow:"hidden",border:"2px solid #ffcc80",marginBottom:4}}>
-    <div style={{background:"linear-gradient(135deg,#e65100,#bf360c)",padding:"8px 12px",textAlign:"center"}}>
-      <p style={{color:"#fff",fontSize:11,fontWeight:800}}>महाराष्ट्र शासन • 7/12 Utara</p>
-    </div>
-    <div style={{background:"#fffde7",padding:"10px 12px"}}>
-      {[["जिल्हा","Chandrapur"],["गाव",vil||"—"],["क्षेत्रफळ",acres?`${acres} Acres`:"—"],["धारकाचे नाव","Pankaj Dinkar Raut"]].map(([k,v])=>(
-        <div key={k} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",borderBottom:"1px dotted #e0d8b0"}}>
-          <span style={{fontSize:11,color:"#795548",fontWeight:600}}>{k}</span>
-          <span style={{fontSize:11,color:"#212121",fontWeight:700}}>{v}</span>
+function AadCard({name="Document Holder"}){
+  return(
+    <div style={{
+      border:"2px solid #2563EB",
+      borderRadius:16,
+      overflow:"hidden",
+      background:"#fff",
+      marginBottom:6,
+      boxShadow:"0 2px 8px rgba(0,0,0,.08)"
+    }}>
+
+      <div style={{
+        background:"linear-gradient(135deg,#1E3A8A,#2563EB)",
+        color:"#fff",
+        padding:"10px 14px",
+        display:"flex",
+        justifyContent:"space-between",
+        alignItems:"center"
+      }}>
+        <span style={{fontWeight:800,fontSize:13}}>
+          🇮🇳 Aadhaar Card
+        </span>
+
+        <span style={{fontSize:11,fontWeight:700}}>
+          Preview
+        </span>
+      </div>
+
+      <div style={{padding:16,textAlign:"center"}}>
+
+        <div style={{
+          width:80,
+          height:80,
+          margin:"0 auto 12px",
+          borderRadius:"50%",
+          background:"#E0F2FE",
+          display:"flex",
+          alignItems:"center",
+          justifyContent:"center",
+          fontSize:40
+        }}>
+          👤
         </div>
-      ))}
+
+        <div style={{
+          fontWeight:800,
+          fontSize:16,
+          color:"#0F172A"
+        }}>
+          {name}
+        </div>
+
+        <div style={{
+          marginTop:10,
+          color:"#64748B",
+          fontSize:13
+        }}>
+          Aadhaar Document Preview
+        </div>
+
+      </div>
+
     </div>
-  </div>
-);}
+  );
+}
+
+function SatCard({vil="—",acres="—"}){
+  return(
+    <div style={{
+      border:"2px solid #EA580C",
+      borderRadius:16,
+      overflow:"hidden",
+      background:"#fff",
+      marginBottom:6,
+      boxShadow:"0 2px 8px rgba(0,0,0,.08)"
+    }}>
+
+      <div style={{
+        background:"linear-gradient(135deg,#C2410C,#EA580C)",
+        color:"#fff",
+        padding:"10px 14px",
+        display:"flex",
+        justifyContent:"space-between",
+        alignItems:"center"
+      }}>
+        <span style={{fontWeight:800,fontSize:13}}>
+          🌾 7/12 Utara
+        </span>
+
+        <span style={{fontSize:11,fontWeight:700}}>
+          Preview
+        </span>
+      </div>
+
+      <div style={{padding:14}}>
+
+        <table style={{
+          width:"100%",
+          borderCollapse:"collapse",
+          fontSize:13
+        }}>
+          <tbody>
+
+            <tr>
+              <td style={{padding:6,fontWeight:700}}>Village</td>
+              <td style={{padding:6}}>{vil}</td>
+            </tr>
+
+            <tr>
+              <td style={{padding:6,fontWeight:700}}>Area</td>
+              <td style={{padding:6}}>
+                {acres} Acres
+              </td>
+            </tr>
+
+            <tr>
+              <td style={{padding:6,fontWeight:700}}>Document</td>
+              <td style={{padding:6}}>
+                7/12 Extract
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+
+      </div>
+
+    </div>
+  );
+}
+
 
 // ═══ CUSTOMER REGISTRATION ═════════════════════════════════════════════════
 function Reg({phone,onDone,back}){
