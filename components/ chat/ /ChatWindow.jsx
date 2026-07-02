@@ -5,7 +5,6 @@ import MessageInput from "./MessageInput";
 import { supabase } from "../../lib/supabase";
 
 export default function ChatWindow({ bookingId, user }) {
-
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -13,14 +12,17 @@ export default function ChatWindow({ bookingId, user }) {
   // LOAD OLD MESSAGES
   // -------------------------
   async function loadMessages() {
-
     const { data, error } = await supabase
       .from("messages")
       .select("*")
       .eq("booking_id", bookingId)
       .order("created_at", { ascending: true });
 
-    if (!error) setMessages(data || []);
+    if (error) {
+      console.error(error);
+    } else {
+      setMessages(data || []);
+    }
 
     setLoading(false);
   }
@@ -29,14 +31,16 @@ export default function ChatWindow({ bookingId, user }) {
   // SEND MESSAGE
   // -------------------------
   async function sendMessage(text) {
-
-    if (!text) return;
+    if (!text?.trim()) return;
 
     const newMsg = {
       booking_id: bookingId,
-      sender: user?.role || "customer",
       sender_id: user?.id,
-      text,
+      sender_type: user?.role || "customer",
+      receiver_id: "", // baad me actual receiver id dalenge
+      message: text,
+      image_url: "",
+      is_read: false,
       created_at: new Date().toISOString(),
     };
 
@@ -44,15 +48,15 @@ export default function ChatWindow({ bookingId, user }) {
       .from("messages")
       .insert([newMsg]);
 
-    if (error) console.log(error);
-
+    if (error) {
+      console.error("Send Message Error:", error);
+    }
   }
 
   // -------------------------
-  // REALTIME LISTENER
+  // REALTIME
   // -------------------------
   useEffect(() => {
-
     loadMessages();
 
     const channel = supabase
@@ -65,12 +69,8 @@ export default function ChatWindow({ bookingId, user }) {
           table: "messages",
           filter: `booking_id=eq.${bookingId}`,
         },
-        (payload) => {
-
-          const newMsg = payload.new;
-
-          setMessages((prev) => [...prev, newMsg]);
-
+        () => {
+          loadMessages();
         }
       )
       .subscribe();
@@ -78,7 +78,6 @@ export default function ChatWindow({ bookingId, user }) {
     return () => {
       supabase.removeChannel(channel);
     };
-
   }, [bookingId]);
 
   // -------------------------
@@ -93,7 +92,6 @@ export default function ChatWindow({ bookingId, user }) {
         background: "#fff",
       }}
     >
-
       <h2>💬 Live Chat</h2>
 
       {loading ? (
@@ -103,7 +101,6 @@ export default function ChatWindow({ bookingId, user }) {
       )}
 
       <MessageInput onSend={sendMessage} />
-
     </div>
   );
 }
