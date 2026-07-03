@@ -63,12 +63,20 @@ async function loadHistory() {
             <p>💰 Amount : ₹{booking.amount}</p>
 
             <p>
-              ✅ Status :
-              <b style={{ color: "green" }}>
-                {" "}
-                Completed
-              </b>
-            </p>
+  ✅ Status :
+  <b
+    style={{
+      color:
+        booking.status === "Completed"
+          ? "green"
+          : booking.status === "Accepted"
+          ? "blue"
+          : "orange",
+    }}
+  >
+    {booking.status}
+  </b>
+</p>
 
           </div>
 
