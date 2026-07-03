@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-
+import { useNavigate } from "react-router-dom";
 export default function LocationSelector({ onSelect }) {
   const [state, setState] = useState("");
   const [district, setDistrict] = useState("");
-
+  const navigate = useNavigate();
   const states = [
     "Maharashtra",
     "Madhya Pradesh",
