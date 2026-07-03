@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import DriverBookingCard from "./DriverBookingCard";
+import { supabase } from "../../lib/supabase";
 import { sbGetAllBookings } from "../supabase/bookings"; // path apne project ke hisaab se check kar lena
 
 export default function MyBookings({ phone }) {
@@ -10,13 +11,20 @@ export default function MyBookings({ phone }) {
   }, []);
 
   async function loadBookings() {
-    try {
-      const data = await sbGetAllBookings();
+  try {
+    const { data, error } = await supabase
+      .from("bookings")
+      .select("*")
+      .eq("customer_phone", phone)
+      .order("created_at", { ascending: false });
 
-      const myBookings = data.filter(
-        (b) => b.customer_phone === phone
-      );
+    if (error) throw error;
 
+    setBookings(data || []);
+  } catch (err) {
+    console.error(err);
+  }
+}
       setBookings(myBookings);
     } catch (err) {
       console.error(err);
