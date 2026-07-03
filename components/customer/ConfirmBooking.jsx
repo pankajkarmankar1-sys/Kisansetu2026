@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { supabase } from "../../lib/supabase";
 
 export default function ConfirmBooking({
   booking,
@@ -6,19 +7,33 @@ export default function ConfirmBooking({
   onBack,
 }) {
 
-  const [loading, setLoading] = useState(false);
-
-  const handleConfirm = () => {
-
+  const handleConfirm = async () => {
+  try {
     setLoading(true);
 
-    setTimeout(() => {
+    const { error } = await supabase
+      .from("bookings")
+      .insert([
+        {
+          service_name: booking?.service?.name,
+          acres: booking?.acres,
+          date: booking?.date,
+          amount: booking?.amount,
+          payment_status: booking?.payment_status,
+          status: "Pending",
+        },
+      ]);
 
-      onConfirm();
+    if (error) throw error;
 
-    },1000);
-
-  };
+    onConfirm();
+  } catch (err) {
+    console.error(err);
+    alert("Booking failed!");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
 
@@ -46,7 +61,7 @@ export default function ConfirmBooking({
         <p>
           🚜 Service :
           {" "}
-          {booking?.service?.n}
+          {booking?.service?.name}
         </p>
 
         <p>
