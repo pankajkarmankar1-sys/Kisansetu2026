@@ -1,20 +1,34 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { supabase } from "../../lib/supabase";
 
 export default function DriverEarnings({ driver, bookings = [] }) {
 
-  const completed = bookings.filter(
-    (b) =>
-      (b.driver_status === "completed" ||
-        b.booking_status === "completed")
-  );
+  const [completed, setCompleted] = useState([]);
 
-  const totalEarnings = completed.reduce(
-    (sum, b) => sum + Number(b.driver_amount || b.amount || 0),
-    0
-  );
+useEffect(() => {
+  loadCompletedBookings();
+}, []);
 
-  const totalJobs = completed.length;
+async function loadCompletedBookings() {
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("*")
+    .eq("status", "Completed");
 
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  setCompleted(data || []);
+}
+
+const totalEarnings = completed.reduce(
+  (sum, b) => sum + Number(b.driver_amount || b.amount || 0),
+  0
+);
+
+const totalJobs = completed.length;
   return (
     <div style={{ padding: 20 }}>
 
