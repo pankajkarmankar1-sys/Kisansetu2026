@@ -1,3 +1,4 @@
+import { supabase } from "../../lib/supabase";
 import React, { useEffect, useState } from "react";
 
 export default function DriverBookings({ driver }) {
@@ -9,20 +10,48 @@ export default function DriverBookings({ driver }) {
   }, []);
 
   async function loadBookings() {
+  try {
+    const { data, error } = await supabase
+      .from("bookings")
+      .select("*")
+      .eq("status", "Pending")
+      .order("created_at", { ascending: false });
 
-    // Baad me Supabase se sirf assigned bookings load karenge
+    if (error) throw error;
 
-    setBookings([]);
+    setBookings(data || []);
+  } catch (err) {
+    console.error(err);
+  }
+}
 
+  async function acceptBooking(id) {
+  const { error } = await supabase
+    .from("bookings")
+    .update({ status: "Accepted" })
+    .eq("id", id);
+
+  if (error) {
+    alert("Accept failed");
+    return;
   }
 
-  function acceptBooking(id) {
-    console.log("Accept", id);
+  loadBookings();
+}
+
+  async function rejectBooking(id) {
+  const { error } = await supabase
+    .from("bookings")
+    .update({ status: "Rejected" })
+    .eq("id", id);
+
+  if (error) {
+    alert("Reject failed");
+    return;
   }
 
-  function rejectBooking(id) {
-    console.log("Reject", id);
-  }
+  loadBookings();
+}
 
   return (
 
