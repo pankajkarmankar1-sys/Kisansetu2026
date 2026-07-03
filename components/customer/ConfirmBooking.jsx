@@ -6,7 +6,7 @@ export default function ConfirmBooking({
   onConfirm,
   onBack,
 }) {
-
+  const [loading, setLoading] = useState(false);
   const handleConfirm = async () => {
   try {
     setLoading(true);
