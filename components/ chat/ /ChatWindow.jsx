@@ -103,4 +103,4 @@ export default function ChatWindow({ bookingId, user }) {
       <MessageInput onSend={sendMessage} />
     </div>
   );
-}
+} 
