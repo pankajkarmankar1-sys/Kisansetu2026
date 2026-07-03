@@ -23,7 +23,7 @@ export default function BookingSuccess({
           marginBottom: 20,
         }}
       >
-        <p><b>Service:</b> {booking?.service?.n}</p>
+        <p><b>Service:</b> {booking?.service?.name}</p>
         <p><b>Amount:</b> ₹{booking?.amount}</p>
         <p><b>Date:</b> {booking?.date}</p>
         <p><b>Payment:</b> ✅ Paid</p>
