@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
-import Dashboard from "./Component/costomer/Dashboard";
+import Dashboard from "./Pages/Dashboard";
 
 function AppRoutes() {
   const navigate = useNavigate();
