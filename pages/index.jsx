@@ -1,5 +1,20 @@
 import dynamic from "next/dynamic";
 import Head from "next/head";
+import LocationSelector from "./components/LocationSelector";
+
+export default function App() {
+  return (
+    <div>
+      <h1>My App</h1>
+
+      <LocationSelector
+        onSelect={(data) => {
+          console.log("Selected Location:", data);
+        }}
+      />
+    </div>
+  );
+}
 
 const App = dynamic(() => import("../components/KisanSetu"), {
   ssr: false,
