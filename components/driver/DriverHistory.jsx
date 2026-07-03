@@ -1,12 +1,28 @@
-import React from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "../../lib/supabase";
 
 export default function DriverHistory({ bookings = [] }) {
 
-  const history = bookings.filter(
-    (b) =>
-      b.driver_status === "completed" ||
-      b.booking_status === "completed"
-  );
+  const [history, setHistory] = useState([]);
+
+useEffect(() => {
+  loadHistory();
+}, []);
+
+async function loadHistory() {
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("*")
+    .eq("status", "Completed")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  setHistory(data || []);
+}
 
   return (
     <div style={{ padding: 20 }}>
