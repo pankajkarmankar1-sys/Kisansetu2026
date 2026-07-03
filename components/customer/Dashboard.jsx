@@ -1,6 +1,6 @@
 import { useState } from "react";
 import NotificationBell from "../notifications/NotificationBell";
-
+import { useNavigate } from "react-router-dom";
 export default function Dashboard({
   user,
   onBook,
@@ -63,6 +63,7 @@ export default function Dashboard({
   );
 }
 
+
 const btn = {
   width: "100%",
   padding: 16,
@@ -74,3 +75,17 @@ const btn = {
   color: "#fff",
   cursor: "pointer",
 };
+const navigate = useNavigate();
+<Route
+  path="/dashboard"
+  element={
+    <Dashboard
+      user={{ name: "Pankaj" }}
+      onBook={() => navigate("/book")}
+      onBookings={() => navigate("/bookings")}
+      onProfile={() => navigate("/profile")}
+      onNotifications={() => alert("Notifications")}
+      onLogout={() => navigate("/login")}
+    />
+  }
+/>
