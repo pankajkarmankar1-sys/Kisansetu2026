@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 
 import ServiceSelection from "./booking/ServiceSelection";
@@ -14,7 +13,6 @@ export default function BookService({
   onNext,
   back,
 }) {
-
   const [selectedService, setSelectedService] = useState(null);
   const [acres, setAcres] = useState("");
   const [paymentDone, setPaymentDone] = useState(false);
@@ -40,18 +38,53 @@ export default function BookService({
           setAcres={setAcres}
           paymentDone={paymentDone}
           setPaymentDone={setPaymentDone}
-          next={() => setStep("Payment")}
+          next={() => setStep("payment")}
           back={back}
-          {step === "payment" && (
-  <PaymentSummary
-    selectedService={selectedService}
-    acres={acres}
-    paymentDone={paymentDone}
-    setPaymentDone={setPaymentDone}
-    next={() => setStep("date")}
-    back={() => setStep("service")}
-  />
-)}
+        />
+      )}
+
+      {step === "payment" && (
+        <PaymentSummary
+          selectedService={selectedService}
+          acres={acres}
+          paymentDone={paymentDone}
+          setPaymentDone={setPaymentDone}
+          next={() => setStep("date")}
+          back={() => setStep("service")}
+        />
+      )}
+
+      {step === "date" && (
+        <DateSelection
+          date={date}
+          setDate={setDate}
+          note={note}
+          setNote={setNote}
+          next={() => {
+            setBookingData({
+              selectedService,
+              acres,
+              date,
+              note,
+            });
+            setStep("confirm");
+          }}
+          back={() => setStep("payment")}
+        />
+      )}
+
+      {step === "confirm" && (
+        <ConfirmBooking
+          bookingData={bookingData}
+          onConfirm={() => setStep("success")}
+          back={() => setStep("date")}
+        />
+      )}
+
+      {step === "success" && (
+        <BookingSuccess
+          bookingData={bookingData}
+          onDone={onNext}
         />
       )}
 
