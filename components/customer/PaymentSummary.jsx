@@ -9,12 +9,7 @@ export default function PaymentSummary({
   back,
 }) {
   const amount =
-    (Number(selectedService?.price || 0) * Number(acres || 0)).toFixed(2);
-
-  const handlePayment = () => {
-    alert("✅ Payment Successful");
-    setPaymentDone(true);
-  };
+    (selectedService?.normalPrice || 0) * Number(acres || 0);
 
   return (
     <div style={{ padding: 20 }}>
@@ -27,7 +22,9 @@ export default function PaymentSummary({
       <p>💰 Amount: ₹{amount}</p>
 
       {!paymentDone ? (
-        <button onClick={handlePayment}>
+        <button
+          onClick={() => setPaymentDone(true)}
+        >
           Pay Now
         </button>
       ) : (
