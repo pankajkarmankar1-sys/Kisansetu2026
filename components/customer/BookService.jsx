@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 
-import ServiceSelection from "./booking/ServiceSelection";
-import PaymentSummary from "./booking/PaymentSummary";
-import DateSelection from "./booking/DateSelection";
+import ServiceSelection from "./ServiceSelection";
+import PaymentSummary from "./PaymentSummary";
+import DateSelection from "./DateSelection";
 import ConfirmBooking from "./ConfirmBooking";
 import BookingSuccess from "./BookingSuccess";
 
