@@ -17,23 +17,23 @@ export default function AdminDashboard() {
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (error) {
-      console.log("Error loading bookings:", error.message);
-    } else {
-      setBookings(data);
-    }
+    if (!error) setBookings(data);
 
     setLoading(false);
   }
 
-  async function deleteBooking(id) {
+  async function updateStatus(id, status) {
     const { error } = await supabase
       .from("bookings")
-      .delete()
+      .update({ status })
       .eq("id", id);
 
     if (!error) {
-      setBookings((prev) => prev.filter((b) => b.id !== id));
+      setBookings((prev) =>
+        prev.map((b) =>
+          b.id === id ? { ...b, status } : b
+        )
+      );
     }
   }
 
@@ -42,17 +42,15 @@ export default function AdminDashboard() {
       <h2>🧑‍🌾 Admin Dashboard</h2>
 
       {loading ? (
-        <p>Loading bookings...</p>
-      ) : bookings.length === 0 ? (
-        <p>No bookings found</p>
+        <p>Loading...</p>
       ) : (
         <table border="1" cellPadding="10" width="100%">
           <thead>
             <tr>
-              <th>ID</th>
               <th>User</th>
               <th>Location</th>
               <th>Date</th>
+              <th>Status</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -60,22 +58,45 @@ export default function AdminDashboard() {
           <tbody>
             {bookings.map((b) => (
               <tr key={b.id}>
-                <td>{b.id}</td>
                 <td>{b.user_name}</td>
                 <td>{b.location}</td>
                 <td>{b.date}</td>
+
+                <td>
+                  <b
+                    style={{
+                      color:
+                        b.status === "approved"
+                          ? "green"
+                          : b.status === "rejected"
+                          ? "red"
+                          : "orange",
+                    }}
+                  >
+                    {b.status}
+                  </b>
+                </td>
+
                 <td>
                   <button
-                    onClick={() => deleteBooking(b.id)}
+                    onClick={() => updateStatus(b.id, "approved")}
+                    style={{
+                      marginRight: 5,
+                      background: "green",
+                      color: "white",
+                    }}
+                  >
+                    Approve
+                  </button>
+
+                  <button
+                    onClick={() => updateStatus(b.id, "rejected")}
                     style={{
                       background: "red",
                       color: "white",
-                      border: "none",
-                      padding: "5px 10px",
-                      cursor: "pointer",
                     }}
                   >
-                    Delete
+                    Reject
                   </button>
                 </td>
               </tr>
