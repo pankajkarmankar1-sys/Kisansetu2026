@@ -28,6 +28,8 @@ export default function LocationSelector({ onSelect }) {
       district,
     };
 
+    localStorage.setItem("location", JSON.stringify(locationData));
+
     console.log("Location Saved:", locationData);
 
     if (onSelect) {
@@ -47,6 +49,8 @@ export default function LocationSelector({ onSelect }) {
           state: "Current Location",
           district: `${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}`,
         };
+
+        localStorage.setItem("location", JSON.stringify(locationData));
 
         console.log("GPS Location:", locationData);
 
@@ -92,7 +96,11 @@ export default function LocationSelector({ onSelect }) {
         placeholder="Enter District"
         value={district}
         onChange={(e) => setDistrict(e.target.value)}
-        style={{ width: "100%", padding: 10, marginBottom: 10 }}
+        style={{
+          width: "100%",
+          padding: 10,
+          marginBottom: 10,
+        }}
       />
 
       <button
@@ -105,6 +113,7 @@ export default function LocationSelector({ onSelect }) {
           color: "#fff",
           border: "none",
           borderRadius: 8,
+          cursor: "pointer",
         }}
       >
         Save
@@ -119,6 +128,7 @@ export default function LocationSelector({ onSelect }) {
           color: "#fff",
           border: "none",
           borderRadius: 8,
+          cursor: "pointer",
         }}
       >
         Use GPS
