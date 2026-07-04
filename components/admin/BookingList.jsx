@@ -1,118 +1,116 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 
-export default function BookingList({ bookings = [] }) {
+export default function BookingList() {
+  const [bookings, setBookings] = useState([]);
+
+  useEffect(() => {
+    loadBookings();
+  }, []);
+
+  async function loadBookings() {
+    const { data, error } = await supabase
+      .from("bookings")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (!error) {
+      setBookings(data || []);
+    }
+  }
+
   async function updateStatus(id, status) {
-    try {
-      const { error } = await supabase
-        .from("bookings")
-        .update({ status })
-        .eq("id", id);
+    const { error } = await supabase
+      .from("bookings")
+      .update({ status })
+      .eq("id", id);
 
-      if (error) throw error;
+    if (!error) {
+      loadBookings();
+    }
+  }
 
-      alert(`Booking ${status}`);
-      window.location.reload();
-    } catch (err) {
-      console.error(err);
-      alert("Status update failed");
+  async function deleteBooking(id) {
+    const ok = window.confirm("Delete this booking?");
+
+    if (!ok) return;
+
+    const { error } = await supabase
+      .from("bookings")
+      .delete()
+      .eq("id", id);
+
+    if (!error) {
+      loadBookings();
     }
   }
 
   return (
-    <div>
-      <h2>📋 All Bookings</h2>
+    <div
+      style={{
+        background: "#fff",
+        padding: 20,
+        borderRadius: 10,
+        marginTop: 20,
+      }}
+    >
+      <h2>📋 Booking List</h2>
 
-      {bookings.length === 0 ? (
-        <p>No bookings available.</p>
-      ) : (
-        bookings.map((booking) => (
-          <div
-            key={booking.id}
-            style={{
-              border: "1px solid #ddd",
-              borderRadius: 10,
-              padding: 15,
-              marginBottom: 15,
-              background: "#fff",
-            }}
-          >
-            <h3>
-              🚜 {booking.service_name || booking.serviceName}
-            </h3>
+      <table
+        border="1"
+        cellPadding="8"
+        width="100%"
+        style={{ borderCollapse: "collapse" }}
+      >
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Location</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Driver</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
 
-            <p>👨 Customer : {booking.customer_name}</p>
+        <tbody>
+          {bookings.map((booking) => (
+            <tr key={booking.id}>
+              <td>{booking.user_name}</td>
+              <td>{booking.location}</td>
+              <td>{booking.date}</td>
 
-            <p>📞 Phone : {booking.customer_phone}</p>
+              <td>{booking.status || "Pending"}</td>
 
-            <p>🌾 Acres : {booking.acres}</p>
+              <td>{booking.driver_name || "Not Assigned"}</td>
 
-            <p>📅 Date : {booking.date}</p>
+              <td>
+                <button
+                  onClick={() =>
+                    updateStatus(booking.id, "approved")
+                  }
+                >
+                  Approve
+                </button>
 
-            <p>💰 Amount : ₹{booking.amount}</p>
+                <button
+                  onClick={() =>
+                    updateStatus(booking.id, "rejected")
+                  }
+                >
+                  Reject
+                </button>
 
-            <p>
-              📦 Status :
-              <b
-                style={{
-                  color:
-                    booking.status === "Completed"
-                      ? "green"
-                      : booking.status === "Accepted"
-                      ? "blue"
-                      : booking.status === "Cancelled"
-                      ? "red"
-                      : "#d97706",
-                }}
-              >
-                {" "}
-                {booking.status || "Pending"}
-              </b>
-            </p>
-
-            <div
-              style={{
-                display: "flex",
-                gap: 10,
-                marginTop: 15,
-                flexWrap: "wrap",
-              }}
-            >
-              <button
-                onClick={() =>
-                  updateStatus(booking.id, "Accepted")
-                }
-              >
-                ✅ Accept
-              </button>
-
-              <button
-                onClick={() =>
-                  updateStatus(booking.id, "Running")
-                }
-              >
-                🚜 Running
-              </button>
-
-              <button
-                onClick={() =>
-                  updateStatus(booking.id, "Completed")
-                }
-              >
-                ✔️ Complete
-              </button>
-
-              <button
-                onClick={() =>
-                  updateStatus(booking.id, "Cancelled")
-                }
-              >
-                ❌ Cancel
-              </button>
-            </div>
-          </div>
-        ))
-      )}
+                <button
+                  onClick={() => deleteBooking(booking.id)}
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
