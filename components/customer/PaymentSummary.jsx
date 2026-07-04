@@ -1,27 +1,33 @@
 import React from "react";
 
 export default function PaymentSummary({
-  service,
+  selectedService,
   acres,
-  amount,
   paymentDone,
-  onPay,
+  setPaymentDone,
   next,
+  back,
 }) {
+  const amount =
+    (Number(selectedService?.price || 0) * Number(acres || 0)).toFixed(2);
+
+  const handlePayment = () => {
+    alert("✅ Payment Successful");
+    setPaymentDone(true);
+  };
 
   return (
-    <div>
-
+    <div style={{ padding: 20 }}>
       <h2>💳 Payment Summary</h2>
 
-      <p>Service : {service?.n}</p>
+      <p>🚜 Service: {selectedService?.name}</p>
 
-      <p>Acres : {acres}</p>
+      <p>🌾 Acres: {acres}</p>
 
-      <p>Amount : ₹{amount}</p>
+      <p>💰 Amount: ₹{amount}</p>
 
       {!paymentDone ? (
-        <button onClick={onPay}>
+        <button onClick={handlePayment}>
           Pay Now
         </button>
       ) : (
@@ -30,7 +36,12 @@ export default function PaymentSummary({
         </button>
       )}
 
+      <br />
+      <br />
+
+      <button onClick={back}>
+        ← Back
+      </button>
     </div>
   );
-
 }
