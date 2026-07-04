@@ -1,44 +1,71 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { supabase } from "../../lib/supabase";
 
-export default function AssignDriver({
-  booking,
-  drivers = [],
-  onAssign,
-}) {
+export default function AssignDriver({ bookingId, currentDriver }) {
+  const [drivers, setDrivers] = useState([]);
+  const [selectedDriver, setSelectedDriver] = useState(
+    currentDriver || ""
+  );
+
+  useEffect(() => {
+    loadDrivers();
+  }, []);
+
+  async function loadDrivers() {
+    const { data, error } = await supabase
+      .from("drivers")
+      .select("*")
+      .order("name");
+
+    if (!error) {
+      setDrivers(data || []);
+    }
+  }
+
+  async function assignDriver() {
+    if (!selectedDriver) {
+      alert("Please select a driver");
+      return;
+    }
+
+    const driver = drivers.find(
+      (d) => d.name === selectedDriver
+    );
+
+    const { error } = await supabase
+      .from("bookings")
+      .update({
+        driver_name: driver.name,
+        driver_id: driver.id,
+        status: "assigned",
+      })
+      .eq("id", bookingId);
+
+    if (error) {
+      alert("Failed to assign driver");
+    } else {
+      alert("Driver assigned successfully");
+    }
+  }
+
   return (
-    <div
-      style={{
-        border: "1px solid #ddd",
-        borderRadius: 10,
-        padding: 15,
-        marginTop: 15,
-      }}
-    >
-      <h3>🚜 Assign Driver</h3>
+    <div style={{ display: "flex", gap: 10 }}>
+      <select
+        value={selectedDriver}
+        onChange={(e) => setSelectedDriver(e.target.value)}
+      >
+        <option value="">Select Driver</option>
 
-      <p>
-        Booking :
-        <b> {booking?.service_name || booking?.serviceName}</b>
-      </p>
+        {drivers.map((driver) => (
+          <option key={driver.id} value={driver.name}>
+            {driver.name}
+          </option>
+        ))}
+      </select>
 
-      {drivers.length === 0 ? (
-        <p>No Driver Available</p>
-      ) : (
-        drivers.map((driver) => (
-          <button
-            key={driver.id}
-            onClick={() => onAssign(driver)}
-            style={{
-              display: "block",
-              width: "100%",
-              marginTop: 10,
-              padding: 10,
-            }}
-          >
-            👨‍🌾 {driver.name} ({driver.phone})
-          </button>
-        ))
-      )}
+      <button onClick={assignDriver}>
+        Assign
+      </button>
     </div>
   );
 }
