@@ -1,68 +1,121 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { supabase } from "../../lib/supabase";
 
-export default function DriverList({
-  drivers = [],
-  onSelectDriver,
-}) {
+export default function DriverList() {
+  const [drivers, setDrivers] = useState([]);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+
+  useEffect(() => {
+    loadDrivers();
+  }, []);
+
+  async function loadDrivers() {
+    const { data, error } = await supabase
+      .from("drivers")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (!error) {
+      setDrivers(data || []);
+    }
+  }
+
+  async function addDriver() {
+    if (!name || !phone) {
+      alert("Enter driver name and phone");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("drivers")
+      .insert({
+        name,
+        phone,
+      });
+
+    if (!error) {
+      setName("");
+      setPhone("");
+      loadDrivers();
+    }
+  }
+
+  async function deleteDriver(id) {
+    const { error } = await supabase
+      .from("drivers")
+      .delete()
+      .eq("id", id);
+
+    if (!error) {
+      loadDrivers();
+    }
+  }
 
   return (
+    <div
+      style={{
+        background: "#fff",
+        padding: 20,
+        marginTop: 20,
+        borderRadius: 10,
+      }}
+    >
+      <h2>🚜 Driver List</h2>
 
-    <div>
+      <div style={{ marginBottom: 20 }}>
+        <input
+          placeholder="Driver Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
 
-      <h2>👨‍🌾 Driver List</h2>
+        <input
+          placeholder="Phone"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          style={{ marginLeft: 10 }}
+        />
 
-      {drivers.length === 0 ? (
+        <button
+          onClick={addDriver}
+          style={{ marginLeft: 10 }}
+        >
+          Add Driver
+        </button>
+      </div>
 
-        <p>No Drivers Found</p>
+      <table
+        border="1"
+        cellPadding="8"
+        width="100%"
+        style={{ borderCollapse: "collapse" }}
+      >
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Action</th>
+          </tr>
+        </thead>
 
-      ) : (
+        <tbody>
+          {drivers.map((driver) => (
+            <tr key={driver.id}>
+              <td>{driver.name}</td>
+              <td>{driver.phone}</td>
 
-        drivers.map((driver) => (
-
-          <div
-            key={driver.id}
-            style={{
-              border: "1px solid #ddd",
-              borderRadius: 10,
-              padding: 15,
-              marginBottom: 15,
-              background: "#fff",
-            }}
-          >
-
-            <h3>{driver.name}</h3>
-
-            <p>📞 {driver.phone}</p>
-
-            <p>📍 {driver.village}</p>
-
-            <p>🚜 {driver.vehicle_type}</p>
-
-            <p>⭐ {driver.rating || "New Driver"}</p>
-
-            <button
-              onClick={() => onSelectDriver(driver)}
-              style={{
-                marginTop: 10,
-                padding: "8px 15px",
-                background: "#2d8a4e",
-                color: "#fff",
-                border: "none",
-                borderRadius: 8,
-                cursor: "pointer",
-              }}
-            >
-              Assign Driver
-            </button>
-
-          </div>
-
-        ))
-
-      )}
-
+              <td>
+                <button
+                  onClick={() => deleteDriver(driver.id)}
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
-
   );
-
 }
