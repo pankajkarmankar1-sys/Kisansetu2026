@@ -37,7 +37,7 @@ export default function DriverBookings({ driver }) {
         .update({
           status: "Accepted",
           driver_id: driver?.id || null,
-          driver_name: driver?.name || "Driver",
+          driver_name: driver?.name || "",
           accepted_at: new Date().toISOString(),
         })
         .eq("id", id);
@@ -72,11 +72,15 @@ export default function DriverBookings({ driver }) {
   }
 
   if (loading) {
-    return <h3>Loading bookings...</h3>;
+    return (
+      <div style={{ padding: 20 }}>
+        <h2>Loading...</h2>
+      </div>
+    );
   }
 
   return (
-    <div>
+    <div style={{ padding: 20 }}>
       <h2>🚜 Pending Bookings</h2>
 
       {bookings.length === 0 ? (
@@ -95,15 +99,15 @@ export default function DriverBookings({ driver }) {
           >
             <h3>{booking.service_name}</h3>
 
-            <p>👤 {booking.customer_name || "Customer"}</p>
+            <p>👤 Customer: {booking.customer_name || "-"}</p>
 
-            <p>📞 {booking.customer_phone || "-"}</p>
+            <p>📞 Phone: {booking.customer_phone || "-"}</p>
 
-            <p>🌾 {booking.acres} Acre</p>
+            <p>🌾 Acres: {booking.acres}</p>
 
-            <p>📅 {booking.date}</p>
+            <p>📅 Date: {booking.date}</p>
 
-            <p>💰 ₹{booking.amount}</p>
+            <p>💰 Amount: ₹{booking.amount}</p>
 
             <p>Status: {booking.status}</p>
 
@@ -111,7 +115,7 @@ export default function DriverBookings({ driver }) {
               style={{
                 display: "flex",
                 gap: 10,
-                marginTop: 10,
+                marginTop: 15,
               }}
             >
               <button onClick={() => acceptBooking(booking.id)}>
@@ -127,27 +131,4 @@ export default function DriverBookings({ driver }) {
       )}
     </div>
   );
-}                onClick={() => acceptBooking(booking.id)}
-              >
-                ✅ Accept
-              </button>
-
-              <button
-                onClick={() => rejectBooking(booking.id)}
-              >
-                ❌ Reject
-              </button>
-
-            </div>
-
-          </div>
-
-        ))
-
-      )}
-
-    </div>
-
-  );
-
 }
