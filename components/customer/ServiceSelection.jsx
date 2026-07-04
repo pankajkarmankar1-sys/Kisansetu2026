@@ -1,5 +1,5 @@
 import React from "react";
-import { SVC } from "../../Component/Costomer/services";
+import { SVC } from "../../data/services";
 import { S } from "../../styles";
 
 export default function ServiceSelection({
