@@ -26,7 +26,6 @@ export default function BookService({
 
   return (
     <div>
-
       {step === "service" && (
         <ServiceSelection
           user={user}
@@ -61,12 +60,19 @@ export default function BookService({
           note={note}
           setNote={setNote}
           next={() => {
+            const amount =
+              (selectedService?.normalPrice || 0) *
+              Number(acres || 0);
+
             setBookingData({
               selectedService,
               acres,
               date,
               note,
+              amount,
+              payment_status: paymentDone ? "Paid" : "Pending",
             });
+
             setStep("confirm");
           }}
           back={() => setStep("payment")}
@@ -87,7 +93,6 @@ export default function BookService({
           onDone={onNext}
         />
       )}
-
     </div>
   );
 }
