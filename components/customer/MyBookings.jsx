@@ -1,34 +1,66 @@
 import React, { useState, useEffect } from "react";
 import DriverBookingCard from "./DriverBookingCard";
 import { supabase } from "../../lib/supabase";
-import { sbGetAllBookings } from "../supabase/bookings"; // path apne project ke hisaab se check kar lena
 
 export default function MyBookings({ phone }) {
   const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadBookings();
-  }, []);
+
+    const channel = supabase
+      .channel("customer-bookings")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "bookings",
+        },
+        () => {
+          loadBookings();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [phone]);
 
   async function loadBookings() {
-  try {
-    const { data, error } = await supabase
-      .from("bookings")
-      .select("*")
-      .eq("customer_phone", phone)
-      .order("created_at", { ascending: false });
+    try {
+      setLoading(true);
 
-    if (error) throw error;
+      let query = supabase
+        .from("bookings")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-    setBookings(data || []);
-  } catch (err) {
-    console.error(err);
-  }
-}
-      setBookings(myBookings);
+      if (phone) {
+        query = query.eq("customer_phone", phone);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      setBookings(data || []);
     } catch (err) {
       console.error(err);
+      alert("Failed to load bookings");
+    } finally {
+      setLoading(false);
     }
+  }
+
+  if (loading) {
+    return (
+      <div style={{ padding: 20 }}>
+        <h2>Loading...</h2>
+      </div>
+    );
   }
 
   return (
@@ -38,10 +70,10 @@ export default function MyBookings({ phone }) {
       {bookings.length === 0 ? (
         <p>No bookings found.</p>
       ) : (
-        bookings.map((b) => (
+        bookings.map((booking) => (
           <DriverBookingCard
-            key={b.id}
-            booking={b}
+            key={booking.id}
+            booking={booking}
           />
         ))
       )}
