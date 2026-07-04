@@ -1,66 +1,74 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { supabase } from "../../lib/supabase";
 
-export default function StatsCard({ bookings = [] }) {
-  const total = bookings.length;
+export default function StatsCards() {
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    approved: 0,
+    drivers: 0,
+  });
 
-  const pending = bookings.filter(
-    (b) => (b.booking_status || b.status) === "Pending"
-  ).length;
+  useEffect(() => {
+    loadStats();
+  }, []);
 
-  const accepted = bookings.filter(
-    (b) => (b.booking_status || b.status) === "Accepted"
-  ).length;
+  async function loadStats() {
+    const { data: bookings } = await supabase
+      .from("bookings")
+      .select("status");
 
-  const running = bookings.filter(
-    (b) => (b.booking_status || b.status) === "Running"
-  ).length;
+    const { count: driverCount } = await supabase
+      .from("drivers")
+      .select("*", { count: "exact", head: true });
 
-  const completed = bookings.filter(
-    (b) => (b.booking_status || b.status) === "Completed"
-  ).length;
+    if (bookings) {
+      setStats({
+        total: bookings.length,
+        pending: bookings.filter(b => b.status === "pending").length,
+        approved: bookings.filter(b => b.status === "approved").length,
+        drivers: driverCount || 0,
+      });
+    }
+  }
 
-  const cancelled = bookings.filter(
-    (b) => (b.booking_status || b.status) === "Cancelled"
-  ).length;
-
-  const revenue = bookings
-    .filter((b) => (b.booking_status || b.status) === "Completed")
-    .reduce((sum, b) => sum + Number(b.amount || 0), 0);
+  const cardStyle = {
+    flex: 1,
+    background: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+    textAlign: "center",
+  };
 
   return (
     <div
       style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))",
-        gap: 15,
-        marginBottom: 20,
+        display: "flex",
+        gap: 20,
+        marginBottom: 25,
+        flexWrap: "wrap",
       }}
     >
-      <Card title="📋 Total Bookings" value={total} />
-      <Card title="⏳ Pending" value={pending} />
-      <Card title="✅ Accepted" value={accepted} />
-      <Card title="🚜 Running" value={running} />
-      <Card title="✔️ Completed" value={completed} />
-      <Card title="❌ Cancelled" value={cancelled} />
-      <Card title="💰 Revenue" value={`₹${revenue}`} />
-    </div>
-  );
-}
+      <div style={cardStyle}>
+        <h3>📋 Total Bookings</h3>
+        <h1>{stats.total}</h1>
+      </div>
 
-function Card({ title, value }) {
-  return (
-    <div
-      style={{
-        background: "#fff",
-        border: "1px solid #ddd",
-        borderRadius: 12,
-        padding: 20,
-        textAlign: "center",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-      }}
-    >
-      <h4>{title}</h4>
-      <h2>{value}</h2>
+      <div style={cardStyle}>
+        <h3>⏳ Pending</h3>
+        <h1>{stats.pending}</h1>
+      </div>
+
+      <div style={cardStyle}>
+        <h3>✅ Approved</h3>
+        <h1>{stats.approved}</h1>
+      </div>
+
+      <div style={cardStyle}>
+        <h3>🚜 Drivers</h3>
+        <h1>{stats.drivers}</h1>
+      </div>
     </div>
   );
 }
