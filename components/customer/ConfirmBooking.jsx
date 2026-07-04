@@ -2,106 +2,105 @@ import React, { useState } from "react";
 import { supabase } from "../../lib/supabase";
 
 export default function ConfirmBooking({
-  booking,
+  bookingData,
   onConfirm,
-  onBack,
+  back,
 }) {
   const [loading, setLoading] = useState(false);
+
   const handleConfirm = async () => {
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const { error } = await supabase
-      .from("bookings")
-      .insert([
-        {
-          service_name: booking?.service?.name,
-          acres: booking?.acres,
-          date: booking?.date,
-          amount: booking?.amount,
-          payment_status: booking?.payment_status,
-          status: "Pending",
-        },
-      ]);
+      const amount =
+        (bookingData?.selectedService?.normalPrice || 0) *
+        Number(bookingData?.acres || 0);
 
-    if (error) throw error;
+      const { error } = await supabase
+        .from("bookings")
+        .insert([
+          {
+            service_name: bookingData?.selectedService?.name,
+            acres: Number(bookingData?.acres),
+            date: bookingData?.date,
+            amount: amount,
+            payment_status: bookingData?.payment_status || "Paid",
+            status: "Pending",
+            note: bookingData?.note || "",
+          },
+        ]);
 
-    onConfirm();
-  } catch (err) {
-    console.error(err);
-    alert("Booking failed!");
-  } finally {
-    setLoading(false);
-  }
-};
+      if (error) throw error;
+
+      alert("✅ Booking Successful");
+      onConfirm();
+    } catch (err) {
+      console.error(err);
+      alert("Booking failed!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const amount =
+    (bookingData?.selectedService?.normalPrice || 0) *
+    Number(bookingData?.acres || 0);
 
   return (
+    <div
+      style={{
+        background: "#F8FAFC",
+        minHeight: "100vh",
+        padding: 20,
+      }}
+    >
+      <button onClick={back}>← Back</button>
 
-    <div style={{
-      background:"#F8FAFC",
-      minHeight:"100vh",
-      padding:20
-    }}>
+      <h2>✅ Confirm Booking</h2>
 
-      <button onClick={onBack}>
-        ← Back
-      </button>
+      <div
+        style={{
+          background: "#fff",
+          borderRadius: 12,
+          padding: 15,
+          marginTop: 20,
+        }}
+      >
+        <p>🚜 Service : {bookingData?.selectedService?.name}</p>
 
-      <h2>
-        ✅ Confirm Booking
-      </h2>
+        <p>🌾 Acres : {bookingData?.acres}</p>
 
-      <div style={{
-        background:"#fff",
-        borderRadius:12,
-        padding:15,
-        marginTop:20
-      }}>
+        <p>📅 Date : {bookingData?.date}</p>
 
-        <p>
-          🚜 Service :
-          {" "}
-          {booking?.service?.name}
-        </p>
-
-        <p>
-          🌾 Acres :
-          {" "}
-          {booking?.acres}
-        </p>
+        <p>💰 Amount : ₹{amount}</p>
 
         <p>
-          📅 Date :
-          {" "}
-          {booking?.date}
+          💳 Payment : {bookingData?.payment_status || "Paid"}
         </p>
 
-        <p>
-          💰 Amount :
-          ₹{booking?.amount}
-        </p>
-
-        <p>
-          💳 Payment :
-          {booking?.payment_status}
-        </p>
-
-        <p>
-          📍 Farm :
-          {booking?.khet?.name}
-        </p>
-
+        <p>📝 Note : {bookingData?.note || "-"}</p>
       </div>
 
       <button
         onClick={handleConfirm}
         disabled={loading}
         style={{
-          marginTop:20,
-          width:"100%",
-          padding:14,
-          border:"none",
-          borderRadius:10,
+          marginTop: 20,
+          width: "100%",
+          padding: 14,
+          border: "none",
+          borderRadius: 10,
+          background: "#2d8a4e",
+          color: "#fff",
+          fontSize: 16,
+          fontWeight: "bold",
+        }}
+      >
+        {loading ? "Booking..." : "✅ Confirm Booking"}
+      </button>
+    </div>
+  );
+}          borderRadius:10,
           background:"#2d8a4e",
           color:"#fff",
           fontSize:16,
