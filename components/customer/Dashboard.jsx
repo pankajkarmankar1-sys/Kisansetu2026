@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import NotificationBell from "../notifications/NotificationBell";
+import NotificationBell from "./NotificationBell";
 
 export default function Dashboard({
   user,
