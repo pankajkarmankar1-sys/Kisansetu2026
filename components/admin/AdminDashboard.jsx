@@ -3,35 +3,42 @@ import { supabase } from "../../lib/supabase";
 
 export default function AdminDashboard() {
   const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [drivers, setDrivers] = useState([]);
 
   useEffect(() => {
     loadBookings();
+    loadDrivers();
   }, []);
 
   async function loadBookings() {
-    setLoading(true);
-
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("bookings")
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (!error) setBookings(data);
-
-    setLoading(false);
+    if (data) setBookings(data);
   }
 
-  async function updateStatus(id, status) {
+  async function loadDrivers() {
+    const { data } = await supabase
+      .from("drivers")
+      .select("*");
+
+    if (data) setDrivers(data);
+  }
+
+  async function assignDriver(bookingId, driverName) {
     const { error } = await supabase
       .from("bookings")
-      .update({ status })
-      .eq("id", id);
+      .update({ driver_name: driverName, status: "assigned" })
+      .eq("id", bookingId);
 
     if (!error) {
       setBookings((prev) =>
         prev.map((b) =>
-          b.id === id ? { ...b, status } : b
+          b.id === bookingId
+            ? { ...b, driver_name: driverName, status: "assigned" }
+            : b
         )
       );
     }
@@ -41,69 +48,54 @@ export default function AdminDashboard() {
     <div style={{ padding: 20 }}>
       <h2>🧑‍🌾 Admin Dashboard</h2>
 
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <table border="1" cellPadding="10" width="100%">
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Location</th>
-              <th>Date</th>
-              <th>Status</th>
-              <th>Action</th>
+      <table border="1" cellPadding="10" width="100%">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th>Driver</th>
+            <th>Assign Driver</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {bookings.map((b) => (
+            <tr key={b.id}>
+              <td>{b.user_name}</td>
+              <td>{b.location}</td>
+              <td>{b.status}</td>
+
+              <td>
+                {b.driver_name ? (
+                  <b style={{ color: "blue" }}>{b.driver_name}</b>
+                ) : (
+                  "Not Assigned"
+                )}
+              </td>
+
+              <td>
+                <select
+                  onChange={(e) =>
+                    assignDriver(b.id, e.target.value)
+                  }
+                  defaultValue=""
+                >
+                  <option value="" disabled>
+                    Select Driver
+                  </option>
+
+                  {drivers.map((d) => (
+                    <option key={d.id} value={d.name}>
+                      {d.name}
+                    </option>
+                  ))}
+                </select>
+              </td>
             </tr>
-          </thead>
-
-          <tbody>
-            {bookings.map((b) => (
-              <tr key={b.id}>
-                <td>{b.user_name}</td>
-                <td>{b.location}</td>
-                <td>{b.date}</td>
-
-                <td>
-                  <b
-                    style={{
-                      color:
-                        b.status === "approved"
-                          ? "green"
-                          : b.status === "rejected"
-                          ? "red"
-                          : "orange",
-                    }}
-                  >
-                    {b.status}
-                  </b>
-                </td>
-
-                <td>
-                  <button
-                    onClick={() => updateStatus(b.id, "approved")}
-                    style={{
-                      marginRight: 5,
-                      background: "green",
-                      color: "white",
-                    }}
-                  >
-                    Approve
-                  </button>
-
-                  <button
-                    onClick={() => updateStatus(b.id, "rejected")}
-                    style={{
-                      background: "red",
-                      color: "white",
-                    }}
-                  >
-                    Reject
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
