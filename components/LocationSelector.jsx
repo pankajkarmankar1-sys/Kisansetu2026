@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+
 export default function LocationSelector({ onSelect }) {
   const [state, setState] = useState("");
   const [district, setDistrict] = useState("");
-  const navigate = useNavigate();
+
   const states = [
     "Maharashtra",
     "Madhya Pradesh",
@@ -28,37 +28,34 @@ export default function LocationSelector({ onSelect }) {
       district,
     };
 
+    console.log("Location Saved:", locationData);
+
     if (onSelect) {
       onSelect(locationData);
     }
-
-    console.log("Location Saved:", locationData);
   };
 
   const useCurrentLocation = () => {
     if (!navigator.geolocation) {
-      alert("Geolocation not supported in this browser");
+      alert("Geolocation not supported");
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const { latitude, longitude } = position.coords;
-
         const locationData = {
           state: "Current Location",
-          district: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
+          district: `${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}`,
         };
+
+        console.log("GPS Location:", locationData);
 
         if (onSelect) {
           onSelect(locationData);
         }
-
-        console.log("GPS Location:", locationData);
       },
-      (error) => {
-        console.log(error);
-        alert("Location permission denied or error occurred");
+      () => {
+        alert("Location permission denied");
       }
     );
   };
@@ -71,79 +68,61 @@ export default function LocationSelector({ onSelect }) {
         padding: 20,
         border: "1px solid #ddd",
         borderRadius: 10,
-        fontFamily: "Arial",
+        background: "#fff",
       }}
     >
-      <h2 style={{ marginBottom: 15 }}>📍 Select Location</h2>
+      <h2>📍 Select Location</h2>
 
-      {/* State */}
-      <div style={{ marginBottom: 10 }}>
-        <select
-          value={state}
-          onChange={(e) => setState(e.target.value)}
-          style={{
-            width: "100%",
-            padding: 10,
-            borderRadius: 6,
-          }}
-        >
-          <option value="">Select State</option>
-          {states.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-      </div>
+      <select
+        value={state}
+        onChange={(e) => setState(e.target.value)}
+        style={{ width: "100%", padding: 10, marginBottom: 10 }}
+      >
+        <option value="">Select State</option>
 
-      {/* District */}
-      <div style={{ marginBottom: 10 }}>
-        <input
-          type="text"
-          value={district}
-          onChange={(e) => setDistrict(e.target.value)}
-          placeholder="Enter District"
-          style={{
-            width: "100%",
-            padding: 10,
-            borderRadius: 6,
-            border: "1px solid #ccc",
-          }}
-        />
-      </div>
+        {states.map((s) => (
+          <option key={s} value={s}>
+            {s}
+          </option>
+        ))}
+      </select>
 
-      {/* Buttons */}
-      <div style={{ display: "flex", gap: 10 }}>
-        <button
-          onClick={handleSave}
-          style={{
-            flex: 1,
-            padding: 10,
-            backgroundColor: "#2d8a4e",
-            color: "white",
-            border: "none",
-            borderRadius: 6,
-            cursor: "pointer",
-          }}
-        >
-          Save
-        </button>
+      <input
+        type="text"
+        placeholder="Enter District"
+        value={district}
+        onChange={(e) => setDistrict(e.target.value)}
+        style={{ width: "100%", padding: 10, marginBottom: 10 }}
+      />
 
-        <button
-          onClick={useCurrentLocation}
-          style={{
-            flex: 1,
-            padding: 10,
-            backgroundColor: "#1e88e5",
-            color: "white",
-            border: "none",
-            borderRadius: 6,
-            cursor: "pointer",
-          }}
-        >
-          GPS
-        </button>
-      </div>
+      <button
+        onClick={handleSave}
+        style={{
+          width: "100%",
+          padding: 12,
+          marginBottom: 10,
+          background: "#16a34a",
+          color: "#fff",
+          border: "none",
+          borderRadius: 8,
+        }}
+      >
+        Save
+      </button>
+
+      <button
+        onClick={useCurrentLocation}
+        style={{
+          width: "100%",
+          padding: 12,
+          background: "#2563eb",
+          color: "#fff",
+          border: "none",
+          borderRadius: 8,
+        }}
+      >
+        Use GPS
+      </button>
     </div>
   );
 }
