@@ -196,7 +196,11 @@ function getAvailableTractors(customerVillage) {
     const bMatch = b.village === customerVillage ? 0 : 1;
     if (aMatch !== bMatch) return aMatch - bMatch;
     // Secondary: fewest pending acres (load balancing)
-   return a.driverName.localeCompare(b.driverName); 
+   if (a.completedAcres !== b.completedAcres) {
+  return a.completedAcres - b.completedAcres;
+}
+
+return a.driverName.localeCompare(b.driverName);
   });
 }
 
