@@ -201,72 +201,100 @@ function getAvailableTractors(customerVillage) {
 }
 
 return a.driverName.localeCompare(b.driverName);
+  
   });
 }
-
 // ── Reserve dates in tractor schedule ────────────────────────────────────
 function reserveSchedule(tractorId, startDate, acres) {
   const t = DB.fleet[tractorId];
   if (!t) return [];
 
-  const daysNeeded = Math.ceil(acres / cap);
+  const capacity = t.dailyCapacity || 5;
+  const daysNeeded = Math.ceil(acres / capacity);
+
   const reserved = [];
   let d = startDate ? new Date(startDate) : new Date();
   let remaining = daysNeeded;
+
   while (remaining > 0) {
     const key = d.toISOString().split("T")[0];
+
     if (!DB.schedules[tractorId]) DB.schedules[tractorId] = {};
     if (!DB.schedules[tractorId][key]) DB.schedules[tractorId][key] = [];
+
     reserved.push(key);
     remaining--;
     d.setDate(d.getDate() + 1);
   }
+
   return reserved;
 }
 
 // ── AUTO ASSIGN: core dispatch function ──────────────────────────────────
 function autoAssign(booking) {
   const tractors = getAvailableTractors(booking.village || "");
+
   if (tractors.length === 0) {
-    // No tractor available → add to waiting list
-    DB.waitList.push({ bookingId: booking.id, addedAt: new Date().toISOString() });
-    const idx = DB.bookings.findIndex(b => b.id === booking.id);
-    if (idx >= 0) DB.bookings[idx].assignmentStatus = "waiting";
+    DB.waitList.push({
+      bookingId: booking.id,
+      addedAt: new Date().toISOString(),
+    });
+
+    const idx = DB.bookings.findIndex((b) => b.id === booking.id);
+
+    if (idx >= 0) {
+      DB.bookings[idx].assignmentStatus = "waiting";
+    }
+
     return null;
   }
+
   const tractor = tractors[0];
   const acres = parseFloat(booking.acres) || 1;
-  const reserved = reserveSchedule(tractor.id, booking.date, acres);
- 
-  // Update booking
-  const idx = DB.bookings.findIndex(b => b.id === booking.id);
+
+  const reserved = reserveSchedule(
+    tractor.id,
+    booking.date,
+    acres
+  );
+
+  const idx = DB.bookings.findIndex((b) => b.id === booking.id);
+
   if (idx >= 0) {
-    DB.bookings[idx].driverId        = tractor.driverPhone;
-    DB.bookings[idx].tractorId       = tractor.id;
-    DB.bookings[idx].tractorNum      = tractor.tractorNum;
-    DB.bookings[idx].driverName      = tractor.driverName;
-    DB.bookings[idx].status          = "Accepted";
-    DB.bookings[idx].drvWorkflow     = "accepted";
-    DB.bookings[idx].assignmentStatus= "assigned";
-    DB.bookings[idx].scheduledDates  = reserved;
-    DB.bookings[idx].assignedAt      = new Date().toISOString();
+    DB.bookings[idx].driverId = tractor.driverPhone;
+    DB.bookings[idx].tractorId = tractor.id;
+    DB.bookings[idx].tractorNum = tractor.tractorNum;
+    DB.bookings[idx].driverName = tractor.driverName;
+    DB.bookings[idx].status = "Accepted";
+    DB.bookings[idx].drvWorkflow = "accepted";
+    DB.bookings[idx].assignmentStatus = "assigned";
+    DB.bookings[idx].scheduledDates = reserved;
+    DB.bookings[idx].assignedAt = new Date().toISOString();
   }
-  // Update tractor
-  tractor.pendingAcres += acres;
+
+  tractor.pendingAcres =
+    (tractor.pendingAcres || 0) + acres;
+
   tractor.assignedJobs.push(booking.id);
-  if (reserved.length > 0) {
-    reserved.forEach(dt => {
-      if (!DB.schedules[tractor.id]) DB.schedules[tractor.id] = {};
-      if (!DB.schedules[tractor.id][dt]) DB.schedules[tractor.id][dt] = [];
-      DB.schedules[tractor.id][dt].push(booking.id);
-    });
-  }
-  // Mark busy if fully loaded
-  const dayLoad = Object.values(DB.schedules[tractor.id] || {})
-    .reduce((s, arr) => s + arr.length, 0);
-  if (tractor.pendingAcres >= tractor.dailyCapacity * 5) {
+
+  reserved.forEach((dt) => {
+    if (!DB.schedules[tractor.id]) {
+      DB.schedules[tractor.id] = {};
+    }
+
+    if (!DB.schedules[tractor.id][dt]) {
+      DB.schedules[tractor.id][dt] = [];
+    }
+
+    DB.schedules[tractor.id][dt].push(booking.id);
+  });
+
+  const dailyCapacity = tractor.dailyCapacity || 5;
+
+  if (tractor.pendingAcres >= dailyCapacity * 5) {
     tractor.status = TRACTOR_STATUS.BUSY;
   }
+
   return tractor;
 }
 
