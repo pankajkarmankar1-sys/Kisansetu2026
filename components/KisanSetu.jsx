@@ -298,57 +298,6 @@ function autoAssign(booking) {
   return tractor;
 }
 
-// ── BREAKDOWN HANDLER ────────────────────────────────────────────────────
-function handleBreakdown(tractorId, reason = "Breakdown") {
-  const t = DB.fleet[tractorId];
-  if (!t) return;
-  t.status = TRACTOR_STATUS.BREAKDOWN;
-
-  // Find all pending jobs for this tractor
-  const pendingJobs = DB.bookings.filter(b =>
-    b.tractorId === tractorId &&
-    !["Completed", "Cancelled"].includes(b.status)
-  );
-  if (pendingJobs.length === 0) return;
-
-  // Find next available tractor (different from broken one)
-  const alts = getAvailableTractors(t.village).filter(x => x.id !== tractorId);
-  const newTractor = alts[0] || null;
-
-  pendingJobs.forEach(job => {
-    const transfer = {
-      id:            "TR" + Math.random().toString(36).slice(2,7).toUpperCase(),
-      bookingId:     job.id,
-      fromTractorId: tractorId,
-      fromTractor:   t.tractorNum,
-      fromDriver:    t.driverName,
-      toTractorId:   newTractor?.id   || null,
-      toTractor:     newTractor?.tractorNum || "Unassigned",
-      toDriver:      newTractor?.driverName || "Unassigned",
-      reason,
-      transferredAt: new Date().toISOString(),
-    };
-    DB.transfers.push(transfer);
-
-    const idx = DB.bookings.findIndex(b => b.id === job.id);
-    if (newTractor && idx >= 0) {
-      DB.bookings[idx].driverId        = newTractor.driverPhone;
-      DB.bookings[idx].tractorId       = newTractor.id;
-      DB.bookings[idx].tractorNum      = newTractor.tractorNum;
-      DB.bookings[idx].driverName      = newTractor.driverName;
-      DB.bookings[idx].assignmentStatus = "transferred";
-      DB.bookings[idx].transferHistory  = [...(DB.bookings[idx].transferHistory||[]), transfer];
-      
-      newTractor.assignedJobs.push(job.id);
-    } else if (idx >= 0) {
-      DB.bookings[idx].assignmentStatus = "waiting";
-      DB.waitList.push({ bookingId: job.id, addedAt: new Date().toISOString() });
-    }
-    // Free from broken tractor
-    t.pendingAcres = Math.max(0, t.pendingAcres - (parseFloat(job.acres) || 0));
-    t.assignedJobs = t.assignedJobs.filter(id => id !== job.id);
-  });
-}
 
 // ── MANUAL REASSIGN ──────────────────────────────────────────────────────
 function manualReassign(bookingId, newTractorId) {
@@ -408,6 +357,143 @@ function fleetSummary() {
     waiting: DB.waitList.length,
   };
 }
+// ── BREAKDOWN HANDLER ────────────────────────────────────────────────────
+function handleBreakdown(tractorId, reason = "Breakdown") {
+  const tractor = DB.fleet[tractorId];
+
+  if (!tractor) return false;
+
+  tractor.status = TRACTOR_STATUS.BREAKDOWN;
+  tractor.breakdownReason = reason;
+  tractor.breakdownAt = new Date().toISOString();
+
+  const jobs = [...tractor.assignedJobs];
+
+  tractor.assignedJobs = [];
+  tractor.pendingAcres = 0;
+
+  jobs.forEach((bookingId) => {
+    manualReassignToAvailable(bookingId, tractorId);
+  });
+
+  return true;
+}
+
+function manualReassignToAvailable(bookingId, excludeTractorId) {
+  const booking = DB.bookings.find((b) => b.id === bookingId);
+
+  if (!booking) return false;
+
+  const tractors = getAvailableTractors(booking.village || "").filter(
+    (t) => t.id !== excludeTractorId
+  );
+
+  if (!tractors.length) {
+    DB.waitList.push({
+      bookingId,
+      addedAt: new Date().toISOString(),
+    });
+
+    booking.assignmentStatus = "waiting";
+    return false;
+  }
+
+  return manualReassign(bookingId, tractors[0].id);
+}
+
+// ── MANUAL REASSIGN ──────────────────────────────────────────────────────
+function manualReassign(bookingId, newTractorId) {
+  const booking = DB.bookings.find((b) => b.id === bookingId);
+  const newT = DB.fleet[newTractorId];
+
+  if (!booking || !newT) return false;
+
+  if (booking.tractorId && DB.fleet[booking.tractorId]) {
+    const old = DB.fleet[booking.tractorId];
+
+    old.assignedJobs = old.assignedJobs.filter((id) => id !== bookingId);
+    old.pendingAcres = Math.max(
+      0,
+      (old.pendingAcres || 0) - (parseFloat(booking.acres) || 0)
+    );
+  }
+
+  const idx = DB.bookings.findIndex((b) => b.id === bookingId);
+
+  if (idx >= 0) {
+    DB.bookings[idx].driverId = newT.driverPhone;
+    DB.bookings[idx].tractorId = newT.id;
+    DB.bookings[idx].tractorNum = newT.tractorNum;
+    DB.bookings[idx].driverName = newT.driverName;
+    DB.bookings[idx].status = "Accepted";
+    DB.bookings[idx].drvWorkflow = "accepted";
+    DB.bookings[idx].assignmentStatus = "reassigned";
+    DB.bookings[idx].assignedAt = new Date().toISOString();
+  }
+
+  newT.pendingAcres =
+    (newT.pendingAcres || 0) + (parseFloat(booking.acres) || 0);
+
+  newT.assignedJobs.push(bookingId);
+
+  return true;
+}
+
+// ── Process waiting list when capacity frees up ───────────────────────────
+function processWaitList() {
+  if (!DB.waitList.length) return;
+
+  const remaining = [];
+
+  DB.waitList.forEach((w) => {
+    const bk = DB.bookings.find((b) => b.id === w.bookingId);
+
+    if (!bk || bk.status === "Cancelled") return;
+
+    const result = autoAssign(bk);
+
+    if (!result) remaining.push(w);
+  });
+
+  DB.waitList.length = 0;
+  DB.waitList.push(...remaining);
+}
+
+function fleetSummary() {
+  syncFleet();
+
+  const all = Object.values(DB.fleet);
+
+  const completedAc = all.reduce(
+    (s, t) => s + (t.completedAcres || 0),
+    0
+  );
+
+  return {
+    total: all.length,
+    available: all.filter(
+      (t) => t.status === TRACTOR_STATUS.AVAILABLE
+    ).length,
+    busy: all.filter(
+      (t) => t.status === TRACTOR_STATUS.BUSY
+    ).length,
+    maintenance: all.filter(
+      (t) => t.status === TRACTOR_STATUS.MAINTENANCE
+    ).length,
+    breakdown: all.filter(
+      (t) => t.status === TRACTOR_STATUS.BREAKDOWN
+    ).length,
+    completedAc: Math.round(completedAc),
+    waiting: DB.waitList.length,
+  };
+}
+
+
+        cr,
+        rating,
+      },
+    ];
+  const totalCompanyA
 
 // ── Village workload map ──────────────────────────────────────────────────
 function villageWorkload() {
@@ -486,12 +572,7 @@ function calcIncentives(driver){
   ? dbDrivers
   : [
       {
-        ac,
-        cr,
-        rating,
-      },
-    ];
-  const totalCompanyAc = allDrivers.reduce((s,d)=>s+d.ac,0)+ac||1;
+        ac,c = allDrivers.reduce((s,d)=>s+d.ac,0)+ac||1;
 
   // ── 1. MILESTONE POOL ──────────────────────────────────────────────────
   // Dynamic: milestones are % of pool; each tier is earned when driver hits that acre mark
