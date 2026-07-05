@@ -63,7 +63,9 @@ async function sbSaveBooking(b){
     booking_status:b.booking_status||"confirmed",
     payment_status:b.payment_status||"paid",
     pay_method:b.payMethod||null, pay_ref:b.payRef||null,
-    completion_otp:b.completionOtp||"1234",
+    completion_otp:
+  b.completionOtp ||
+  Math.floor(1000 + Math.random() * 9000).toString(),
     status:b.status||"Pending",
     paid_at:b.paidAt||null, created_at:b.at||new Date().toISOString()
   },{onConflict:"id"});
@@ -94,8 +96,7 @@ async function sbUploadFile(dataUrl, bucket, path){
 async function sbGetAllUsers(){
   const {data}=await supa.from("users").select("*").order("created_at",{ascending:false});
   return data||[];
-}
-async function sbGetAllBookings(){
+}async function sbGetAllBookings(){
   const {data}=await supa.from("bookings").select("*").order("created_at",{ascending:false});
   return data||[];
 }
@@ -137,8 +138,9 @@ const DB={users:{},bookings:[],drivers:{},chats:{},khets:{},reviews:{},
 const fd=d=>d?new Date(d).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"}):"";
 const ft=d=>d?new Date(d).toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"}):"";
 const inr=n=>"₹"+(Math.round(n)||0).toLocaleString("en-IN");
-const gid=()=>Math.random().toString(36).slice(2,8).toUpperCase();
-const ADMIN_PWD="kisan2025";
+const gid=()=>Math.random
+().toString(36).slice(2,8).toUpperCase();
+const ADMIN_PWD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "kisan2025";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // FLEET DISPATCH & SCHEDULING ENGINE
