@@ -4,8 +4,6 @@ import { supabase } from "../../lib/supabase";
 export default function ChatWindow({ roomId, user }) {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
-  const [typing, setTyping] = useState(null);
-  const [online, setOnline] = useState(null);
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -25,19 +23,6 @@ export default function ChatWindow({ roomId, user }) {
         },
         (payload) => {
           setMessages((prev) => [...prev, payload.new]);
-        }
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "chat_rooms",
-          filter: `id=eq.${roomId}`,
-        },
-        (payload) => {
-          setTyping(payload.new.typing);
-          setOnline(payload.new.online_status);
         }
       )
       .subscribe();
@@ -72,55 +57,51 @@ export default function ChatWindow({ roomId, user }) {
     await supabase.from("messages").insert([msg]);
   }
 
-  async function sendTyping(isTyping) {
-    await supabase
-      .from("chat_rooms")
-      .update({
-        typing: {
-          user: user.id,
-          isTyping: isTyping,
-        },
-      })
-      .eq("id", roomId);
+  // ---------------- FILE UPLOAD ----------------
+  async function uploadFile(file) {
+    const fileName = `${Date.now()}-${file.name}`;
+
+    const { error } = await supabase.storage
+      .from("chat-files")
+      .upload(fileName, file);
+
+    if (error) {
+      console.log(error.message);
+      return null;
+    }
+
+    const { data } = supabase.storage
+      .from("chat-files")
+      .getPublicUrl(fileName);
+
+    return data.publicUrl;
   }
 
-  async function updateOnline(status) {
-    await supabase
-      .from("chat_rooms")
-      .update({
-        online_status: {
-          user: user.id,
-          status: status,
-        },
-      })
-      .eq("id", roomId);
+  async function sendFile(file) {
+    const url = await uploadFile(file);
+    if (!url) return;
+
+    const msg = {
+      room_id: roomId,
+      sender_id: user.id,
+      sender_name: user.name || "User",
+      message: "",
+      file_url: url,
+      file_type: file.type,
+      is_read: false,
+      created_at: new Date().toISOString(),
+    };
+
+    await supabase.from("messages").insert([msg]);
   }
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  useEffect(() => {
-    if (!roomId) return;
-
-    updateOnline(true);
-
-    return () => {
-      updateOnline(false);
-    };
-  }, [roomId]);
-
   return (
     <div style={styles.container}>
       <div style={styles.chatBox}>
-
-        {/* ONLINE STATUS */}
-        {online?.status && online?.user !== user.id && (
-          <div style={styles.online}>
-            🟢 online
-          </div>
-        )}
-
         {messages.map((m) => {
           const isMe = m.sender_id === user.id;
 
@@ -133,26 +114,61 @@ export default function ChatWindow({ roomId, user }) {
                 background: isMe ? "#DCF8C6" : "#fff",
               }}
             >
-              <div>{m.message}</div>
+              {/* TEXT */}
+              {m.message && <div>{m.message}</div>}
+
+              {/* FILE */}
+              {m.file_url && (
+                <div style={{ marginTop: 5 }}>
+                  {m.file_type?.includes("image") ? (
+                    <img
+                      src={m.file_url}
+                      alt="file"
+                      style={{
+                        width: 150,
+                        borderRadius: 10,
+                      }}
+                    />
+                  ) : (
+                    <a href={m.file_url} target="_blank">
+                      📎 File
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}
-
-        {typing?.isTyping && typing?.user !== user.id && (
-          <div style={styles.typing}>typing...</div>
-        )}
 
         <div ref={bottomRef} />
       </div>
 
       <div style={styles.inputBox}>
+        {/* FILE INPUT */}
+        <input
+          type="file"
+          id="fileUpload"
+          style={{ display: "none" }}
+          onChange={(e) => {
+            if (e.target.files[0]) {
+              sendFile(e.target.files[0]);
+            }
+          }}
+        />
+
+        <button
+          onClick={() =>
+            document.getElementById("fileUpload").click()
+          }
+          style={styles.fileBtn}
+        >
+          📎
+        </button>
+
+        {/* TEXT INPUT */}
         <input
           value={text}
-          onChange={(e) => {
-            setText(e.target.value);
-            sendTyping(true);
-          }}
-          onBlur={() => sendTyping(false)}
+          onChange={(e) => setText(e.target.value)}
           placeholder="Type message..."
           style={styles.input}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
@@ -198,6 +214,7 @@ const styles = {
     padding: 8,
     background: "#fff",
     borderTop: "1px solid #ccc",
+    alignItems: "center",
   },
 
   input: {
@@ -206,6 +223,7 @@ const styles = {
     borderRadius: 20,
     border: "1px solid #ccc",
     outline: "none",
+    marginLeft: 5,
   },
 
   button: {
@@ -217,17 +235,11 @@ const styles = {
     color: "#fff",
   },
 
-  typing: {
-    fontSize: 12,
-    fontStyle: "italic",
-    opacity: 0.7,
-    paddingLeft: 10,
-  },
-
-  online: {
-    fontSize: 12,
-    color: "green",
-    paddingLeft: 10,
-    marginBottom: 5,
+  fileBtn: {
+    padding: "8px 12px",
+    borderRadius: 20,
+    border: "none",
+    background: "#eee",
+    cursor: "pointer",
   },
 };
