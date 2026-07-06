@@ -6,27 +6,34 @@ export default function DriverChat({ driver }) {
   const [rooms, setRooms] = useState([]);
   const [activeRoom, setActiveRoom] = useState(null);
 
-  // -----------------------------
-  // Load Driver Chat Rooms
-  // -----------------------------
   useEffect(() => {
     if (!driver?.id) return;
     loadRooms();
   }, [driver]);
 
   async function loadRooms() {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("chat_rooms")
-      .select("*")
-      .eq("driver_id", driver.id)
-      .order("created_at", { ascending: false });
+      .select("*");
 
-    if (!error) setRooms(data || []);
+    const roomsWithUnread = await Promise.all(
+      (data || []).map(async (room) => {
+        const { count } = await supabase
+          .from("messages")
+          .select("*", { count: "exact", head: true })
+          .eq("room_id", room.id)
+          .eq("is_read", false)
+          .neq("sender_id", driver.id);
+
+        return { ...room, unread: count || 0 };
+      })
+    );
+
+    setRooms(roomsWithUnread);
   }
 
   return (
     <div style={styles.container}>
-      {/* LEFT: Rooms */}
       <div style={styles.sidebar}>
         <h3>🚜 Driver Chats</h3>
 
@@ -38,25 +45,32 @@ export default function DriverChat({ driver }) {
               ...styles.room,
               background:
                 activeRoom?.id === room.id ? "#dcedc8" : "#fff",
+              position: "relative",
             }}
           >
             <div style={{ fontWeight: "bold" }}>
               {room.customer_name}
             </div>
-            <div style={{ fontSize: 12, opacity: 0.7 }}>
+
+            <div style={{ fontSize: 12 }}>
               Booking: {room.booking_id}
             </div>
+
+            {room.unread > 0 && (
+              <span style={styles.badge}>
+                {room.unread}
+              </span>
+            )}
           </div>
         ))}
       </div>
 
-      {/* RIGHT: Chat */}
       <div style={styles.chatArea}>
         {activeRoom ? (
           <ChatWindow roomId={activeRoom.id} user={driver} />
         ) : (
           <div style={styles.empty}>
-            Select a chat to start 🚜
+            Select chat 🚜
           </div>
         )}
       </div>
@@ -64,9 +78,6 @@ export default function DriverChat({ driver }) {
   );
 }
 
-// -----------------------------
-// Styles
-// -----------------------------
 const styles = {
   container: {
     display: "flex",
@@ -95,10 +106,25 @@ const styles = {
   },
 
   empty: {
-    height: "100%",
     display: "flex",
-    justifyContent: "center",
+    height: "100%",
     alignItems: "center",
+    justifyContent: "center",
     color: "#777",
+  },
+
+  badge: {
+    position: "absolute",
+    right: 10,
+    top: 10,
+    background: "red",
+    color: "#fff",
+    width: 20,
+    height: 20,
+    borderRadius: "50%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: 12,
   },
 };
