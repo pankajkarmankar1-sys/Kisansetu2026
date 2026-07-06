@@ -6,7 +6,6 @@ export default function ChatWindow({ roomId, user }) {
   const [text, setText] = useState("");
   const bottomRef = useRef(null);
 
-  // Load messages + realtime
   useEffect(() => {
     if (!roomId) return;
 
@@ -41,7 +40,6 @@ export default function ChatWindow({ roomId, user }) {
     setMessages(data || []);
   }
 
-  // SEND MESSAGE
   async function sendMessage() {
     if (!text.trim()) return;
 
@@ -50,8 +48,8 @@ export default function ChatWindow({ roomId, user }) {
       sender_id: user.id,
       sender_name: user.name || "User",
       message: text,
-      created_at: new Date().toISOString(),
       is_read: false,
+      created_at: new Date().toISOString(),
     };
 
     setText("");
@@ -59,25 +57,9 @@ export default function ChatWindow({ roomId, user }) {
     await supabase.from("messages").insert([msg]);
   }
 
-  // AUTO SCROLL
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  // MARK AS READ
-  useEffect(() => {
-    if (!roomId || !user?.id) return;
-
-    markAsRead();
-  }, [roomId]);
-
-  async function markAsRead() {
-    await supabase
-      .from("messages")
-      .update({ is_read: true })
-      .eq("room_id", roomId)
-      .neq("sender_id", user.id);
-  }
 
   return (
     <div style={styles.container}>
@@ -89,13 +71,24 @@ export default function ChatWindow({ roomId, user }) {
             <div
               key={m.id}
               style={{
-                ...styles.msg,
+                ...styles.bubble,
                 alignSelf: isMe ? "flex-end" : "flex-start",
                 background: isMe ? "#DCF8C6" : "#fff",
               }}
             >
-              <div style={styles.name}>{m.sender_name}</div>
               <div>{m.message}</div>
+
+              <div style={styles.meta}>
+                {isMe ? (
+                  <span>
+                    {m.is_read ? "✔✔ Read" : "✔ Sent"}
+                  </span>
+                ) : (
+                  <span style={{ opacity: 0.6 }}>
+                    {m.sender_name}
+                  </span>
+                )}
+              </div>
             </div>
           );
         })}
@@ -128,7 +121,7 @@ const styles = {
     border: "1px solid #ddd",
     borderRadius: 10,
     overflow: "hidden",
-    background: "#f5f5f5",
+    background: "#e5ddd5",
   },
 
   chatBox: {
@@ -140,40 +133,42 @@ const styles = {
     gap: 8,
   },
 
-  msg: {
+  bubble: {
     maxWidth: "70%",
-    padding: 8,
+    padding: "8px 10px",
     borderRadius: 10,
     fontSize: 14,
+    boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
   },
 
-  name: {
-    fontSize: 11,
-    opacity: 0.6,
-    marginBottom: 3,
+  meta: {
+    fontSize: 10,
+    marginTop: 4,
+    opacity: 0.7,
+    textAlign: "right",
   },
 
   inputBox: {
     display: "flex",
     padding: 8,
-    borderTop: "1px solid #ddd",
     background: "#fff",
+    borderTop: "1px solid #ccc",
   },
 
   input: {
     flex: 1,
     padding: 10,
+    borderRadius: 20,
     border: "1px solid #ccc",
-    borderRadius: 8,
     outline: "none",
   },
 
   button: {
     marginLeft: 8,
-    padding: "10px 15px",
+    padding: "10px 16px",
     border: "none",
-    borderRadius: 8,
-    background: "#2e7d32",
+    borderRadius: 20,
+    background: "#128C7E",
     color: "#fff",
   },
 };
