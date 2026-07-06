@@ -4,6 +4,7 @@ import { supabase } from "../../lib/supabase";
 export default function ChatWindow({ roomId, user }) {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
+  const [typing, setTyping] = useState(null);
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -23,6 +24,18 @@ export default function ChatWindow({ roomId, user }) {
         },
         (payload) => {
           setMessages((prev) => [...prev, payload.new]);
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "chat_rooms",
+          filter: `id=eq.${roomId}`,
+        },
+        (payload) => {
+          setTyping(payload.new.typing);
         }
       )
       .subscribe();
@@ -57,6 +70,18 @@ export default function ChatWindow({ roomId, user }) {
     await supabase.from("messages").insert([msg]);
   }
 
+  async function sendTyping(isTyping) {
+    await supabase
+      .from("chat_rooms")
+      .update({
+        typing: {
+          user: user.id,
+          isTyping: isTyping,
+        },
+      })
+      .eq("id", roomId);
+  }
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -77,21 +102,13 @@ export default function ChatWindow({ roomId, user }) {
               }}
             >
               <div>{m.message}</div>
-
-              <div style={styles.meta}>
-                {isMe ? (
-                  <span>
-                    {m.is_read ? "✔✔ Read" : "✔ Sent"}
-                  </span>
-                ) : (
-                  <span style={{ opacity: 0.6 }}>
-                    {m.sender_name}
-                  </span>
-                )}
-              </div>
             </div>
           );
         })}
+
+        {typing?.isTyping && typing?.user !== user.id && (
+          <div style={styles.typing}>typing...</div>
+        )}
 
         <div ref={bottomRef} />
       </div>
@@ -99,7 +116,11 @@ export default function ChatWindow({ roomId, user }) {
       <div style={styles.inputBox}>
         <input
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => {
+            setText(e.target.value);
+            sendTyping(true);
+          }}
+          onBlur={() => sendTyping(false)}
           placeholder="Type message..."
           style={styles.input}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
@@ -138,14 +159,6 @@ const styles = {
     padding: "8px 10px",
     borderRadius: 10,
     fontSize: 14,
-    boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
-  },
-
-  meta: {
-    fontSize: 10,
-    marginTop: 4,
-    opacity: 0.7,
-    textAlign: "right",
   },
 
   inputBox: {
@@ -170,5 +183,12 @@ const styles = {
     borderRadius: 20,
     background: "#128C7E",
     color: "#fff",
+  },
+
+  typing: {
+    fontSize: 12,
+    fontStyle: "italic",
+    opacity: 0.7,
+    paddingLeft: 10,
   },
 };
