@@ -6,15 +6,12 @@ export default function ChatWindow({ roomId, user }) {
   const [text, setText] = useState("");
   const bottomRef = useRef(null);
 
-  // -----------------------------
-  // Load Messages
-  // -----------------------------
+  // Load messages + realtime
   useEffect(() => {
     if (!roomId) return;
 
     loadMessages();
 
-    // realtime subscription
     const channel = supabase
       .channel(`chat-${roomId}`)
       .on(
@@ -31,24 +28,20 @@ export default function ChatWindow({ roomId, user }) {
       )
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => supabase.removeChannel(channel);
   }, [roomId]);
 
   async function loadMessages() {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("messages")
       .select("*")
       .eq("room_id", roomId)
       .order("created_at", { ascending: true });
 
-    if (!error) setMessages(data || []);
+    setMessages(data || []);
   }
 
-  // -----------------------------
-  // Send Message
-  // -----------------------------
+  // SEND MESSAGE
   async function sendMessage() {
     if (!text.trim()) return;
 
@@ -58,28 +51,36 @@ export default function ChatWindow({ roomId, user }) {
       sender_name: user.name || "User",
       message: text,
       created_at: new Date().toISOString(),
+      is_read: false,
     };
 
     setText("");
 
-    const { error } = await supabase.from("messages").insert([msg]);
-
-    if (error) {
-      console.log("Message send error:", error.message);
-    }
+    await supabase.from("messages").insert([msg]);
   }
 
-  // Auto scroll
+  // AUTO SCROLL
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // -----------------------------
-  // UI
-  // -----------------------------
+  // MARK AS READ
+  useEffect(() => {
+    if (!roomId || !user?.id) return;
+
+    markAsRead();
+  }, [roomId]);
+
+  async function markAsRead() {
+    await supabase
+      .from("messages")
+      .update({ is_read: true })
+      .eq("room_id", roomId)
+      .neq("sender_id", user.id);
+  }
+
   return (
     <div style={styles.container}>
-      {/* Messages */}
       <div style={styles.chatBox}>
         {messages.map((m) => {
           const isMe = m.sender_id === user.id;
@@ -102,7 +103,6 @@ export default function ChatWindow({ roomId, user }) {
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
       <div style={styles.inputBox}>
         <input
           value={text}
@@ -120,9 +120,6 @@ export default function ChatWindow({ roomId, user }) {
   );
 }
 
-// -----------------------------
-// Styles
-// -----------------------------
 const styles = {
   container: {
     display: "flex",
@@ -148,7 +145,6 @@ const styles = {
     padding: 8,
     borderRadius: 10,
     fontSize: 14,
-    boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
   },
 
   name: {
@@ -179,6 +175,5 @@ const styles = {
     borderRadius: 8,
     background: "#2e7d32",
     color: "#fff",
-    cursor: "pointer",
   },
 };
