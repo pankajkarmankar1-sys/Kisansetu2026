@@ -6,35 +6,38 @@ export default function CustomerChat({ user }) {
   const [rooms, setRooms] = useState([]);
   const [activeRoom, setActiveRoom] = useState(null);
 
-  // -----------------------------
-  // Load Customer Rooms
-  // -----------------------------
   useEffect(() => {
     if (!user?.id) return;
     loadRooms();
   }, [user]);
 
   async function loadRooms() {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("chat_rooms")
       .select("*")
-      .eq("customer_id", user.id)
-      .order("created_at", { ascending: false });
+      .eq("customer_id", user.id);
 
-    if (!error) setRooms(data || []);
+    const roomsWithUnread = await Promise.all(
+      (data || []).map(async (room) => {
+        const { count } = await supabase
+          .from("messages")
+          .select("*", { count: "exact", head: true })
+          .eq("room_id", room.id)
+          .eq("is_read", false)
+          .neq("sender_id", user.id);
+
+        return { ...room, unread: count || 0 };
+      })
+    );
+
+    setRooms(roomsWithUnread);
   }
 
   return (
     <div style={styles.container}>
-      {/* LEFT: Rooms List */}
+      {/* LEFT SIDE */}
       <div style={styles.sidebar}>
         <h3>👨‍🌾 My Chats</h3>
-
-        {rooms.length === 0 && (
-          <p style={{ fontSize: 12, opacity: 0.6 }}>
-            No chats yet
-          </p>
-        )}
 
         {rooms.map((room) => (
           <div
@@ -44,25 +47,33 @@ export default function CustomerChat({ user }) {
               ...styles.room,
               background:
                 activeRoom?.id === room.id ? "#e3f2fd" : "#fff",
+              position: "relative",
             }}
           >
             <div style={{ fontWeight: "bold" }}>
               🚜 Driver: {room.driver_id}
             </div>
-            <div style={{ fontSize: 12, opacity: 0.7 }}>
+
+            <div style={{ fontSize: 12 }}>
               Booking: {room.booking_id}
             </div>
+
+            {room.unread > 0 && (
+              <span style={styles.badge}>
+                {room.unread}
+              </span>
+            )}
           </div>
         ))}
       </div>
 
-      {/* RIGHT: CHAT */}
+      {/* CHAT AREA */}
       <div style={styles.chatArea}>
         {activeRoom ? (
           <ChatWindow roomId={activeRoom.id} user={user} />
         ) : (
           <div style={styles.empty}>
-            Select a chat to start 💬
+            Select chat 💬
           </div>
         )}
       </div>
@@ -70,9 +81,6 @@ export default function CustomerChat({ user }) {
   );
 }
 
-// -----------------------------
-// Styles
-// -----------------------------
 const styles = {
   container: {
     display: "flex",
@@ -102,10 +110,25 @@ const styles = {
   },
 
   empty: {
-    height: "100%",
     display: "flex",
-    justifyContent: "center",
+    height: "100%",
     alignItems: "center",
+    justifyContent: "center",
     color: "#777",
+  },
+
+  badge: {
+    position: "absolute",
+    right: 10,
+    top: 10,
+    background: "red",
+    color: "#fff",
+    width: 20,
+    height: 20,
+    borderRadius: "50%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: 12,
   },
 };
