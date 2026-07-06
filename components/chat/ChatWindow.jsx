@@ -5,6 +5,7 @@ export default function ChatWindow({ roomId, user }) {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
   const [typing, setTyping] = useState(null);
+  const [online, setOnline] = useState(null);
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -36,6 +37,7 @@ export default function ChatWindow({ roomId, user }) {
         },
         (payload) => {
           setTyping(payload.new.typing);
+          setOnline(payload.new.online_status);
         }
       )
       .subscribe();
@@ -82,13 +84,43 @@ export default function ChatWindow({ roomId, user }) {
       .eq("id", roomId);
   }
 
+  async function updateOnline(status) {
+    await supabase
+      .from("chat_rooms")
+      .update({
+        online_status: {
+          user: user.id,
+          status: status,
+        },
+      })
+      .eq("id", roomId);
+  }
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    if (!roomId) return;
+
+    updateOnline(true);
+
+    return () => {
+      updateOnline(false);
+    };
+  }, [roomId]);
+
   return (
     <div style={styles.container}>
       <div style={styles.chatBox}>
+
+        {/* ONLINE STATUS */}
+        {online?.status && online?.user !== user.id && (
+          <div style={styles.online}>
+            🟢 online
+          </div>
+        )}
+
         {messages.map((m) => {
           const isMe = m.sender_id === user.id;
 
@@ -190,5 +222,12 @@ const styles = {
     fontStyle: "italic",
     opacity: 0.7,
     paddingLeft: 10,
+  },
+
+  online: {
+    fontSize: 12,
+    color: "green",
+    paddingLeft: 10,
+    marginBottom: 5,
   },
 };
