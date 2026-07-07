@@ -1,54 +1,92 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import Dashboard from "../components/customer/Dashboard";
+import CustomerNotifications from "../components/customer/CustomerNotifications";
 import { supabase } from "../lib/supabase";
 
-export default function DashboardPage() {
+export default function NotificationsPage(){
+
   const router = useRouter();
-  const [user, setUser] = useState({ name: "Loading..." });
 
-  useEffect(() => {
+  const [user,setUser] = useState(null);
+
+
+  useEffect(()=>{
+
     loadUser();
-  }, []);
 
-  async function loadUser() {
+  },[]);
+
+
+
+  async function loadUser(){
+
     const {
-      data: { user: authUser },
+      data:{
+        user:authUser
+      }
     } = await supabase.auth.getUser();
 
-    if (!authUser) {
+
+    if(!authUser){
+
       router.replace("/");
       return;
+
     }
 
-    const { data } = await supabase
+
+    const {data}=await supabase
       .from("profiles")
       .select("*")
-      .eq("id", authUser.id)
+      .eq(
+        "id",
+        authUser.id
+      )
       .single();
 
-    if (data) {
-      setUser(data);
-    } else {
-      setUser({
-        name: authUser.phone || authUser.email || "User",
-      });
-    }
+
+    setUser(
+      data || {
+        id:authUser.id,
+        name:"User"
+      }
+    );
+
   }
 
-  async function logout() {
-    await supabase.auth.signOut();
-    router.replace("/");
-  }
 
-  return (
-    <Dashboard
-      user={user}
-      onBook={() => router.push("/book")}
-      onBookings={() => router.push("/bookings")}
-      onProfile={() => router.push("/profile")}
-      onNotifications={() => alert("Notifications")}
-      onLogout={logout}
-    />
+
+
+
+  return(
+
+    <div
+      style={{
+        padding:20,
+        background:"#f5f7fb",
+        minHeight:"100vh",
+      }}
+    >
+
+      <button
+        onClick={()=>router.back()}
+        style={{
+          padding:10,
+          marginBottom:20,
+        }}
+      >
+        ← Back
+      </button>
+
+
+      {
+        user &&
+        <CustomerNotifications user={user}/>
+      }
+
+
+    </div>
+
   );
+
 }
