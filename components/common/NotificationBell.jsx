@@ -1,15 +1,19 @@
 import { useEffect, useState } from "react";
 import { getNotifications } from "../../lib/NotificationService";
 
-export default function NotificationBell({ onClick }) {
+export default function NotificationBell({
+  user,
+  onClick,
+}) {
   const [count, setCount] = useState(0);
 
   async function load() {
     try {
-      const data = await getNotifications();
-      setCount(data.length);
+      const data = await getNotifications(user?.id);
+      setCount(data?.length || 0);
+
     } catch (e) {
-      console.error(e);
+      console.error("Notification Error:", e);
     }
   }
 
@@ -19,7 +23,9 @@ export default function NotificationBell({ onClick }) {
     const timer = setInterval(load, 5000);
 
     return () => clearInterval(timer);
-  }, []);
+
+  }, [user]);
+
 
   return (
     <button
@@ -30,6 +36,7 @@ export default function NotificationBell({ onClick }) {
         background: "none",
         border: "none",
         cursor: "pointer",
+        color: "#fff",
       }}
     >
       🔔
