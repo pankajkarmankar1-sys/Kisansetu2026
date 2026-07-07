@@ -1,135 +1,267 @@
 import React, { useState, useEffect } from "react";
 import DriverBookingCard from "./DriverBookingCard";
+import BookingDetailsModal from "./BookingDetailsModal";
 import { supabase } from "../../lib/supabase";
 
 export default function MyBookings() {
+
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+
+
 
   useEffect(() => {
+
     loadBookings();
+
 
     const channel = supabase
       .channel("customer-bookings")
       .on(
         "postgres_changes",
         {
-          event: "*",
-          schema: "public",
-          table: "bookings",
+          event:"*",
+          schema:"public",
+          table:"bookings",
         },
-        () => {
+        ()=>{
           loadBookings();
         }
       )
       .subscribe();
 
-    return () => {
+
+
+    return ()=>{
       supabase.removeChannel(channel);
     };
-  }, []);
 
-  async function loadBookings() {
-    try {
+
+  },[]);
+
+
+
+
+
+  async function loadBookings(){
+
+    try{
+
       setLoading(true);
 
+
       const {
-        data: { user },
+        data:{
+          user
+        },
       } = await supabase.auth.getUser();
 
-      if (!user) {
+
+
+      if(!user){
+
         setBookings([]);
         return;
+
       }
 
-      const { data, error } = await supabase
+
+
+      const {
+        data,
+        error
+      } = await supabase
         .from("bookings")
         .select("*")
-        .eq("customer_id", user.id)
-        .order("created_at", { ascending: false });
+        .eq(
+          "customer_id",
+          user.id
+        )
+        .order(
+          "created_at",
+          {
+            ascending:false,
+          }
+        );
 
-      if (error) throw error;
+
+
+      if(error)
+        throw error;
+
+
 
       setBookings(data || []);
-    } catch (err) {
-      console.error(err);
-      alert("Failed to load bookings");
-    } finally {
+
+
+
+    }catch(err){
+
+      console.log(
+        "Booking Error:",
+        err.message
+      );
+
+
+    }finally{
+
       setLoading(false);
+
     }
+
   }
 
-  async function cancelBooking(id) {
+
+
+
+
+
+  async function cancelBooking(id){
+
+
     const ok = window.confirm(
-      "Are you sure you want to cancel this booking?"
+      "Cancel this booking?"
     );
 
-    if (!ok) return;
 
-    const { error } = await supabase
+    if(!ok) return;
+
+
+
+    const {
+      error
+    } = await supabase
       .from("bookings")
       .update({
-        status: "Cancelled",
+        status:"Cancelled",
       })
-      .eq("id", id);
+      .eq(
+        "id",
+        id
+      );
 
-    if (error) {
+
+
+    if(error){
+
       alert(error.message);
       return;
+
     }
 
-    alert("✅ Booking cancelled successfully");
+
+    alert(
+      "✅ Booking Cancelled"
+    );
+
 
     loadBookings();
+
   }
 
-  if (loading) {
-    return (
-      <div style={{ padding: 20 }}>
-        <h2>Loading...</h2>
-      </div>
+
+
+
+
+
+  if(loading){
+
+    return(
+      <h2>
+        Loading bookings...
+      </h2>
     );
+
   }
+
+
+
+
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>📋 My Bookings</h2>
+
+    <div
+      style={{
+        padding:20,
+      }}
+    >
+
+      <h2>
+        📋 My Bookings
+      </h2>
+
+
 
       <button
         onClick={loadBookings}
         style={{
-          marginBottom: 20,
-          padding: "10px 16px",
-          border: "none",
-          borderRadius: 8,
-          background: "#16a34a",
-          color: "#fff",
-          cursor: "pointer",
+          padding:10,
+          marginBottom:20,
+          background:"#16a34a",
+          color:"#fff",
+          border:"none",
+          borderRadius:8,
         }}
       >
         🔄 Refresh
       </button>
 
-      {bookings.length === 0 ? (
-        <div
-          style={{
-            background: "#fff",
-            padding: 20,
-            borderRadius: 10,
-            textAlign: "center",
-          }}
-        >
-          <h3>No bookings found.</h3>
-        </div>
-      ) : (
-        bookings.map((booking) => (
+
+
+
+      {
+        bookings.length===0 ?
+
+        (
+          <p>
+            No bookings found
+          </p>
+        )
+
+        :
+
+        bookings.map((booking)=>(
+
           <DriverBookingCard
+
             key={booking.id}
+
             booking={booking}
-            onCancel={cancelBooking}
+
+            onView={
+              (data)=>
+                setSelectedBooking(data)
+            }
+
+            onCancel={
+              cancelBooking
+            }
+
           />
+
         ))
-      )}
+
+      }
+
+
+
+
+
+      <BookingDetailsModal
+
+        booking={selectedBooking}
+
+        onClose={()=>
+          setSelectedBooking(null)
+        }
+
+      />
+
+
+
     </div>
+
   );
+
 }
