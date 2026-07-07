@@ -51,3 +51,6 @@ export const SERVICES = [
     icon: "🔁",
   },
 ];
+
+// Backward compatibility
+export const SVC = SERVICES;
