@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import NotificationPanel from "../components/NotificationPanel";
+import NotificationPanel from "../components/common/NotificationPanel";
 
 export default function NotificationsPage() {
   const router = useRouter();
@@ -15,8 +15,8 @@ export default function NotificationsPage() {
       <button
         onClick={() => router.back()}
         style={{
-          marginBottom: 20,
           padding: "10px 16px",
+          marginBottom: 20,
           border: "none",
           borderRadius: 8,
           background: "#16a34a",
@@ -27,7 +27,9 @@ export default function NotificationsPage() {
         ← Back
       </button>
 
-      <h2 style={{ marginBottom: 20 }}>🔔 Notifications</h2>
+      <h2 style={{ marginBottom: 20 }}>
+        🔔 Notifications
+      </h2>
 
       <NotificationPanel />
     </div>
