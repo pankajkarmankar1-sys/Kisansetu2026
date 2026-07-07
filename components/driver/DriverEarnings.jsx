@@ -1,38 +1,102 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 
-export default function DriverEarnings({ driver, bookings = [] }) {
+export default function DriverEarnings({ driver }) {
 
   const [completed, setCompleted] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-useEffect(() => {
-  loadCompletedBookings();
-}, []);
 
-async function loadCompletedBookings() {
-  const { data, error } = await supabase
-    .from("bookings")
-    .select("*")
-    .eq("status", "Completed");
+  useEffect(() => {
 
-  if (error) {
-    console.error(error);
-    return;
+    if (!driver?.id) return;
+
+    loadCompletedBookings();
+
+  }, [driver]);
+
+
+
+  async function loadCompletedBookings() {
+
+    try {
+
+      setLoading(true);
+
+      const { data, error } = await supabase
+        .from("bookings")
+        .select("*")
+        .eq("driver_id", driver.id)
+        .eq("status", "Completed");
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      setCompleted(data || []);
+
+
+    } catch (error) {
+
+      console.error(
+        "Earnings Error:",
+        error.message
+      );
+
+
+    } finally {
+
+      setLoading(false);
+
+    }
   }
 
-  setCompleted(data || []);
-}
 
-const totalEarnings = completed.reduce(
-  (sum, b) => sum + Number(b.driver_amount || b.amount || 0),
-  0
-);
 
-const totalJobs = completed.length;
+  const totalEarnings = completed.reduce(
+    (sum, b) =>
+      sum + Number(
+        b.driver_amount || b.amount || 0
+      ),
+    0
+  );
+
+
+  const totalJobs = completed.length;
+
+
+
+  if (!driver?.id) {
+    return (
+      <p>
+        Driver login nahi hai
+      </p>
+    );
+  }
+
+
+
   return (
-    <div style={{ padding: 20 }}>
+    <div
+      style={{
+        padding: 20,
+      }}
+    >
 
-      <h2>💰 Driver Earnings</h2>
+      <h2>
+        💰 Driver Earnings
+      </h2>
+
+
+      {loading && (
+        <p>
+          Loading...
+        </p>
+      )}
+
+
 
       <div
         style={{
@@ -43,10 +107,18 @@ const totalJobs = completed.length;
           background: "#fff",
         }}
       >
-        <h3>Total Earnings</h3>
 
-        <h1>₹{totalEarnings}</h1>
+        <h3>
+          Total Earnings
+        </h3>
+
+        <h1>
+          ₹{totalEarnings}
+        </h1>
+
       </div>
+
+
 
       <div
         style={{
@@ -57,10 +129,18 @@ const totalJobs = completed.length;
           background: "#fff",
         }}
       >
-        <h3>Total Completed Jobs</h3>
 
-        <h1>{totalJobs}</h1>
+        <h3>
+          Total Completed Jobs
+        </h3>
+
+        <h1>
+          {totalJobs}
+        </h1>
+
       </div>
+
+
 
       <div
         style={{
@@ -70,15 +150,24 @@ const totalJobs = completed.length;
           background: "#fff",
         }}
       >
-        <h3>Average Per Job</h3>
+
+        <h3>
+          Average Per Job
+        </h3>
 
         <h1>
           ₹
-          {totalJobs === 0
+          {
+            totalJobs === 0
             ? 0
-            : Math.round(totalEarnings / totalJobs)}
+            : Math.round(
+                totalEarnings / totalJobs
+              )
+          }
         </h1>
+
       </div>
+
 
     </div>
   );
