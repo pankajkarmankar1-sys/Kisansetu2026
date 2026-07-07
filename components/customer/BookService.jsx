@@ -81,10 +81,11 @@ export default function BookService({
 
       {step === "confirm" && (
         <ConfirmBooking
-          bookingData={bookingData}
-          onConfirm={() => setStep("success")}
-          back={() => setStep("date")}
-        />
+  user={user}
+  bookingData={bookingData}
+  onConfirm={() => setStep("success")}
+  back={() => setStep("date")}
+/>
       )}
 
       {step === "success" && (
