@@ -2,32 +2,83 @@ import React, { useState } from "react";
 import { supabase } from "../../lib/supabase";
 
 export default function DriverProfile({ driver }) {
-  const [status, setStatus] = useState(driver?.status || "Available");
+
+  const [status, setStatus] = useState(
+    driver?.status || "Available"
+  );
+
   const [loading, setLoading] = useState(false);
 
+
+
   async function changeStatus() {
+
+    if (!driver?.id) {
+      alert("Driver not found");
+      return;
+    }
+
+
     try {
+
       setLoading(true);
 
+
       const newStatus =
-        status === "Available" ? "Busy" : "Available";
+        status === "Available"
+          ? "Busy"
+          : "Available";
+
 
       const { error } = await supabase
         .from("drivers")
-        .update({ status: newStatus })
-        .eq("id", driver?.id);
+        .update({
+          status: newStatus,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", driver.id);
 
-      if (error) throw error;
+
+
+      if (error) {
+        throw error;
+      }
+
 
       setStatus(newStatus);
-      alert("Status updated successfully");
+
+      alert(
+        "Status updated successfully"
+      );
+
+
     } catch (err) {
+
       console.error(err);
-      alert("Status update failed");
+
+      alert(
+        "Status update failed"
+      );
+
+
     } finally {
+
       setLoading(false);
+
     }
   }
+
+
+
+  if (!driver) {
+    return (
+      <div>
+        Driver data loading...
+      </div>
+    );
+  }
+
+
 
   return (
     <div
@@ -38,58 +89,73 @@ export default function DriverProfile({ driver }) {
         padding: 20,
       }}
     >
-      <h2>👨‍🌾 Driver Profile</h2>
+
+      <h2>
+        👨‍🌾 Driver Profile
+      </h2>
+
 
       <p>
-        <b>Name :</b> {driver?.name || "-"}
+        <b>Name :</b>
+        {" "}
+        {driver.name || "-"}
       </p>
 
-      <p>
-        <b>Phone :</b> {driver?.phone || "-"}
-      </p>
 
       <p>
-        <b>Village :</b> {driver?.village || "-"}
+        <b>Phone :</b>
+        {" "}
+        {driver.phone || "-"}
       </p>
 
-      <p>
-        <b>Vehicle :</b> {driver?.vehicle_type || "Tractor"}
-      </p>
 
       <p>
-        <b>Experience :</b> {driver?.experience || "0"} Years
+        <b>Village :</b>
+        {" "}
+        {driver.village || "-"}
       </p>
 
-      <p>
-        <b>Rating :</b> ⭐ {driver?.rating || "New"}
-      </p>
 
       <p>
-        <b>Status :</b>{" "}
+        <b>Vehicle :</b>
+        {" "}
+        {driver.vehicle_type || "Tractor"}
+      </p>
+
+
+      <p>
+        <b>Experience :</b>
+        {" "}
+        {driver.experience || 0} Years
+      </p>
+
+
+      <p>
+        <b>Rating :</b>
+        {" "}
+        ⭐ {driver.rating || "New"}
+      </p>
+
+
+      <p>
+        <b>Status :</b>
+        {" "}
+
         <span
           style={{
-            color: status === "Available" ? "#2d8a4e" : "#d97706",
+            color:
+              status === "Available"
+              ? "green"
+              : "#d97706",
             fontWeight: "bold",
           }}
         >
           {status}
         </span>
+
       </p>
 
-      <button
-        style={{
-          marginTop: 15,
-          padding: "10px 20px",
-          background: "#2d8a4e",
-          color: "#fff",
-          border: "none",
-          borderRadius: 8,
-          cursor: "pointer",
-          marginRight: 10,
-        }}
-      >
-        ✏️ Edit Profile
-      </button>
+
 
       <button
         onClick={changeStatus}
@@ -104,8 +170,14 @@ export default function DriverProfile({ driver }) {
           cursor: "pointer",
         }}
       >
-        {loading ? "Updating..." : "🔄 Change Status"}
+        {
+          loading
+          ? "Updating..."
+          : "🔄 Change Status"
+        }
       </button>
+
+
     </div>
   );
 }
