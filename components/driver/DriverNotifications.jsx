@@ -11,7 +11,7 @@ export default function DriverNotifications({ driver }) {
     loadNotifications();
 
     const channel = supabase
-      .channel("driver_notifications")
+      .channel(`driver_notifications_${driver.id}`)
       .on(
         "postgres_changes",
         {
@@ -32,24 +32,37 @@ export default function DriverNotifications({ driver }) {
     return () => {
       supabase.removeChannel(channel);
     };
+
   }, [driver]);
 
+
   async function loadNotifications() {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const { data, error } = await supabase
-      .from("notifications")
-      .select("*")
-      .eq("user_id", driver.id)
-      .order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("user_id", driver.id)
+        .order("created_at", {
+          ascending: false,
+        });
 
-    if (error) {
-      console.log("Notification Error:", error);
-    } else {
+      if (error) {
+        throw error;
+      }
+
       setNotifications(data || []);
-    }
 
-    setLoading(false);
+    } catch (error) {
+      console.log(
+        "Notification Error:",
+        error.message
+      );
+
+    } finally {
+      setLoading(false);
+    }
   }
 
 
@@ -63,15 +76,21 @@ export default function DriverNotifications({ driver }) {
 
 
   return (
-    <div style={styles.container}>
+    <div
+      style={{
+        padding: 20,
+      }}
+    >
 
-      <h2 style={styles.title}>
+      <h2>
         🔔 Driver Notifications
       </h2>
 
 
       {loading && (
-        <p>Loading...</p>
+        <p>
+          Loading...
+        </p>
       )}
 
 
@@ -85,7 +104,14 @@ export default function DriverNotifications({ driver }) {
       {notifications.map((item) => (
         <div
           key={item.id}
-          style={styles.card}
+          style={{
+            background: "#fff",
+            padding: 15,
+            marginBottom: 12,
+            borderRadius: 10,
+            boxShadow:
+              "0 2px 8px rgba(0,0,0,0.1)",
+          }}
         >
 
           <h3>
@@ -97,35 +123,15 @@ export default function DriverNotifications({ driver }) {
           </p>
 
           <small>
-            {new Date(item.created_at).toLocaleString()}
+            {item.created_at &&
+              new Date(
+                item.created_at
+              ).toLocaleString()}
           </small>
 
         </div>
       ))}
 
-
     </div>
   );
 }
-
-
-
-const styles = {
-
-  container: {
-    padding: "20px",
-  },
-
-  title: {
-    marginBottom: "20px",
-  },
-
-  card: {
-    background: "#fff",
-    padding: "15px",
-    marginBottom: "12px",
-    borderRadius: "10px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-  },
-
-};
