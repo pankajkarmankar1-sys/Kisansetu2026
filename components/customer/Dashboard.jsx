@@ -29,7 +29,10 @@ export default function Dashboard({
         }}
       >
         <div>
-          <h2 style={{ margin: 0 }}>🚜 KisanSetu</h2>
+          <h2 style={{ margin: 0 }}>
+            🚜 KisanSetu
+          </h2>
+
           <p style={{ margin: "10px 0 0" }}>
             Welcome, <b>{user?.name || "Farmer"}</b>
           </p>
@@ -39,20 +42,28 @@ export default function Dashboard({
           </p>
         </div>
 
-        <NotificationBell onClick={onNotifications} />
+        <NotificationBell
+          user={user}
+          onClick={onNotifications}
+        />
+
       </div>
+
 
       <button style={btn} onClick={onBook}>
         🚜 Book Tractor
       </button>
 
+
       <button style={btn} onClick={onBookings}>
         📋 My Bookings
       </button>
 
+
       <button style={btn} onClick={onProfile}>
         👤 My Profile
       </button>
+
 
       <button
         style={{
@@ -63,9 +74,11 @@ export default function Dashboard({
       >
         🚪 Logout
       </button>
+
     </div>
   );
 }
+
 
 const btn = {
   width: "100%",
