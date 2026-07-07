@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getNotifications } from "../lib/notification";
+import { getNotifications } from "../lib/NotificationService.js
 
 export default function NotificationBell({ onClick }) {
   const [count, setCount] = useState(0);
