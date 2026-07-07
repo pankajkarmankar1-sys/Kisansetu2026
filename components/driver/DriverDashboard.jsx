@@ -5,7 +5,9 @@ import DriverBookings from "./DriverBookings";
 import DriverProfile from "./DriverProfile";
 import DriverEarnings from "./DriverEarnings";
 import DriverHistory from "./DriverHistory";
+import DriverNotifications from "./DriverNotifications";
 
+<DriverNotifications driver={driver}/>
 export default function DriverDashboard() {
   const [driver, setDriver] = useState(null);
   const [tab, setTab] = useState("bookings");
