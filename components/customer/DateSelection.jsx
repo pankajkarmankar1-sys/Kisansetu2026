@@ -13,36 +13,79 @@ export default function DateSelection({
   minDate.setDate(minDate.getDate() + 1);
 
   return (
-    <div style={{ padding: 20 }}>
+    <div
+      style={{
+        padding: 20,
+        background: "#F8FAFC",
+        minHeight: "100vh",
+      }}
+    >
 
       <h2>📅 Select Booking Date</h2>
 
-      <input
-        type="date"
-        min={minDate.toISOString().split("T")[0]}
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-      />
+      <div
+        style={{
+          background: "#fff",
+          padding: 15,
+          borderRadius: 12,
+        }}
+      >
 
-      <br /><br />
+        <label>
+          Booking Date
+        </label>
 
-      <textarea
-        rows={4}
-        placeholder="Customer Note (Optional)"
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-      />
+        <br />
 
-      <br /><br />
+        <input
+          type="date"
+          min={minDate.toISOString().split("T")[0]}
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          style={{
+            padding: 10,
+            width: "100%",
+            marginTop: 10,
+          }}
+        />
 
-      <button onClick={back}>
+
+        <br /><br />
+
+
+        <textarea
+          rows={4}
+          placeholder="Customer Note (Optional)"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          style={{
+            width: "100%",
+            padding: 10,
+          }}
+        />
+
+      </div>
+
+
+      <button
+        onClick={back}
+        style={{
+          marginTop: 20,
+          padding: 12,
+        }}
+      >
         ← Back
       </button>
+
 
       <button
         onClick={next}
         disabled={!date}
-        style={{ marginLeft: 10 }}
+        style={{
+          marginTop: 20,
+          marginLeft: 10,
+          padding: 12,
+        }}
       >
         Continue →
       </button>
