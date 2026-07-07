@@ -1,6 +1,6 @@
 import React from "react";
 import AdminSidebar from "./AdminSidebar";
-import StatsCards from "./StatsCards";
+import StatsCard from "./StatsCard";
 import BookingList from "./BookingList";
 import DriverList from "./DriverList";
 
