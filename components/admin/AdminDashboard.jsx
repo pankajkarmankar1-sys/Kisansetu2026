@@ -26,7 +26,7 @@ export default function AdminDashboard() {
           👨‍💼 Admin Dashboard
         </h1>
 
-        <StatsCards />
+        <StatsCard />
 
         <div style={{ marginTop: 30 }}>
           <BookingList />
