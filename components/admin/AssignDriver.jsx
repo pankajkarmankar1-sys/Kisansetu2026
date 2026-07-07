@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 
-export default function AssignDriver({ bookingId, currentDriver }) {
+export default function AssignDriver({ booking }) {
   const [drivers, setDrivers] = useState([]);
   const [selectedDriver, setSelectedDriver] = useState(
-    currentDriver || ""
+    booking?.driver_id || ""
   );
 
   useEffect(() => {
@@ -13,8 +13,9 @@ export default function AssignDriver({ bookingId, currentDriver }) {
 
   async function loadDrivers() {
     const { data, error } = await supabase
-      .from("drivers")
+      .from("profiles")
       .select("*")
+      .eq("role", "driver")
       .order("name");
 
     if (!error) {
@@ -28,28 +29,26 @@ export default function AssignDriver({ bookingId, currentDriver }) {
       return;
     }
 
-    const driver = drivers.find(
-      (d) => d.name === selectedDriver
-    );
+    const driver = drivers.find((d) => d.id === selectedDriver);
 
     const { error } = await supabase
       .from("bookings")
       .update({
-        driver_name: driver.name,
         driver_id: driver.id,
-        status: "assigned",
+        driver_name: driver.name,
+        status: "Accepted",
       })
-      .eq("id", bookingId);
+      .eq("id", booking.id);
 
     if (error) {
-      alert("Failed to assign driver");
+      alert(error.message);
     } else {
-      alert("Driver assigned successfully");
+      alert("✅ Driver assigned successfully");
     }
   }
 
   return (
-    <div style={{ display: "flex", gap: 10 }}>
+    <div style={{ display: "flex", gap: 8 }}>
       <select
         value={selectedDriver}
         onChange={(e) => setSelectedDriver(e.target.value)}
@@ -57,7 +56,7 @@ export default function AssignDriver({ bookingId, currentDriver }) {
         <option value="">Select Driver</option>
 
         {drivers.map((driver) => (
-          <option key={driver.id} value={driver.name}>
+          <option key={driver.id} value={driver.id}>
             {driver.name}
           </option>
         ))}
