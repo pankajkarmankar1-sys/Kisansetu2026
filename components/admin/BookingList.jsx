@@ -4,9 +4,27 @@ import { supabase } from "../../lib/supabase";
 
 export default function BookingList() {
   const [bookings, setBookings] = useState([]);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     loadBookings();
+
+    const channel = supabase
+      .channel("admin-bookings")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "bookings",
+        },
+        loadBookings
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   async function loadBookings() {
@@ -15,9 +33,7 @@ export default function BookingList() {
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (!error) {
-      setBookings(data || []);
-    }
+    if (!error) setBookings(data || []);
   }
 
   async function updateStatus(id, status) {
@@ -26,86 +42,121 @@ export default function BookingList() {
       .update({ status })
       .eq("id", id);
 
-    if (!error) {
-      loadBookings();
-    }
+    if (!error) loadBookings();
   }
 
   async function deleteBooking(id) {
-    const ok = window.confirm("Delete this booking?");
-
-    if (!ok) return;
+    if (!window.confirm("Delete booking?")) return;
 
     const { error } = await supabase
       .from("bookings")
       .delete()
       .eq("id", id);
 
-    if (!error) {
-      loadBookings();
-    }
+    if (!error) loadBookings();
   }
+
+  const filtered = bookings.filter((b) =>
+    JSON.stringify(b)
+      .toLowerCase()
+      .includes(search.toLowerCase())
+  );
 
   return (
     <div
       style={{
         background: "#fff",
         padding: 20,
-        borderRadius: 10,
-        marginTop: 20,
+        borderRadius: 12,
       }}
     >
-      <h2>📋 Booking List</h2>
+      <h2>📋 Booking Management</h2>
+
+      <input
+        placeholder="Search booking..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        style={{
+          width: "100%",
+          padding: 10,
+          margin: "15px 0",
+        }}
+      />
 
       <table
+        width="100%"
         border="1"
         cellPadding="8"
-        width="100%"
         style={{ borderCollapse: "collapse" }}
       >
         <thead>
           <tr>
             <th>Customer</th>
-            <th>Location</th>
+            <th>Service</th>
             <th>Date</th>
             <th>Status</th>
             <th>Driver</th>
-            <th>Actions</th>
+            <th>Assign</th>
+            <th>Action</th>
           </tr>
         </thead>
 
         <tbody>
-          {bookings.map((booking) => (
+          {filtered.map((booking) => (
             <tr key={booking.id}>
-              <td>{booking.user_name}</td>
-              <td>{booking.location}</td>
-              <td>{booking.date}</td>
+              <td>
+                {booking.customer_name ||
+                  booking.customer_phone ||
+                  "-"}
+              </td>
 
-              <td>{booking.status || "Pending"}</td>
+              <td>{booking.service_name}</td>
 
-              <td>{booking.driver_name || "Not Assigned"}</td>
+              <td>
+                {booking.booking_date || booking.date}
+              </td>
+
+              <td>{booking.status}</td>
+
+              <td>
+                {booking.driver_name || "Not Assigned"}
+              </td>
+
+              <td>
+                <AssignDriver booking={booking} />
+              </td>
 
               <td>
                 <button
                   onClick={() =>
-                    updateStatus(booking.id, "approved")
+                    updateStatus(
+                      booking.id,
+                      "Completed"
+                    )
                   }
                 >
-                  Approve
+                  ✅ Complete
                 </button>
 
                 <button
+                  style={{ marginLeft: 8 }}
                   onClick={() =>
-                    updateStatus(booking.id, "rejected")
+                    updateStatus(
+                      booking.id,
+                      "Cancelled"
+                    )
                   }
                 >
-                  Reject
+                  ❌ Cancel
                 </button>
 
                 <button
-                  onClick={() => deleteBooking(booking.id)}
+                  style={{ marginLeft: 8 }}
+                  onClick={() =>
+                    deleteBooking(booking.id)
+                  }
                 >
-                  Delete
+                  🗑 Delete
                 </button>
               </td>
             </tr>
