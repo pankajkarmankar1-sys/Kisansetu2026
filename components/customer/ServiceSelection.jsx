@@ -15,10 +15,8 @@ export default function ServiceSelection({
   next,
   back,
 }) {
-
   return (
-    <div style={{ background:"#F8FAFC", minHeight:"100vh" }}>
-
+    <div style={{ background: "#F8FAFC", minHeight: "100vh" }}>
       <div style={S.hdr}>
         <button style={S.bkb} onClick={back}>
           ← Back
@@ -29,8 +27,7 @@ export default function ServiceSelection({
         <p>Select Farm • Service • Acres</p>
       </div>
 
-      <div style={{ padding:15 }}>
-
+      <div style={{ padding: 15 }}>
         {selKhet && (
           <div style={S.card}>
             <h3>🌾 Selected Farm</h3>
@@ -53,26 +50,34 @@ export default function ServiceSelection({
           <input
             type="number"
             value={acres}
-            onChange={(e)=>setAcres(e.target.value)}
+            onChange={(e) => setAcres(e.target.value)}
           />
         </div>
 
         <div style={S.card}>
-
           <h3>Select Service</h3>
 
-          {SVC.map((service)=>(
+          {SVC.map((service) => (
             <button
               key={service.id}
-              onClick={()=>{
+              onClick={() => {
                 setSelectedService(service);
                 setPaymentDone(false);
               }}
+              style={{
+                display: "block",
+                width: "100%",
+                marginBottom: 10,
+                padding: 12,
+                borderRadius: 10,
+                border: "1px solid #ddd",
+                cursor: "pointer",
+                textAlign: "left",
+              }}
             >
-              {service.ico} {service.n}
+              {service.icon} {service.name}
             </button>
           ))}
-
         </div>
 
         <button
@@ -82,9 +87,7 @@ export default function ServiceSelection({
         >
           Continue →
         </button>
-
       </div>
-
     </div>
   );
 }
