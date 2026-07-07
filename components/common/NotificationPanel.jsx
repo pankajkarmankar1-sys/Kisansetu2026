@@ -1,33 +1,37 @@
-import { useEffect, useState } from "react";
-import { getNotifications } from "../../lib/notification";
-
+import React, { useEffect, useState } from "react";
+import { getNotifications } from "../../lib/notificationService";
 
 export default function NotificationPanel({ user }) {
 
   const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
 
 
-  async function load() {
+  async function loadNotifications() {
+
+    if (!user?.id) {
+      setNotifications([]);
+      return;
+    }
 
     try {
 
-      if (!user?.id) return;
+      setLoading(true);
 
-
-      const data = await getNotifications(
-        user.id
-      );
-
+      const data = await getNotifications(user.id);
 
       setNotifications(data || []);
 
-
-    } catch (e) {
+    } catch (error) {
 
       console.error(
         "Notification Load Error:",
-        e
+        error
       );
+
+    } finally {
+
+      setLoading(false);
 
     }
 
@@ -37,22 +41,18 @@ export default function NotificationPanel({ user }) {
 
   useEffect(() => {
 
-    load();
-
+    loadNotifications();
 
     const timer = setInterval(
-      load,
+      loadNotifications,
       5000
     );
-
 
     return () => {
       clearInterval(timer);
     };
 
-
   }, [user]);
-
 
 
 
@@ -60,30 +60,36 @@ export default function NotificationPanel({ user }) {
 
     <div
       style={{
-        padding:15,
+        padding:20,
         background:"#fff",
-        borderRadius:10,
-        boxShadow:
-          "0 0 10px rgba(0,0,0,.1)",
+        borderRadius:12,
+        boxShadow:"0 2px 8px rgba(0,0,0,0.1)",
       }}
     >
 
-      <h3>
+      <h2>
         🔔 Notifications
-      </h3>
+      </h2>
+
+
+      {
+        loading && (
+          <p>
+            Loading...
+          </p>
+        )
+      }
 
 
 
       {
+        !loading &&
         notifications.length === 0 && (
-
           <p>
             No Notifications
           </p>
-
         )
       }
-
 
 
 
@@ -93,38 +99,35 @@ export default function NotificationPanel({ user }) {
           <div
             key={n.id}
             style={{
-              borderBottom:
-                "1px solid #ddd",
-              padding:
-                "10px 0",
+              padding:15,
+              marginBottom:10,
+              borderRadius:10,
+              background:"#f5f5f5",
+              borderBottom:"1px solid #ddd",
             }}
           >
 
-            <b>
-              {n.title}
-            </b>
+            <h3>
+              {n.title || "Notification"}
+            </h3>
 
 
-            <div>
+            <p>
               {n.message}
-            </div>
-
+            </p>
 
 
             <small>
-
               {
+                n.created_at &&
                 new Date(
                   n.created_at
                 ).toLocaleString()
-
               }
-
             </small>
 
 
           </div>
-
 
         ))
       }
@@ -133,5 +136,4 @@ export default function NotificationPanel({ user }) {
     </div>
 
   );
-
 }
