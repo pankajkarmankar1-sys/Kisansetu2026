@@ -1,94 +1,186 @@
-import NotificationBell from "../common/NotificationBell";
+import React, { useEffect, useState } from "react";
+import { supabase } from "../../lib/supabase";
 
-export default function Dashboard({
-  user,
-  onBook,
-  onBookings,
-  onProfile,
-  onNotifications,
-  onLogout,
-}) {
-  return (
+export default function CustomerNotifications({ user }) {
+
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+
+  useEffect(() => {
+
+    if (!user?.id) return;
+
+    loadNotifications();
+
+
+    const channel = supabase
+      .channel(`customer_notifications_${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter:
+            `user_id=eq.${user.id}`,
+        },
+        (payload)=>{
+
+          setNotifications((prev)=>[
+            payload.new,
+            ...prev,
+          ]);
+
+        }
+      )
+      .subscribe();
+
+
+
+    return ()=>{
+      supabase.removeChannel(channel);
+    };
+
+
+  },[user]);
+
+
+
+
+
+  async function loadNotifications(){
+
+    try{
+
+      setLoading(true);
+
+
+      const {data,error}=await supabase
+        .from("notifications")
+        .select("*")
+        .eq(
+          "user_id",
+          user.id
+        )
+        .order(
+          "created_at",
+          {
+            ascending:false,
+          }
+        );
+
+
+      if(error) throw error;
+
+
+      setNotifications(
+        data || []
+      );
+
+
+    }catch(err){
+
+      console.log(err.message);
+
+    }finally{
+
+      setLoading(false);
+
+    }
+
+  }
+
+
+
+
+
+  return(
+
     <div
       style={{
-        minHeight: "100vh",
-        background: "#f5f7fb",
-        padding: 20,
+        background:"#fff",
+        padding:20,
+        borderRadius:12,
       }}
     >
-      <div
-        style={{
-          background: "#16a34a",
-          color: "#fff",
-          padding: 20,
-          borderRadius: 16,
-          marginBottom: 20,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <div>
-          <h2 style={{ margin: 0 }}>
-            🚜 KisanSetu
-          </h2>
 
-          <p style={{ margin: "10px 0 0" }}>
-            Welcome, <b>{user?.name || "Farmer"}</b>
-          </p>
-
-          <p style={{ margin: "6px 0 0", fontSize: 14 }}>
-            📱 {user?.phone || "No Phone"}
-          </p>
-        </div>
-
-        <NotificationBell
-          user={user}
-          onClick={onNotifications}
-        />
-
-      </div>
-
-
-      <button style={btn} onClick={onBook}>
-        🚜 Book Tractor
-      </button>
-
-
-      <button style={btn} onClick={onBookings}>
-        📋 My Bookings
-      </button>
-
-
-      <button style={btn} onClick={onProfile}>
-        👤 My Profile
-      </button>
+      <h2>
+        🔔 Notifications
+      </h2>
 
 
       <button
+        onClick={loadNotifications}
         style={{
-          ...btn,
-          background: "#ef4444",
+          padding:10,
+          marginBottom:15,
         }}
-        onClick={onLogout}
       >
-        🚪 Logout
+        🔄 Refresh
       </button>
 
+
+
+      {
+        loading &&
+        <p>
+          Loading...
+        </p>
+      }
+
+
+
+      {
+        !loading &&
+        notifications.length===0 &&
+        <p>
+          No Notifications
+        </p>
+      }
+
+
+
+
+      {
+        notifications.map((n)=>(
+
+          <div
+            key={n.id}
+            style={{
+              borderBottom:
+                "1px solid #ddd",
+              padding:"10px 0",
+            }}
+          >
+
+            <h3>
+              {n.title}
+            </h3>
+
+            <p>
+              {n.message}
+            </p>
+
+
+            <small>
+              {
+                new Date(
+                  n.created_at
+                ).toLocaleString()
+              }
+            </small>
+
+
+          </div>
+
+        ))
+      }
+
+
+
     </div>
+
   );
+
 }
-
-
-const btn = {
-  width: "100%",
-  padding: 16,
-  marginBottom: 16,
-  border: "none",
-  borderRadius: 14,
-  background: "#16a34a",
-  color: "#fff",
-  fontSize: 17,
-  fontWeight: "bold",
-  cursor: "pointer",
-};
