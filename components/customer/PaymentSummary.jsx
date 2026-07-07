@@ -9,34 +9,83 @@ export default function PaymentSummary({
   back,
 }) {
   const amount =
-    (selectedService?.normalPrice || 0) * Number(acres || 0);
+    (selectedService?.normalPrice || 0) *
+    Number(acres || 0);
 
   return (
-    <div style={{ padding: 20 }}>
+    <div
+      style={{
+        padding: 20,
+        background: "#F8FAFC",
+        minHeight: "100vh",
+      }}
+    >
       <h2>💳 Payment Summary</h2>
 
-      <p>🚜 Service: {selectedService?.name}</p>
+      <div
+        style={{
+          background: "#fff",
+          padding: 15,
+          borderRadius: 12,
+        }}
+      >
+        <p>
+          🚜 Service:
+          {" "}
+          {selectedService?.name || "-"}
+        </p>
 
-      <p>🌾 Acres: {acres}</p>
+        <p>
+          🌾 Acres:
+          {" "}
+          {acres || 0}
+        </p>
 
-      <p>💰 Amount: ₹{amount}</p>
+        <p>
+          💰 Amount:
+          {" "}
+          ₹{amount}
+        </p>
+
+        <p>
+          Status:
+          {" "}
+          {paymentDone ? "✅ Paid" : "⏳ Pending"}
+        </p>
+      </div>
 
       {!paymentDone ? (
         <button
           onClick={() => setPaymentDone(true)}
+          style={{
+            marginTop: 20,
+            padding: 12,
+            width: "100%",
+          }}
         >
-          Pay Now
+          💳 Pay Now
         </button>
       ) : (
-        <button onClick={next}>
-          Continue
+        <button
+          onClick={next}
+          style={{
+            marginTop: 20,
+            padding: 12,
+            width: "100%",
+          }}
+        >
+          Continue →
         </button>
       )}
 
-      <br />
-      <br />
-
-      <button onClick={back}>
+      <button
+        onClick={back}
+        style={{
+          marginTop: 15,
+          padding: 12,
+          width: "100%",
+        }}
+      >
         ← Back
       </button>
     </div>
