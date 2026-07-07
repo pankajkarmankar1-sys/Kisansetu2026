@@ -1,6 +1,6 @@
 import { useState } from "react";
-import FormField from "./FormField";
-import Upload from "./Upload";
+import FormField from "../common/FormField";
+import Upload from "../common/Upload";
 
 export default function DriverRegistration() {
   const [driver, setDriver] = useState({
