@@ -1,4 +1,4 @@
-import NotificationBell from "./NotificationBell";
+import NotificationBell from "../common/NotificationBell";
 
 export default function Dashboard({
   user,
