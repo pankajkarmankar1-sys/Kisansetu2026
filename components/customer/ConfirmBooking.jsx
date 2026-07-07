@@ -12,6 +12,15 @@ export default function ConfirmBooking({
     try {
       setLoading(true);
 
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        alert("Please login first.");
+        return;
+      }
+
       const amount =
         (bookingData?.selectedService?.normalPrice || 0) *
         Number(bookingData?.acres || 0);
@@ -20,14 +29,16 @@ export default function ConfirmBooking({
         .from("bookings")
         .insert([
           {
+            customer_id: user.id,
             service_name: bookingData?.selectedService?.name,
             acres: Number(bookingData?.acres),
-            date: bookingData?.date,
-            amount,
+            booking_date: bookingData?.date,
+            amount: amount,
             payment_status:
-              bookingData?.payment_status || "Paid",
+              bookingData?.payment_status || "Pending",
             status: "Pending",
             note: bookingData?.note || "",
+            created_at: new Date().toISOString(),
           },
         ]);
 
@@ -35,12 +46,10 @@ export default function ConfirmBooking({
 
       alert("✅ Booking Successful");
 
-      if (onConfirm) {
-        onConfirm();
-      }
+      if (onConfirm) onConfirm();
     } catch (err) {
       console.error(err);
-      alert("❌ Booking failed!");
+      alert(err.message);
     } finally {
       setLoading(false);
     }
@@ -58,33 +67,23 @@ export default function ConfirmBooking({
         padding: 20,
       }}
     >
-      <button onClick={back}>
-        ← Back
-      </button>
+      <button onClick={back}>← Back</button>
 
       <h2>✅ Confirm Booking</h2>
 
       <div
         style={{
           background: "#fff",
-          borderRadius: 12,
           padding: 15,
+          borderRadius: 12,
           marginTop: 20,
         }}
       >
         <p>🚜 Service: {bookingData?.selectedService?.name}</p>
-
         <p>🌾 Acres: {bookingData?.acres}</p>
-
         <p>📅 Date: {bookingData?.date}</p>
-
         <p>💰 Amount: ₹{amount}</p>
-
-        <p>
-          💳 Payment:{" "}
-          {bookingData?.payment_status || "Paid"}
-        </p>
-
+        <p>💳 Payment: {bookingData?.payment_status}</p>
         <p>📝 Note: {bookingData?.note || "-"}</p>
       </div>
 
@@ -94,14 +93,13 @@ export default function ConfirmBooking({
         style={{
           marginTop: 20,
           width: "100%",
-          padding: 14,
+          padding: 15,
           border: "none",
-          borderRadius: 10,
-          background: "#2d8a4e",
+          borderRadius: 12,
+          background: "#16a34a",
           color: "#fff",
-          fontSize: 16,
+          fontSize: 18,
           fontWeight: "bold",
-          cursor: "pointer",
         }}
       >
         {loading ? "Booking..." : "✅ Confirm Booking"}
