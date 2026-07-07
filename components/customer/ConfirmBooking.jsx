@@ -57,32 +57,69 @@ export default function ConfirmBooking({
           new Date().toISOString(),
       };
 
+
       const { data, error } = await supabase
         .from("bookings")
         .insert([booking])
         .select()
         .single();
 
+
       if (error) {
         throw error;
       }
 
-      console.log("Booking Created:", data);
 
-      alert("✅ Booking Successful");
+      // Customer Notification
+      await supabase
+        .from("notifications")
+        .insert([
+          {
+            user_id: user.id,
+            title: "✅ Booking Created",
+            message:
+              `Your ${booking.service_name} booking has been created successfully.`,
+            created_at:
+              new Date().toISOString(),
+          },
+        ]);
+
+
+      console.log(
+        "Booking Created:",
+        data
+      );
+
+
+      alert(
+        "✅ Booking Successful"
+      );
+
 
       if (onConfirm) {
         onConfirm(data);
       }
 
+
     } catch (err) {
-      console.error("Booking Error:", err);
-      alert(err.message);
+
+      console.error(
+        "Booking Error:",
+        err
+      );
+
+      alert(
+        err.message
+      );
+
 
     } finally {
+
       setLoading(false);
+
     }
   };
+
 
   return (
     <div
@@ -92,13 +129,16 @@ export default function ConfirmBooking({
         padding: 20,
       }}
     >
+
       <button onClick={back}>
         ← Back
       </button>
 
+
       <h2>
         ✅ Confirm Booking
       </h2>
+
 
       <div
         style={{
@@ -115,11 +155,13 @@ export default function ConfirmBooking({
           {bookingData?.selectedService?.name || "-"}
         </p>
 
+
         <p>
           🌾 Acres:
           {" "}
           {bookingData?.acres || 0}
         </p>
+
 
         <p>
           📅 Date:
@@ -127,11 +169,13 @@ export default function ConfirmBooking({
           {bookingData?.date || "-"}
         </p>
 
+
         <p>
           💰 Amount:
           {" "}
           ₹{amount}
         </p>
+
 
         <p>
           💳 Payment:
@@ -139,11 +183,13 @@ export default function ConfirmBooking({
           {bookingData?.payment_status || "Pending"}
         </p>
 
+
         <p>
           📍 Farm:
           {" "}
           {bookingData?.selKhet?.name || "-"}
         </p>
+
 
         <p>
           📝 Note:
@@ -152,6 +198,7 @@ export default function ConfirmBooking({
         </p>
 
       </div>
+
 
       <button
         onClick={handleConfirm}
@@ -174,6 +221,7 @@ export default function ConfirmBooking({
           : "✅ Confirm Booking"
         }
       </button>
+
 
     </div>
   );
