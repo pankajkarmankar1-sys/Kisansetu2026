@@ -1,37 +1,123 @@
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import NotificationPanel from "../components/common/NotificationPanel";
+import { supabase } from "../lib/supabase";
 
-export default function NotificationsPage() {
+
+export default function NotificationsPage(){
+
   const router = useRouter();
 
-  return (
+  const [user,setUser] = useState(null);
+
+
+
+  useEffect(()=>{
+
+    loadUser();
+
+  },[]);
+
+
+
+
+  async function loadUser(){
+
+    const {
+      data:{
+        user:authUser
+      }
+    } = await supabase.auth.getUser();
+
+
+
+    if(!authUser){
+
+      router.replace("/");
+
+      return;
+
+    }
+
+
+
+    const {
+      data
+    } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq(
+        "id",
+        authUser.id
+      )
+      .single();
+
+
+
+    setUser(
+
+      data || {
+
+        id:authUser.id,
+
+        name:"User",
+
+      }
+
+    );
+
+
+  }
+
+
+
+
+  return(
+
     <div
+
       style={{
-        minHeight: "100vh",
-        background: "#f5f7fb",
-        padding: 20,
+
+        padding:20,
+
+        background:"#f5f7fb",
+
+        minHeight:"100vh",
+
       }}
+
     >
+
+
       <button
-        onClick={() => router.back()}
+
+        onClick={()=>router.back()}
+
         style={{
-          padding: "10px 16px",
-          marginBottom: 20,
-          border: "none",
-          borderRadius: 8,
-          background: "#16a34a",
-          color: "#fff",
-          cursor: "pointer",
+
+          padding:10,
+
+          marginBottom:20,
+
         }}
+
       >
+
         ← Back
+
       </button>
 
-      <h2 style={{ marginBottom: 20 }}>
-        🔔 Notifications
-      </h2>
 
-      <NotificationPanel />
+
+      {
+        user &&
+        <NotificationPanel />
+      }
+
+
+
     </div>
+
   );
+
 }
