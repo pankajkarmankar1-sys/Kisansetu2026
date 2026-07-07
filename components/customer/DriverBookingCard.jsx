@@ -1,14 +1,20 @@
 import React from "react";
 import { S } from "../../styles";
 
-export default function DriverBookingCard({ booking, onView }) {
+export default function DriverBookingCard({
+  booking,
+  onView,
+  onCancel,
+}) {
   const status = booking?.status || "Pending";
 
   const statusColor = {
     Pending: "#f59e0b",
     Accepted: "#2563eb",
+    "In Progress": "#9333ea",
     Completed: "#16a34a",
     Cancelled: "#dc2626",
+    Rejected: "#dc2626",
   };
 
   return (
@@ -16,12 +22,19 @@ export default function DriverBookingCard({ booking, onView }) {
       style={{
         ...S.card,
         marginBottom: 15,
-        borderLeft: `6px solid ${statusColor[status] || "#16a34a"}`,
+        borderLeft: `6px solid ${
+          statusColor[status] || "#16a34a"
+        }`,
       }}
     >
-      <h3>
+      <h3 style={{ marginTop: 0 }}>
         🚜 {booking?.service_name || "Tractor Service"}
       </h3>
+
+      <p>
+        🆔 <b>Booking ID:</b>{" "}
+        {booking?.booking_code || booking?.id}
+      </p>
 
       <p>
         📅 <b>Date:</b>{" "}
@@ -29,7 +42,8 @@ export default function DriverBookingCard({ booking, onView }) {
       </p>
 
       <p>
-        🌾 <b>Acres:</b> {booking?.acres || 0}
+        🌾 <b>Acres:</b>{" "}
+        {booking?.acres || 0}
       </p>
 
       <p>
@@ -45,7 +59,8 @@ export default function DriverBookingCard({ booking, onView }) {
         📦 <b>Status:</b>{" "}
         <span
           style={{
-            color: statusColor[status] || "#16a34a",
+            color:
+              statusColor[status] || "#16a34a",
             fontWeight: "bold",
           }}
         >
@@ -54,9 +69,18 @@ export default function DriverBookingCard({ booking, onView }) {
       </p>
 
       <p>
-        🚗 <b>Driver:</b>{" "}
-        {booking?.driver_name || booking?.driverName || "Not Assigned"}
+        🚜 <b>Driver:</b>{" "}
+        {booking?.driver_name ||
+          booking?.driverName ||
+          "Not Assigned"}
       </p>
+
+      {booking?.driver_phone && (
+        <p>
+          📞 <b>Driver Phone:</b>{" "}
+          {booking.driver_phone}
+        </p>
+      )}
 
       {booking?.note && (
         <p>
@@ -64,12 +88,71 @@ export default function DriverBookingCard({ booking, onView }) {
         </p>
       )}
 
-      <button
-        style={S.btnG}
-        onClick={() => onView && onView(booking)}
+      <div
+        style={{
+          display: "flex",
+          gap: 10,
+          marginTop: 15,
+          flexWrap: "wrap",
+        }}
       >
-        View Details
-      </button>
+        <button
+          style={{
+            ...S.btnG,
+            flex: 1,
+          }}
+          onClick={() => onView && onView(booking)}
+        >
+          👁 View Details
+        </button>
+
+        {status === "Pending" && (
+          <button
+            onClick={() =>
+              onCancel && onCancel(booking.id)
+            }
+            style={{
+              flex: 1,
+              padding: 14,
+              border: "none",
+              borderRadius: 10,
+              background: "#dc2626",
+              color: "#fff",
+              fontSize: 16,
+              fontWeight: "bold",
+              cursor: "pointer",
+            }}
+          >
+            ❌ Cancel Booking
+          </button>
+        )}
+
+        {booking?.driver_phone && (
+          <a
+            href={`tel:${booking.driver_phone}`}
+            style={{
+              flex: 1,
+              textDecoration: "none",
+            }}
+          >
+            <button
+              style={{
+                width: "100%",
+                padding: 14,
+                border: "none",
+                borderRadius: 10,
+                background: "#2563eb",
+                color: "#fff",
+                fontSize: 16,
+                fontWeight: "bold",
+                cursor: "pointer",
+              }}
+            >
+              📞 Call Driver
+            </button>
+          </a>
+        )}
+      </div>
     </div>
   );
 }
