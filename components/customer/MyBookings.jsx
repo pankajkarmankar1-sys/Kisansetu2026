@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import DriverBookingCard from "./DriverBookingCard";
 import { supabase } from "../../lib/supabase";
 
-export default function MyBookings({ phone }) {
+export default function MyBookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -27,22 +27,26 @@ export default function MyBookings({ phone }) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [phone]);
+  }, []);
 
   async function loadBookings() {
     try {
       setLoading(true);
 
-      let query = supabase
-        .from("bookings")
-        .select("*")
-        .order("created_at", { ascending: false });
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      if (phone) {
-        query = query.eq("customer_phone", phone);
+      if (!user) {
+        setBookings([]);
+        return;
       }
 
-      const { data, error } = await query;
+      const { data, error } = await supabase
+        .from("bookings")
+        .select("*")
+        .eq("customer_id", user.id)
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
 
@@ -66,6 +70,21 @@ export default function MyBookings({ phone }) {
   return (
     <div style={{ padding: 20 }}>
       <h2>📋 My Bookings</h2>
+
+      <button
+        onClick={loadBookings}
+        style={{
+          marginBottom: 20,
+          padding: "10px 16px",
+          border: "none",
+          borderRadius: 8,
+          background: "#16a34a",
+          color: "#fff",
+          cursor: "pointer",
+        }}
+      >
+        🔄 Refresh
+      </button>
 
       {bookings.length === 0 ? (
         <p>No bookings found.</p>
