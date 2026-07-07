@@ -4,34 +4,29 @@ import NotificationPanel from "../components/common/NotificationPanel";
 import { supabase } from "../lib/supabase";
 
 
-export default function NotificationsPage(){
+export default function NotificationsPage() {
 
   const router = useRouter();
 
-  const [user,setUser] = useState(null);
+  const [user, setUser] = useState(null);
 
 
-
-  useEffect(()=>{
-
+  useEffect(() => {
     loadUser();
-
-  },[]);
-
+  }, []);
 
 
 
-  async function loadUser(){
+  async function loadUser() {
 
     const {
-      data:{
-        user:authUser
+      data: {
+        user: authUser
       }
     } = await supabase.auth.getUser();
 
 
-
-    if(!authUser){
+    if (!authUser) {
 
       router.replace("/");
 
@@ -41,9 +36,7 @@ export default function NotificationsPage(){
 
 
 
-    const {
-      data
-    } = await supabase
+    const { data } = await supabase
       .from("profiles")
       .select("*")
       .eq(
@@ -55,65 +48,42 @@ export default function NotificationsPage(){
 
 
     setUser(
-
       data || {
-
-        id:authUser.id,
-
-        name:"User",
-
+        id: authUser.id,
+        name: "User",
       }
-
     );
-
 
   }
 
 
 
-
-  return(
+  return (
 
     <div
-
       style={{
-
         padding:20,
-
         background:"#f5f7fb",
-
         minHeight:"100vh",
-
       }}
-
     >
 
-
       <button
-
-        onClick={()=>router.back()}
-
+        onClick={() => router.back()}
         style={{
-
           padding:10,
-
           marginBottom:20,
-
         }}
-
       >
-
         ← Back
-
       </button>
 
 
-
       {
-        user &&
-        <NotificationPanel />
+        user && (
+          <NotificationPanel user={user} />
+        )
       }
-
 
 
     </div>
