@@ -1,41 +1,50 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import CustomerNotifications from "../components/customer/CustomerNotifications";
+import Dashboard from "../components/customer/Dashboard";
 import { supabase } from "../lib/supabase";
 
-export default function NotificationsPage(){
+
+export default function DashboardPage() {
 
   const router = useRouter();
 
-  const [user,setUser] = useState(null);
+  const [user, setUser] = useState({
+    name: "Loading..."
+  });
 
 
-  useEffect(()=>{
+
+  useEffect(() => {
 
     loadUser();
 
-  },[]);
+  }, []);
 
 
 
-  async function loadUser(){
+  async function loadUser() {
 
     const {
-      data:{
-        user:authUser
+      data: {
+        user: authUser
       }
     } = await supabase.auth.getUser();
 
 
-    if(!authUser){
+
+    if (!authUser) {
 
       router.replace("/");
+
       return;
 
     }
 
 
-    const {data}=await supabase
+
+    const {
+      data
+    } = await supabase
       .from("profiles")
       .select("*")
       .eq(
@@ -45,11 +54,20 @@ export default function NotificationsPage(){
       .single();
 
 
+
     setUser(
+
       data || {
-        id:authUser.id,
-        name:"User"
+
+        id: authUser.id,
+
+        name:
+          authUser.phone ||
+          authUser.email ||
+          "User"
+
       }
+
     );
 
   }
@@ -58,34 +76,47 @@ export default function NotificationsPage(){
 
 
 
-  return(
+  async function logout() {
 
-    <div
-      style={{
-        padding:20,
-        background:"#f5f7fb",
-        minHeight:"100vh",
-      }}
-    >
+    await supabase.auth.signOut();
 
-      <button
-        onClick={()=>router.back()}
-        style={{
-          padding:10,
-          marginBottom:20,
-        }}
-      >
-        ← Back
-      </button>
+    router.replace("/");
+
+  }
 
 
-      {
-        user &&
-        <CustomerNotifications user={user}/>
+
+
+
+  return (
+
+    <Dashboard
+
+      user={user}
+
+      onBook={() =>
+        router.push("/book")
       }
 
 
-    </div>
+      onBookings={() =>
+        router.push("/bookings")
+      }
+
+
+      onProfile={() =>
+        router.push("/profile")
+      }
+
+
+      onNotifications={() =>
+        router.push("/notifications")
+      }
+
+
+      onLogout={logout}
+
+    />
 
   );
 
