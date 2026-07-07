@@ -1,4 +1,3 @@
-import { useRouter } from "next/router";
 import NotificationBell from "./NotificationBell";
 
 export default function Dashboard({
@@ -10,43 +9,60 @@ export default function Dashboard({
   onLogout,
 }) {
   return (
-    <div style={{ padding: 20 }}>
-
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#f5f7fb",
+        padding: 20,
+      }}
+    >
       <div
         style={{
+          background: "#16a34a",
+          color: "#fff",
+          padding: 20,
+          borderRadius: 16,
+          marginBottom: 20,
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: 25,
         }}
       >
         <div>
-          <h2>👨‍🌾 Welcome</h2>
-          <h3>{user?.name || "Farmer"}</h3>
+          <h2 style={{ margin: 0 }}>🚜 KisanSetu</h2>
+          <p style={{ margin: "10px 0 0" }}>
+            Welcome, <b>{user?.name || "Farmer"}</b>
+          </p>
+
+          <p style={{ margin: "6px 0 0", fontSize: 14 }}>
+            📱 {user?.phone || "No Phone"}
+          </p>
         </div>
 
         <NotificationBell onClick={onNotifications} />
       </div>
 
-      <button onClick={onBook} style={btn}>
+      <button style={btn} onClick={onBook}>
         🚜 Book Tractor
       </button>
 
-      <button onClick={onBookings} style={btn}>
+      <button style={btn} onClick={onBookings}>
         📋 My Bookings
       </button>
 
-      <button onClick={onProfile} style={btn}>
-        👤 Profile
+      <button style={btn} onClick={onProfile}>
+        👤 My Profile
       </button>
 
       <button
+        style={{
+          ...btn,
+          background: "#ef4444",
+        }}
         onClick={onLogout}
-        style={{ ...btn, background: "#d32f2f" }}
       >
-        Logout
+        🚪 Logout
       </button>
-
     </div>
   );
 }
@@ -54,11 +70,12 @@ export default function Dashboard({
 const btn = {
   width: "100%",
   padding: 16,
-  marginBottom: 15,
+  marginBottom: 16,
   border: "none",
-  borderRadius: 12,
-  fontSize: 18,
+  borderRadius: 14,
   background: "#16a34a",
   color: "#fff",
+  fontSize: 17,
+  fontWeight: "bold",
   cursor: "pointer",
 };
