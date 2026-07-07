@@ -59,6 +59,30 @@ export default function MyBookings() {
     }
   }
 
+  async function cancelBooking(id) {
+    const ok = window.confirm(
+      "Are you sure you want to cancel this booking?"
+    );
+
+    if (!ok) return;
+
+    const { error } = await supabase
+      .from("bookings")
+      .update({
+        status: "Cancelled",
+      })
+      .eq("id", id);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    alert("✅ Booking cancelled successfully");
+
+    loadBookings();
+  }
+
   if (loading) {
     return (
       <div style={{ padding: 20 }}>
@@ -87,12 +111,22 @@ export default function MyBookings() {
       </button>
 
       {bookings.length === 0 ? (
-        <p>No bookings found.</p>
+        <div
+          style={{
+            background: "#fff",
+            padding: 20,
+            borderRadius: 10,
+            textAlign: "center",
+          }}
+        >
+          <h3>No bookings found.</h3>
+        </div>
       ) : (
         bookings.map((booking) => (
           <DriverBookingCard
             key={booking.id}
             booking={booking}
+            onCancel={cancelBooking}
           />
         ))
       )}
