@@ -3,23 +3,29 @@ import { supabase } from "../../lib/supabase";
 
 export default function AssignDriver({ booking }) {
   const [drivers, setDrivers] = useState([]);
-  const [selectedDriver, setSelectedDriver] = useState(
-    booking?.driver_id || ""
-  );
+  const [selectedDriver, setSelectedDriver] = useState("");
 
   useEffect(() => {
     loadDrivers();
   }, []);
 
-  async function loadDrivers() {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("role", "driver")
-      .order("name");
+  useEffect(() => {
+    setSelectedDriver(booking?.driver_id || "");
+  }, [booking]);
 
-    if (!error) {
+  async function loadDrivers() {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("role", "driver")
+        .order("name");
+
+      if (error) throw error;
+
       setDrivers(data || []);
+    } catch (err) {
+      console.error("Load Drivers Error:", err);
     }
   }
 
@@ -29,25 +35,34 @@ export default function AssignDriver({ booking }) {
       return;
     }
 
-    const driver = drivers.find((d) => d.id === selectedDriver);
+    const driver = drivers.find(
+      (d) => d.id === selectedDriver
+    );
 
-    const { error } = await supabase
-      .from("bookings")
-      .update({
-        driver_id: driver.id,
-        driver_name: driver.name,
-        status: "Accepted",
-      })
-      .eq("id", booking.id);
+    if (!driver) {
+      alert("Driver not found");
+      return;
+    }
 
-    if (error) {
-      alert(error.message);
-    } else {
+    try {
+      const { error } = await supabase
+        .from("bookings")
+        .update({
+          driver_id: driver.id,
+          driver_name: driver.name,
+          status: "Accepted",
+        })
+        .eq("id", booking.id);
+
+      if (error) throw error;
+
       alert("✅ Driver assigned successfully");
+    } catch (err) {
+      console.error("Assign Driver Error:", err);
+      alert(err.message);
     }
   }
-
-  return (
+    return (
     <div style={{ display: "flex", gap: 8 }}>
       <select
         value={selectedDriver}
