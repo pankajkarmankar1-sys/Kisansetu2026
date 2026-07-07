@@ -69,8 +69,11 @@ export default function BookService({
               acres,
               date,
               note,
+              selKhet,
               amount,
-              payment_status: paymentDone ? "Paid" : "Pending",
+              payment_status: paymentDone
+                ? "Paid"
+                : "Pending",
             });
 
             setStep("confirm");
@@ -81,11 +84,11 @@ export default function BookService({
 
       {step === "confirm" && (
         <ConfirmBooking
-  user={user}
-  bookingData={bookingData}
-  onConfirm={() => setStep("success")}
-  back={() => setStep("date")}
-/>
+          user={user}
+          bookingData={bookingData}
+          onConfirm={() => setStep("success")}
+          back={() => setStep("date")}
+        />
       )}
 
       {step === "success" && (
