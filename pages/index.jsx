@@ -1,6 +1,6 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
-import LocationSelector from "../components/LocationSelector";
+import LocationSelector from "../components/maps/LocationSelector";
 
 export default function Page() {
   const router = useRouter();
