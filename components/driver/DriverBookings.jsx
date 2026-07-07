@@ -7,6 +7,23 @@ export default function DriverBookings({ driver }) {
 
   useEffect(() => {
     loadBookings();
+
+    const channel = supabase
+      .channel("driver-bookings")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "bookings",
+        },
+        loadBookings
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   async function loadBookings() {
@@ -16,7 +33,7 @@ export default function DriverBookings({ driver }) {
       const { data, error } = await supabase
         .from("bookings")
         .select("*")
-        .eq("status", "Pending")
+        .in("status", ["Pending", "Accepted", "In Progress"])
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -24,111 +41,106 @@ export default function DriverBookings({ driver }) {
       setBookings(data || []);
     } catch (err) {
       console.error(err);
-      alert("Failed to load bookings");
     } finally {
       setLoading(false);
     }
   }
 
-  async function acceptBooking(id) {
-    try {
-      const { error } = await supabase
-        .from("bookings")
-        .update({
-          status: "Accepted",
-          driver_id: driver?.id || null,
-          driver_name: driver?.name || "",
-          accepted_at: new Date().toISOString(),
-        })
-        .eq("id", id);
+  async function updateStatus(id, status) {
+    const update = { status };
 
-      if (error) throw error;
-
-      alert("✅ Booking Accepted");
-      loadBookings();
-    } catch (err) {
-      console.error(err);
-      alert("Accept failed");
+    if (status === "Accepted") {
+      update.driver_id = driver?.id;
+      update.driver_name = driver?.name;
     }
-  }
 
-  async function rejectBooking(id) {
-    try {
-      const { error } = await supabase
-        .from("bookings")
-        .update({
-          status: "Rejected",
-        })
-        .eq("id", id);
+    const { error } = await supabase
+      .from("bookings")
+      .update(update)
+      .eq("id", id);
 
-      if (error) throw error;
-
-      alert("❌ Booking Rejected");
-      loadBookings();
-    } catch (err) {
-      console.error(err);
-      alert("Reject failed");
+    if (error) {
+      alert(error.message);
+      return;
     }
+
+    loadBookings();
   }
 
-  if (loading) {
-    return (
-      <div style={{ padding: 20 }}>
-        <h2>Loading...</h2>
-      </div>
-    );
-  }
+  if (loading) return <h2>Loading...</h2>;
 
   return (
     <div style={{ padding: 20 }}>
-      <h2>🚜 Pending Bookings</h2>
+      <h2>🚜 Driver Bookings</h2>
 
-      {bookings.length === 0 ? (
-        <p>No pending bookings.</p>
-      ) : (
-        bookings.map((booking) => (
-          <div
-            key={booking.id}
-            style={{
-              border: "1px solid #ddd",
-              borderRadius: 10,
-              padding: 15,
-              marginBottom: 15,
-              background: "#fff",
-            }}
-          >
-            <h3>{booking.service_name}</h3>
+      <button
+        onClick={loadBookings}
+        style={{
+          marginBottom: 20,
+          padding: 10,
+        }}
+      >
+        🔄 Refresh
+      </button>
 
-            <p>👤 Customer: {booking.customer_name || "-"}</p>
+      {bookings.map((b) => (
+        <div
+          key={b.id}
+          style={{
+            border: "1px solid #ddd",
+            borderRadius: 10,
+            padding: 15,
+            marginBottom: 15,
+          }}
+        >
+          <h3>{b.service_name}</h3>
 
-            <p>📞 Phone: {booking.customer_phone || "-"}</p>
+          <p>👤 {b.customer_name || "-"}</p>
 
-            <p>🌾 Acres: {booking.acres}</p>
+          <p>📞 {b.customer_phone || "-"}</p>
 
-            <p>📅 Date: {booking.date}</p>
+          <p>🌾 Acres: {b.acres}</p>
 
-            <p>💰 Amount: ₹{booking.amount}</p>
+          <p>📅 {b.booking_date || b.date}</p>
 
-            <p>Status: {booking.status}</p>
+          <p>💰 ₹{b.amount}</p>
 
-            <div
-              style={{
-                display: "flex",
-                gap: 10,
-                marginTop: 15,
-              }}
-            >
-              <button onClick={() => acceptBooking(booking.id)}>
+          <p>
+            <b>Status:</b> {b.status}
+          </p>
+
+          {b.status === "Pending" && (
+            <>
+              <button onClick={() => updateStatus(b.id, "Accepted")}>
                 ✅ Accept
               </button>
 
-              <button onClick={() => rejectBooking(booking.id)}>
+              <button
+                style={{ marginLeft: 10 }}
+                onClick={() => updateStatus(b.id, "Rejected")}
+              >
                 ❌ Reject
               </button>
-            </div>
-          </div>
-        ))
-      )}
+            </>
+          )}
+
+          {b.status === "Accepted" && (
+            <button
+              onClick={() => updateStatus(b.id, "In Progress")}
+            >
+              ▶️ Start Work
+            </button>
+          )}
+
+          {b.status === "In Progress" && (
+            <button
+              onClick={() => updateStatus(b.id, "Completed")}
+            >
+              ✔️ Complete Work
+            </button>
+          )}
+        </div>
+      ))}
     </div>
   );
 }
