@@ -1,27 +1,38 @@
 import React from "react";
 
-export default function Modal({ open, title, children, onClose }) {
+export default function Modal({
+  open,
+  title,
+  children,
+  onClose,
+}) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-      <div className="bg-white rounded-xl p-6 w-11/12 max-w-md">
-
-        <h2 className="text-xl font-bold mb-4">
-          {title}
-        </h2>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {title && (
+          <h2 className="mb-4 text-xl font-bold">
+            {title}
+          </h2>
+        )}
 
         {children}
 
-        <div className="mt-5 text-right">
+        <div className="mt-5 flex justify-end">
           <button
             onClick={onClose}
-            className="bg-red-500 text-white px-4 py-2 rounded"
+            className="rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600 transition"
           >
             Close
           </button>
         </div>
-
       </div>
     </div>
   );
