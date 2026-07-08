@@ -1,20 +1,66 @@
+id="h7p4s2"
+// hooks/useUpload.js
+
 import { useState } from "react";
+import { uploadFile } from "../services/uploadService";
+
 
 export default function useUpload() {
+
   const [uploading, setUploading] = useState(false);
 
-  async function upload(file) {
-    setUploading(true);
+  const [error, setError] = useState(null);
 
-    await new Promise((r) => setTimeout(r, 500));
 
-    setUploading(false);
 
-    return file;
+  async function upload(
+    file,
+    folder = "documents"
+  ) {
+
+    try {
+
+      setUploading(true);
+      setError(null);
+
+
+      const result =
+        await uploadFile(
+          file,
+          folder
+        );
+
+
+      return result;
+
+
+    } catch (err) {
+
+      setError(
+        err.message
+      );
+
+      throw err;
+
+
+    } finally {
+
+      setUploading(false);
+
+    }
+
   }
 
+
+
   return {
+
     uploading,
+
+    error,
+
     upload,
+
   };
+
 }
