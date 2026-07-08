@@ -23,6 +23,7 @@ export default function ConfirmBooking({
     );
 
 
+
   const handleConfirm = async () => {
 
     try {
@@ -35,6 +36,7 @@ export default function ConfirmBooking({
       } = await supabase.auth.getUser();
 
 
+
       if (!user) {
 
         alert("Please login first");
@@ -44,6 +46,7 @@ export default function ConfirmBooking({
         return;
 
       }
+
 
 
       const booking = {
@@ -69,10 +72,6 @@ export default function ConfirmBooking({
           ),
 
 
-        booking_date:
-          bookingData?.date || null,
-
-
         amount,
 
 
@@ -90,25 +89,27 @@ export default function ConfirmBooking({
 
 
         note:
-          bookingData?.note || "",
-
-
-        farm_location:
-          bookingData?.selKhet || null,
-
-
-        created_at:
-          new Date().toISOString(),
+          bookingData?.note ||
+          null,
 
       };
-            const { data, error } = await supabase
-        .from("bookings")
-        .insert([booking])
-        .select()
-        .single();
 
 
-      if (error) throw error;
+
+      const { data, error } =
+        await supabase
+          .from("bookings")
+          .insert([booking])
+          .select()
+          .single();
+
+
+
+      if (error) {
+
+        throw error;
+
+      }
 
 
 
@@ -116,16 +117,19 @@ export default function ConfirmBooking({
         .from("notifications")
         .insert([
           {
-            user_id: user.id,
+
+            user_id:
+              user.id,
+
 
             title:
               "✅ Booking Created",
 
-            message:
-              `Your ${booking.service_name} booking has been created successfully.`,
 
-            created_at:
-              new Date().toISOString(),
+            message:
+              `${booking.service_name} booking created successfully`,
+
+
           },
         ]);
 
@@ -142,7 +146,9 @@ export default function ConfirmBooking({
       }
 
 
+
     } catch (err) {
+
 
       console.error(
         "Booking Error:",
@@ -150,12 +156,16 @@ export default function ConfirmBooking({
       );
 
 
-      alert(err.message);
+      alert(
+        err.message
+      );
 
 
     } finally {
 
+
       setLoading(false);
+
 
     }
 
@@ -163,15 +173,17 @@ export default function ConfirmBooking({
 
 
 
+
   return (
 
     <div
       style={{
-        background: "#F8FAFC",
-        minHeight: "100vh",
-        padding: 20,
+        background:"#F8FAFC",
+        minHeight:"100vh",
+        padding:20,
       }}
     >
+
 
       <button onClick={back}>
         ← Back
@@ -187,12 +199,13 @@ export default function ConfirmBooking({
 
       <div
         style={{
-          background: "#fff",
-          padding: 15,
-          borderRadius: 12,
-          marginTop: 20,
+          background:"#fff",
+          padding:15,
+          borderRadius:12,
+          marginTop:20,
         }}
       >
+
 
         <p>
           🚜 Service:
@@ -205,18 +218,13 @@ export default function ConfirmBooking({
         </p>
 
 
+
         <p>
           🌾 Acres:
           {" "}
           {bookingData?.acres || 0}
         </p>
 
-
-        <p>
-          📅 Date:
-          {" "}
-          {bookingData?.date || "-"}
-        </p>
 
 
         <p>
@@ -226,18 +234,13 @@ export default function ConfirmBooking({
         </p>
 
 
+
         <p>
           💳 Payment:
           {" "}
           {bookingData?.payment_status || "Pending"}
         </p>
 
-
-        <p>
-          📍 Farm:
-          {" "}
-          {bookingData?.selKhet?.name || "-"}
-        </p>
 
 
         <p>
@@ -248,34 +251,38 @@ export default function ConfirmBooking({
 
 
       </div>
-            <button
+
+
+
+      <button
 
         onClick={handleConfirm}
 
         disabled={loading}
 
         style={{
-          marginTop: 20,
-          width: "100%",
-          padding: 15,
-          border: "none",
-          borderRadius: 12,
-          background: "#16a34a",
-          color: "#fff",
-          fontSize: 18,
-          fontWeight: "bold",
+          marginTop:20,
+          width:"100%",
+          padding:15,
+          border:"none",
+          borderRadius:12,
+          background:"#16a34a",
+          color:"#fff",
+          fontSize:18,
+          fontWeight:"bold",
         }}
 
       >
 
         {
           loading
-            ? "Booking..."
-            : "✅ Confirm Booking"
+          ? "Booking..."
+          : "✅ Confirm Booking"
         }
 
 
       </button>
+
 
 
     </div>
