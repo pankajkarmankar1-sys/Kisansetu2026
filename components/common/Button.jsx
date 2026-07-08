@@ -12,7 +12,7 @@ export default function Button({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-5 rounded-lg transition duration-200 disabled:bg-gray-400 ${className}`}
+      className={`bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-5 rounded-lg transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed ${className}`}
     >
       {children}
     </button>
