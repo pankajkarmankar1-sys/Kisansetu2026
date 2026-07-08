@@ -1,100 +1,86 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabase";
 import { getNotifications } from "../../lib/notificationService";
 
 export default function NotificationBell({
   user,
   onClick,
 }) {
+
   const [count, setCount] = useState(0);
 
-  async function loadNotifications() {
+  async function load() {
+
     try {
+
       if (!user?.id) {
         setCount(0);
         return;
       }
 
       const data = await getNotifications(user.id);
+
       setCount(data?.length || 0);
 
-    } catch (err) {
-      console.error("Notification Error:", err);
+    } catch (e) {
+
+      console.error("Notification Error:", e);
+
     }
+
   }
 
   useEffect(() => {
 
-    if (!user?.id) return;
+    load();
 
-    loadNotifications();
-
-    const channel = supabase
-      .channel(`notification-bell-${user.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "notifications",
-        },
-        () => {
-          loadNotifications();
-        }
-      )
-      .subscribe();
+    const timer = setInterval(
+      load,
+      5000
+    );
 
     return () => {
-      supabase.removeChannel(channel);
+      clearInterval(timer);
     };
 
   }, [user]);
 
   return (
+
     <button
       onClick={onClick}
-      title="Notifications"
       style={{
         position: "relative",
-        width: 48,
-        height: 48,
-        borderRadius: "50%",
+        fontSize: 22,
+        background: "none",
         border: "none",
-        background: "#16a34a",
-        color: "#fff",
-        fontSize: 24,
         cursor: "pointer",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        boxShadow: "0 3px 10px rgba(0,0,0,.2)",
+        color: "#fff",
       }}
     >
+
       🔔
 
       {count > 0 && (
+
         <span
           style={{
             position: "absolute",
-            top: -4,
-            right: -4,
-            minWidth: 22,
-            height: 22,
-            borderRadius: "50%",
-            background: "#ef4444",
+            top: -5,
+            right: -5,
+            background: "red",
             color: "#fff",
-            fontSize: 11,
-            fontWeight: "bold",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            border: "2px solid #fff",
-            padding: "0 4px",
+            borderRadius: "50%",
+            padding: "2px 6px",
+            fontSize: 10,
           }}
         >
-          {count > 99 ? "99+" : count}
+          {count}
         </span>
+
       )}
+
     </button>
+
   );
+
 }
