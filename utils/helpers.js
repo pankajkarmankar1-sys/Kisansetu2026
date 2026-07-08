@@ -1,33 +1,48 @@
 // Format Date
 export const formatDate = (date) => {
   if (!date) return "";
-  return new Date(date).toLocaleDateString("en-IN");
+
+  return new Date(date)
+    .toLocaleDateString("en-IN");
 };
+
 
 // Format Time
 export const formatTime = (date) => {
   if (!date) return "";
-  return new Date(date).toLocaleTimeString("en-IN");
+
+  return new Date(date)
+    .toLocaleTimeString("en-IN");
 };
+
 
 // Currency
 export const formatCurrency = (amount) => {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(amount || 0);
+  return new Intl.NumberFormat(
+    "en-IN",
+    {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }
+  ).format(Number(amount || 0));
 };
+
 
 // Random ID
 export const generateId = () => {
-  return Math.random().toString(36).substring(2, 10);
+  return Math.random()
+    .toString(36)
+    .substring(2, 10);
 };
+
 
 // Phone
 export const cleanPhone = (phone) => {
-  return phone.replace(/\D/g, "");
+  return String(phone || "")
+    .replace(/\D/g, "");
 };
+
 
 // File Size
 export const formatFileSize = (bytes) => {
