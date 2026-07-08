@@ -1,35 +1,124 @@
 // services/uploadService.js
 
-export async function uploadFile(file, folder = "documents") {
-  console.log("Uploading File...", folder);
+import { supabase } from "../lib/supabase";
+
+
+// Upload File
+export async function uploadFile(
+  file,
+  folder = "documents"
+) {
 
   if (!file) {
+
     return {
-      success: false,
-      message: "No file selected",
+      success:false,
+      message:"No file selected",
     };
+
   }
 
-  // Future:
-  // Upload to Supabase Storage
+
+  const fileName =
+    `${folder}/${Date.now()}-${file.name}`;
+
+
+
+  const {
+    error
+  } = await supabase
+    .storage
+    .from("uploads")
+    .upload(
+      fileName,
+      file
+    );
+
+
+  if(error) {
+
+    throw error;
+
+  }
+
+
+
+  const {
+    data
+  } = supabase
+    .storage
+    .from("uploads")
+    .getPublicUrl(
+      fileName
+    );
+
+
 
   return {
-    success: true,
-    url: URL.createObjectURL(file),
-    name: file.name,
+
+    success:true,
+
+    url:
+      data.publicUrl,
+
+    name:
+      file.name,
+
+    path:
+      fileName,
+
   };
+
 }
 
-export async function deleteFile(path) {
-  console.log("Delete File", path);
+
+
+// Delete File
+export async function deleteFile(
+  path
+) {
+
+  const {
+    error
+  } = await supabase
+    .storage
+    .from("uploads")
+    .remove([
+      path
+    ]);
+
+
+  if(error) {
+    throw error;
+  }
+
 
   return {
-    success: true,
+    success:true,
   };
+
 }
 
-export async function getFile(path) {
-  console.log("Get File", path);
 
-  return path;
+
+// Get File URL
+export async function getFile(
+  path
+) {
+
+  if(!path) return null;
+
+
+  const {
+    data
+  } = supabase
+    .storage
+    .from("uploads")
+    .getPublicUrl(
+      path
+    );
+
+
+  return data.publicUrl;
+
 }
