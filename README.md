@@ -1,33 +1,43 @@
-# KisanSetu
+🌾 KisanSetu
 
-KisanSetu is a modern farmer support platform built using Next.js, React, and Supabase.
+KisanSetu is a modern digital platform that connects farmers with tractor drivers for agricultural services. It is built using Next.js, React, and Supabase, providing a fast, secure, and responsive experience.
 
-## Features
+---
+
+✨ Features
 
 - 🌾 Farmer Registration
 - 🚜 Driver Registration
-- 🔐 OTP Login
-- 🪪 Aadhaar Validation
-- 📁 File Upload
+- 🔐 Secure Authentication
+- 📲 OTP Login
+- 🪪 Aadhaar Verification
+- 📁 Document Upload
+- 📅 Tractor Booking System
+- 🚜 Driver Assignment
+- 🔔 Real-time Notifications
+- 💬 Driver & Customer Chat
+- 📊 Admin Dashboard
+- 💰 Earnings Management
+- 📜 Booking History
 - ☁️ Supabase Backend
-- 📱 Responsive Design
+- 📱 Fully Responsive Design
 - 🚀 Vercel Deployment Ready
 
 ---
 
-## Tech Stack
+🛠️ Tech Stack
 
 - Next.js
-- React
-- JavaScript
+- React.js
+- JavaScript (ES6+)
 - Supabase
+- PostgreSQL
 - Vercel
 
 ---
 
-## Folder Structure
+📂 Project Structure
 
-```
 Kisansetu2026/
 │
 ├── components/
@@ -40,72 +50,60 @@ Kisansetu2026/
 ├── next.config.js
 ├── README.md
 └── .env.example
-```
 
 ---
 
-## Installation
+⚙️ Installation
 
-Clone the repository
+Clone the repository:
 
-```bash
 git clone https://github.com/your-username/Kisansetu2026.git
-```
 
-Install dependencies
+Install dependencies:
 
-```bash
 npm install
-```
 
-Run development server
+Run the development server:
 
-```bash
 npm run dev
-```
 
-Build production
+Create a production build:
 
-```bash
 npm run build
-```
 
-Start production server
+Run the production server:
 
-```bash
 npm start
-```
 
 ---
 
-## Environment Variables
+🔑 Environment Variables
 
-Create a file named
+Create a file named:
 
-```
 .env.local
-```
 
-Copy values from
+Add the following variables:
 
-```
-.env.example
-```
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 ---
 
-## Deployment
+🚀 Deployment
 
-Recommended Platform
-
-- Vercel
+This project is optimized for deployment on Vercel.
 
 ---
 
-## License
+📄 License
 
-MIT License
+This project is licensed under the MIT License.
 
 ---
 
-Developed by **Pankaj Karmankar**
+👨‍💻 Developer
+
+Pankaj Karmankar
+
+Made with ❤️ for Indian Farmers.
