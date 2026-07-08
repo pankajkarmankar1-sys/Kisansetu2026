@@ -4,12 +4,11 @@ import { supabase } from "../../lib/supabase";
 
 export default function BookingList() {
 
-  const [bookings,setBookings] = useState([]);
-  const [search,setSearch] = useState("");
+  const [bookings, setBookings] = useState([]);
+  const [search, setSearch] = useState("");
 
 
-
-  useEffect(()=>{
+  useEffect(() => {
 
     loadBookings();
 
@@ -19,30 +18,28 @@ export default function BookingList() {
       .on(
         "postgres_changes",
         {
-          event:"*",
-          schema:"public",
-          table:"bookings",
+          event: "*",
+          schema: "public",
+          table: "bookings",
         },
-        ()=>{
+        () => {
           loadBookings();
         }
       )
       .subscribe();
 
 
-
-    return ()=>{
+    return () => {
       supabase.removeChannel(channel);
     };
 
 
-  },[]);
+  }, []);
 
 
 
 
-
-  async function loadBookings(){
+  async function loadBookings() {
 
     const {
       data,
@@ -53,12 +50,12 @@ export default function BookingList() {
       .order(
         "created_at",
         {
-          ascending:false,
+          ascending: false,
         }
       );
 
 
-    if(!error){
+    if (!error) {
 
       setBookings(data || []);
 
@@ -70,11 +67,10 @@ export default function BookingList() {
 
 
 
-
   async function updateStatus(
     booking,
     status
-  ){
+  ) {
 
 
     const {
@@ -82,7 +78,7 @@ export default function BookingList() {
     } = await supabase
       .from("bookings")
       .update({
-        status,
+        status: status,
       })
       .eq(
         "id",
@@ -91,7 +87,7 @@ export default function BookingList() {
 
 
 
-    if(error){
+    if (error) {
 
       alert(error.message);
       return;
@@ -104,23 +100,34 @@ export default function BookingList() {
 
     // Customer Notification
 
-    if(booking.customer_id){
+    if (booking.customer_id) {
 
       await supabase
         .from("notifications")
         .insert([
           {
+
             user_id:
               booking.customer_id,
 
+
             title:
-              `Booking ${status}`,
+              status === "Completed"
+                ? "✅ Booking Completed"
+                : "❌ Booking Cancelled",
+
+
 
             message:
-              `Your booking is ${status}.`,
+              status === "Completed"
+                ? "Your farming service booking has been completed."
+                : "Your booking has been cancelled.",
+
+
 
             created_at:
               new Date().toISOString(),
+
           }
         ]);
 
@@ -137,14 +144,17 @@ export default function BookingList() {
 
 
 
-  async function deleteBooking(id){
+  async function deleteBooking(id) {
 
-    if(
-      !window.confirm(
+
+    const confirmDelete =
+      window.confirm(
         "Delete booking?"
-      )
-    )
-    return;
+      );
+
+
+    if (!confirmDelete)
+      return;
 
 
 
@@ -160,11 +170,16 @@ export default function BookingList() {
 
 
 
-    if(!error){
+    if (error) {
 
-      loadBookings();
+      alert(error.message);
+      return;
 
     }
+
+
+
+    loadBookings();
 
   }
 
@@ -174,13 +189,13 @@ export default function BookingList() {
 
 
   const filtered =
-    bookings.filter((b)=>
+    bookings.filter((b) =>
 
       JSON.stringify(b)
-      .toLowerCase()
-      .includes(
-        search.toLowerCase()
-      )
+        .toLowerCase()
+        .includes(
+          search.toLowerCase()
+        )
 
     );
 
@@ -188,19 +203,24 @@ export default function BookingList() {
 
 
 
-  return(
+
+  return (
 
     <div
+
       style={{
         background:"#fff",
         padding:20,
         borderRadius:12,
       }}
+
     >
+
 
       <h2>
         📋 Booking Management
       </h2>
+
 
 
 
@@ -214,13 +234,18 @@ export default function BookingList() {
           setSearch(e.target.value)
         }
 
+
         style={{
+
           width:"100%",
           padding:10,
           margin:"15px 0",
+
         }}
 
       />
+
+
 
 
 
@@ -239,21 +264,32 @@ export default function BookingList() {
 
       >
 
+
         <thead>
 
           <tr>
 
             <th>Customer</th>
+
             <th>Service</th>
+
             <th>Date</th>
+
             <th>Status</th>
+
             <th>Driver</th>
+
             <th>Assign</th>
+
             <th>Action</th>
+
 
           </tr>
 
+
         </thead>
+
+
 
 
 
@@ -268,43 +304,77 @@ export default function BookingList() {
 
 
               <td>
+
                 {
                   booking.customer_name ||
                   booking.customer_phone ||
                   "-"
                 }
+
               </td>
 
 
+
+
               <td>
-                {booking.service_name}
+
+                {
+                  booking.service_name ||
+                  "-"
+                }
+
               </td>
 
 
+
+
               <td>
+
                 {
                   booking.booking_date ||
-                  booking.date
+                  booking.date ||
+                  "-"
                 }
+
               </td>
 
 
+
+
               <td>
-                {booking.status}
+
+                {
+                  booking.status ||
+                  "Pending"
+                }
+
               </td>
 
 
+
+
+
               <td>
+
                 {
                   booking.driver_name ||
                   "Not Assigned"
                 }
+
               </td>
+
+
+
 
 
               <td>
+
                 <AssignDriver booking={booking}/>
+
               </td>
+
+
+
 
 
 
@@ -321,8 +391,12 @@ export default function BookingList() {
                   }
 
                 >
+
                   ✅ Complete
+
                 </button>
+
+
 
 
 
@@ -331,6 +405,7 @@ export default function BookingList() {
                   style={{
                     marginLeft:8,
                   }}
+
 
                   onClick={()=>
                     updateStatus(
@@ -340,8 +415,12 @@ export default function BookingList() {
                   }
 
                 >
+
                   ❌ Cancel
+
                 </button>
+
+
 
 
 
@@ -351,6 +430,7 @@ export default function BookingList() {
                     marginLeft:8,
                   }}
 
+
                   onClick={()=>
                     deleteBooking(
                       booking.id
@@ -358,12 +438,16 @@ export default function BookingList() {
                   }
 
                 >
+
                   🗑 Delete
+
                 </button>
 
 
 
               </td>
+
+
 
 
             </tr>
