@@ -36,23 +36,26 @@ const chandrapur = {
       "Dhanora",
       "Dhidsi",
       "Dongargaon",
-    ],
-
-    Ballarpur: [],
-    Bhadravati: [],
-    Brahmapuri: [],
-    Chandrapur: [],
-    Chimur: [],
-    Gondpipri: [],
-    Jiwati: [],
-    Korpana: [],
-    Mul: [],
-    Nagbhid: [],
-    Pombhurna: [],
-    Sawali: [],
-    Sindewahi: [],
-    Warora: [],
-  },
+      "Ghotta",
+      "Goraj",
+      "Gowari",
+      "Goyegaon",
+      "Hardona Bk.",
+      "Hardona Kh.",
+      "Hirapur",
+      "Isapur",
+      "Jamani",
+      "Jogapur",
+      "Kadholi Bk.",
+      "Kakadghat",
+      "Kalamana",
+      "Kapangaon",
+      "Kawadgondi",
+      "Kawathala",
+      "Kawitpeth",
+      "Kelzar"
+    ]
+  }
 };
 
 export default chandrapur;
