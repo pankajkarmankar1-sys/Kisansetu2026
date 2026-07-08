@@ -1,138 +1,319 @@
+// components/maps/LocationSelector.jsx
+
 import React, { useState } from "react";
 
-export default function LocationSelector({ onSelect }) {
-  const [state, setState] = useState("");
-  const [district, setDistrict] = useState("");
+
+export default function LocationSelector({
+
+  onSelect
+
+}) {
+
+
+  const [state, setState] =
+    useState("");
+
+  const [district, setDistrict] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(false);
+
+
 
   const states = [
+
     "Maharashtra",
+
     "Madhya Pradesh",
+
     "Uttar Pradesh",
+
     "Bihar",
+
     "Rajasthan",
+
     "Gujarat",
+
     "Karnataka",
+
     "Tamil Nadu",
+
     "West Bengal",
+
     "Delhi",
+
   ];
 
-  const handleSave = () => {
-    if (!state || !district) {
-      alert("Please select State and enter District");
-      return;
+
+
+
+  function saveLocation(data) {
+
+    localStorage.setItem(
+      "location",
+      JSON.stringify(data)
+    );
+
+
+    if(onSelect){
+
+      onSelect(data);
+
     }
 
-    const locationData = {
+  }
+
+
+
+
+
+  function handleSave(){
+
+    if(!state || !district){
+
+      alert(
+        "State और District select करें"
+      );
+
+      return;
+
+    }
+
+
+    saveLocation({
+
       state,
+
       district,
-    };
 
-    localStorage.setItem("location", JSON.stringify(locationData));
+    });
 
-    console.log("Location Saved:", locationData);
+  }
 
-    if (onSelect) {
-      onSelect(locationData);
-    }
-  };
 
-  const useCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      alert("Geolocation not supported");
+
+
+
+  function useCurrentLocation(){
+
+
+    if(!navigator.geolocation){
+
+      alert(
+        "GPS available नहीं है"
+      );
+
       return;
+
     }
+
+
+    setLoading(true);
+
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const locationData = {
-          state: "Current Location",
-          district: `${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}`,
+
+      (position)=>{
+
+
+        const data = {
+
+          latitude:
+          position.coords.latitude,
+
+          longitude:
+          position.coords.longitude,
+
         };
 
-        localStorage.setItem("location", JSON.stringify(locationData));
 
-        console.log("GPS Location:", locationData);
+        saveLocation(data);
 
-        if (onSelect) {
-          onSelect(locationData);
-        }
+
+        setLoading(false);
+
+
       },
-      () => {
-        alert("Location permission denied");
+
+
+      ()=>{
+
+        alert(
+          "Location permission denied"
+        );
+
+        setLoading(false);
+
       }
+
     );
-  };
+
+  }
+
+
+
+
 
   return (
+
     <div
+
       style={{
-        maxWidth: 400,
-        margin: "20px auto",
-        padding: 20,
-        border: "1px solid #ddd",
-        borderRadius: 10,
-        background: "#fff",
+
+        maxWidth:400,
+
+        margin:"20px auto",
+
+        padding:20,
+
+        border:"1px solid #ddd",
+
+        borderRadius:10,
+
+        background:"#fff",
+
       }}
+
     >
-      <h2>📍 Select Location</h2>
+
+      <h2>
+        📍 Select Farm Location
+      </h2>
+
+
 
       <select
-        value={state}
-        onChange={(e) => setState(e.target.value)}
-        style={{ width: "100%", padding: 10, marginBottom: 10 }}
-      >
-        <option value="">Select State</option>
 
-        {states.map((s) => (
-          <option key={s} value={s}>
-            {s}
-          </option>
-        ))}
+        value={state}
+
+        onChange={
+          e=>setState(e.target.value)
+        }
+
+        style={{
+
+          width:"100%",
+
+          padding:10,
+
+          marginBottom:10,
+
+        }}
+
+      >
+
+        <option value="">
+          Select State
+        </option>
+
+
+        {
+          states.map((s)=>(
+
+            <option
+              key={s}
+              value={s}
+            >
+              {s}
+            </option>
+
+          ))
+        }
+
+
       </select>
 
+
+
+
       <input
-        type="text"
-        placeholder="Enter District"
+
         value={district}
-        onChange={(e) => setDistrict(e.target.value)}
+
+        onChange={
+          e=>setDistrict(e.target.value)
+        }
+
+        placeholder="Enter District"
+
         style={{
-          width: "100%",
-          padding: 10,
-          marginBottom: 10,
+
+          width:"100%",
+
+          padding:10,
+
+          marginBottom:10,
+
         }}
+
       />
 
-      <button
-        onClick={handleSave}
-        style={{
-          width: "100%",
-          padding: 12,
-          marginBottom: 10,
-          background: "#16a34a",
-          color: "#fff",
-          border: "none",
-          borderRadius: 8,
-          cursor: "pointer",
-        }}
-      >
-        Save
-      </button>
+
+
 
       <button
-        onClick={useCurrentLocation}
+
+        onClick={handleSave}
+
         style={{
-          width: "100%",
-          padding: 12,
-          background: "#2563eb",
-          color: "#fff",
-          border: "none",
-          borderRadius: 8,
-          cursor: "pointer",
+
+          width:"100%",
+
+          padding:12,
+
+          background:"#16a34a",
+
+          color:"#fff",
+
+          border:"none",
+
+          borderRadius:8,
+
         }}
+
       >
-        Use GPS
+
+        Save Location
+
       </button>
+
+
+
+
+      <button
+
+        onClick={useCurrentLocation}
+
+        disabled={loading}
+
+        style={{
+
+          width:"100%",
+
+          padding:12,
+
+          marginTop:10,
+
+          background:"#2563eb",
+
+          color:"#fff",
+
+          border:"none",
+
+          borderRadius:8,
+
+        }}
+
+      >
+
+        {loading ? "Getting GPS..." : "📍 Use GPS"}
+
+      </button>
+
+
     </div>
+
   );
+
 }
