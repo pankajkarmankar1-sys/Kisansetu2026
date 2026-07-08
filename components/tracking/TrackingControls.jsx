@@ -1,105 +1,177 @@
+// components/tracking/TrackingControls.jsx
+
 import React from "react";
 
+
 export default function TrackingControls({
+
   booking,
+
   onStart,
+
   onPause,
+
   onStop,
+
   onRefresh,
+
 }) {
+
+
+  const button = (
+    action,
+    text,
+    color
+  ) => (
+
+    <button
+
+      onClick={action}
+
+      style={{
+
+        padding:12,
+
+        background:color,
+
+        color:"#fff",
+
+        border:"none",
+
+        borderRadius:8,
+
+        cursor:"pointer",
+
+        fontWeight:"bold",
+
+      }}
+
+    >
+
+      {text}
+
+    </button>
+
+  );
+
+
 
   return (
 
     <div
+
       style={{
-        background: "#fff",
-        border: "1px solid #ddd",
-        borderRadius: 12,
-        padding: 20,
-        marginTop: 15,
+
+        background:"#fff",
+
+        border:"1px solid #ddd",
+
+        borderRadius:12,
+
+        padding:20,
+
+        marginTop:15,
+
       }}
+
     >
 
-      <h3>🎮 Tracking Controls</h3>
+      <h3>
+        🎮 Tracking Controls
+      </h3>
+
+
 
       <div
+
         style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 10,
-          marginTop: 15,
+
+          display:"grid",
+
+          gridTemplateColumns:
+          "repeat(auto-fit,minmax(140px,1fr))",
+
+          gap:10,
+
+          marginTop:15,
+
         }}
+
       >
 
-        <button
-          onClick={onStart}
-          style={{
-            padding: 12,
-            background: "#2d8a4e",
-            color: "#fff",
-            border: "none",
-            borderRadius: 8,
-            cursor: "pointer",
-          }}
-        >
-          ▶️ Start Tracking
-        </button>
+        {button(
+          onStart,
+          "▶️ Start",
+          "#16a34a"
+        )}
 
-        <button
-          onClick={onPause}
-          style={{
-            padding: 12,
-            background: "#f9a825",
-            color: "#fff",
-            border: "none",
-            borderRadius: 8,
-            cursor: "pointer",
-          }}
-        >
-          ⏸ Pause
-        </button>
 
-        <button
-          onClick={onRefresh}
-          style={{
-            padding: 12,
-            background: "#1976d2",
-            color: "#fff",
-            border: "none",
-            borderRadius: 8,
-            cursor: "pointer",
-          }}
-        >
-          📍 Refresh
-        </button>
+        {button(
+          onPause,
+          "⏸ Pause",
+          "#f59e0b"
+        )}
 
-        <button
-          onClick={onStop}
-          style={{
-            padding: 12,
-            background: "#d32f2f",
-            color: "#fff",
-            border: "none",
-            borderRadius: 8,
-            cursor: "pointer",
-          }}
-        >
-          ⛔ Stop
-        </button>
+
+        {button(
+          onRefresh,
+          "📍 Refresh",
+          "#2563eb"
+        )}
+
+
+        {button(
+          onStop,
+          "⛔ Stop",
+          "#dc2626"
+        )}
 
       </div>
 
+
+
       <div
+
         style={{
-          marginTop: 20,
-          padding: 10,
-          background: "#f5f5f5",
-          borderRadius: 8,
+
+          marginTop:20,
+
+          padding:10,
+
+          background:"#f8fafc",
+
+          borderRadius:8,
+
         }}
+
       >
-        <p><b>Booking ID:</b> {booking?.id || "-"}</p>
-        <p><b>Status:</b> {booking?.booking_status || "Tracking"}</p>
+
+        <p>
+
+          <b>Booking ID:</b>
+
+          {" "}
+
+          {booking?.id || "-"}
+
+        </p>
+
+
+        <p>
+
+          <b>Status:</b>
+
+          {" "}
+
+          {booking?.booking_status ||
+          booking?.status ||
+          "Tracking"}
+
+        </p>
+
+
       </div>
+
 
     </div>
 
