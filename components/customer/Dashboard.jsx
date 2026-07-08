@@ -1,186 +1,62 @@
-import React, { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabase";
+import React from "react";
 
-export default function CustomerNotifications({ user }) {
-
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-
-  useEffect(() => {
-
-    if (!user?.id) return;
-
-    loadNotifications();
-
-
-    const channel = supabase
-      .channel(`customer_notifications_${user.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "notifications",
-          filter:
-            `user_id=eq.${user.id}`,
-        },
-        (payload)=>{
-
-          setNotifications((prev)=>[
-            payload.new,
-            ...prev,
-          ]);
-
-        }
-      )
-      .subscribe();
-
-
-
-    return ()=>{
-      supabase.removeChannel(channel);
-    };
-
-
-  },[user]);
-
-
-
-
-
-  async function loadNotifications(){
-
-    try{
-
-      setLoading(true);
-
-
-      const {data,error}=await supabase
-        .from("notifications")
-        .select("*")
-        .eq(
-          "user_id",
-          user.id
-        )
-        .order(
-          "created_at",
-          {
-            ascending:false,
-          }
-        );
-
-
-      if(error) throw error;
-
-
-      setNotifications(
-        data || []
-      );
-
-
-    }catch(err){
-
-      console.log(err.message);
-
-    }finally{
-
-      setLoading(false);
-
-    }
-
-  }
-
-
-
-
-
-  return(
-
+export default function Dashboard({
+  user,
+  onBook,
+  onBookings,
+  onProfile,
+  onNotifications,
+  onLogout,
+}) {
+  return (
     <div
       style={{
-        background:"#fff",
-        padding:20,
-        borderRadius:12,
+        padding: 20,
+        minHeight: "100vh",
+        background: "#f5f7fb",
       }}
     >
+      <h1>🚜 KisanSetu Dashboard</h1>
 
       <h2>
-        🔔 Notifications
+        Welcome {user?.name || "User"}
       </h2>
 
-
-      <button
-        onClick={loadNotifications}
+      <div
         style={{
-          padding:10,
-          marginBottom:15,
+          display: "grid",
+          gap: 12,
+          marginTop: 25,
         }}
       >
-        🔄 Refresh
-      </button>
+        <button onClick={onBook} style={{ padding: 15 }}>
+          📅 Book Service
+        </button>
 
+        <button onClick={onBookings} style={{ padding: 15 }}>
+          📋 My Bookings
+        </button>
 
+        <button onClick={onProfile} style={{ padding: 15 }}>
+          👤 Profile
+        </button>
 
-      {
-        loading &&
-        <p>
-          Loading...
-        </p>
-      }
+        <button onClick={onNotifications} style={{ padding: 15 }}>
+          🔔 Notifications
+        </button>
 
-
-
-      {
-        !loading &&
-        notifications.length===0 &&
-        <p>
-          No Notifications
-        </p>
-      }
-
-
-
-
-      {
-        notifications.map((n)=>(
-
-          <div
-            key={n.id}
-            style={{
-              borderBottom:
-                "1px solid #ddd",
-              padding:"10px 0",
-            }}
-          >
-
-            <h3>
-              {n.title}
-            </h3>
-
-            <p>
-              {n.message}
-            </p>
-
-
-            <small>
-              {
-                new Date(
-                  n.created_at
-                ).toLocaleString()
-              }
-            </small>
-
-
-          </div>
-
-        ))
-      }
-
-
-
+        <button
+          onClick={onLogout}
+          style={{
+            padding: 15,
+            background: "#dc2626",
+            color: "#fff",
+            border: "none",
+          }}
+        >
+          Logout
+        </button>
+      </div>
     </div>
-
   );
-
 }
