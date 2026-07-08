@@ -11,9 +11,11 @@ export default function Layout({
         maxWidth: 900,
         margin: "0 auto",
         padding: 20,
+        minHeight: "100vh",
+        background: "#f8fafc",
       }}
     >
-      <h1>{title}</h1>
+      {title && <h1>{title}</h1>}
 
       {subtitle && (
         <p
