@@ -1,29 +1,79 @@
+// components/maps/DriverMarker.jsx
+
 import React from "react";
 
-export default function DriverMarker({ driver }) {
+
+export default function DriverMarker({
+
+  driver
+
+}) {
+
 
   if (!driver) return null;
 
+
+
   return (
+
     <div
+
       style={{
-        background: "#1976D2",
-        color: "#fff",
-        padding: 10,
-        borderRadius: 10,
-        margin: 10,
+
+        background:"#2563eb",
+
+        color:"#fff",
+
+        padding:"12px",
+
+        borderRadius:"12px",
+
+        margin:"10px",
+
+        textAlign:"center",
+
+        fontWeight:"bold",
+
+        boxShadow:
+        "0 3px 8px rgba(0,0,0,0.2)",
+
       }}
+
     >
-      🚜 Driver
+
+      🚜 Driver Location
+
 
       <br />
 
-      {driver.lat}
+
+      👨‍🌾
+      {
+        driver.name ||
+        "Driver"
+      }
+
 
       <br />
 
-      {driver.lng}
+
+      📍 Lat:
+      {
+        driver.lat || "N/A"
+      }
+
+
+      <br />
+
+
+      📍 Lng:
+      {
+        driver.lng || "N/A"
+      }
+
+
     </div>
+
   );
 
 }
