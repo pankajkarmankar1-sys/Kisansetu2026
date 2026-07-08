@@ -7,7 +7,8 @@ export default function FormField({
   value,
   onChange,
   placeholder,
-  error
+  error,
+  autoComplete = "off",
 }) {
   return (
     <div style={{ marginBottom: 16 }}>
@@ -16,7 +17,7 @@ export default function FormField({
           display: "block",
           marginBottom: 6,
           fontWeight: "600",
-          color: "#14532d"
+          color: "#14532d",
         }}
       >
         {icon} {label}
@@ -27,6 +28,7 @@ export default function FormField({
         value={value}
         onChange={onChange}
         placeholder={placeholder || label}
+        autoComplete={autoComplete}
         style={{
           width: "100%",
           padding: "12px",
@@ -34,7 +36,7 @@ export default function FormField({
           border: error ? "2px solid red" : "1px solid #ccc",
           fontSize: "16px",
           outline: "none",
-          boxSizing: "border-box"
+          boxSizing: "border-box",
         }}
       />
 
@@ -43,7 +45,7 @@ export default function FormField({
           style={{
             color: "red",
             marginTop: "5px",
-            fontSize: "13px"
+            fontSize: "13px",
           }}
         >
           {error}
