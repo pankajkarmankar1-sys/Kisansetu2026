@@ -1,123 +1,27 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/router";
 import Dashboard from "../components/customer/Dashboard";
-import { supabase } from "../lib/supabase";
-
 
 export default function DashboardPage() {
-
   const router = useRouter();
 
-  const [user, setUser] = useState({
-    name: "Loading..."
+  const [user] = useState({
+    id: "guest",
+    name: "Guest User",
   });
 
-
-
-  useEffect(() => {
-
-    loadUser();
-
-  }, []);
-
-
-
-  async function loadUser() {
-
-    const {
-      data: {
-        user: authUser
-      }
-    } = await supabase.auth.getUser();
-
-
-
-    if (!authUser) {
-
-      router.replace("/");
-
-      return;
-
-    }
-
-
-
-    const {
-      data
-    } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq(
-        "id",
-        authUser.id
-      )
-      .single();
-
-
-
-    setUser(
-
-      data || {
-
-        id: authUser.id,
-
-        name:
-          authUser.phone ||
-          authUser.email ||
-          "User"
-
-      }
-
-    );
-
-  }
-
-
-
-
-
-  async function logout() {
-
-    await supabase.auth.signOut();
-
+  function logout() {
     router.replace("/");
-
   }
-
-
-
-
 
   return (
-
     <Dashboard
-
       user={user}
-
-      onBook={() =>
-        router.push("/book")
-      }
-
-
-      onBookings={() =>
-        router.push("/bookings")
-      }
-
-
-      onProfile={() =>
-        router.push("/profile")
-      }
-
-
-      onNotifications={() =>
-        router.push("/notifications")
-      }
-
-
+      onBook={() => router.push("/book")}
+      onBookings={() => router.push("/bookings")}
+      onProfile={() => router.push("/profile")}
+      onNotifications={() => router.push("/notifications")}
       onLogout={logout}
-
     />
-
   );
-
 }
