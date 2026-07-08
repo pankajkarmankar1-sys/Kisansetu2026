@@ -28,22 +28,34 @@ export default function ConfirmBooking({
 
       const booking = {
         customer_id: user.id,
+
         service_name:
           bookingData?.selectedService?.name || "",
+
         service_id:
           bookingData?.selectedService?.id || null,
+
         acres:
           Number(bookingData?.acres || 0),
+
         booking_date:
           bookingData?.date || null,
+
         amount,
+
+        total_amount: amount,
+
         payment_status:
           bookingData?.payment_status || "Pending",
+
         status: "Pending",
+
         note:
           bookingData?.note || "",
+
         farm_location:
           bookingData?.selKhet || null,
+
         created_at:
           new Date().toISOString(),
       };
@@ -72,9 +84,11 @@ export default function ConfirmBooking({
       if (onConfirm) {
         onConfirm(data);
       }
+
     } catch (err) {
       console.error("Booking Error:", err);
       alert(err.message);
+
     } finally {
       setLoading(false);
     }
