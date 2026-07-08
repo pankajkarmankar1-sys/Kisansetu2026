@@ -33,6 +33,8 @@ export default function Page() {
 
             localStorage.setItem("location", JSON.stringify(data));
 
+            alert("Location Saved Successfully");
+
             router.push("/dashboard");
           }}
         />
