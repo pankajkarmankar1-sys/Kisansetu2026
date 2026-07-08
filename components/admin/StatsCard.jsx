@@ -3,287 +3,220 @@ import { supabase } from "../../lib/supabase";
 
 export default function StatsCards() {
 
-  const [stats,setStats] = useState({
-    total:0,
-    today:0,
-    pending:0,
-    completed:0,
-    cancelled:0,
-    drivers:0,
-    customers:0,
-    revenue:0,
+  const [stats, setStats] = useState({
+    total: 0,
+    today: 0,
+    pending: 0,
+    completed: 0,
+    cancelled: 0,
+    drivers: 0,
+    customers: 0,
+    revenue: 0,
   });
 
-
-
-  useEffect(()=>{
+  useEffect(() => {
 
     loadStats();
 
-
-    const channel =
-      supabase
+    const channel = supabase
       .channel("stats-update")
       .on(
         "postgres_changes",
         {
-          event:"*",
-          schema:"public",
-          table:"bookings",
+          event: "*",
+          schema: "public",
+          table: "bookings",
         },
-        ()=>{
+        () => {
           loadStats();
         }
       )
       .subscribe();
 
-
-
-    return ()=>{
-
+    return () => {
       supabase.removeChannel(channel);
-
     };
 
+  }, []);
 
-  },[]);
+  async function loadStats() {
 
-
-
-
-
-
-  async function loadStats(){
-
-    try{
-
+    try {
 
       const {
-        data:bookings
+        data: bookings,
+        error,
       } = await supabase
         .from("bookings")
         .select("*");
 
-
-
-
-      const {
-        count:drivers
-      } = await supabase
-        .from("profiles")
-        .select("*",{
-          count:"exact",
-          head:true,
-        })
-        .eq(
-          "role",
-          "driver"
-        );
-
-
-
+      if (error) throw error;
 
       const {
-        count:customers
+        count: drivers,
       } = await supabase
         .from("profiles")
-        .select("*",{
-          count:"exact",
-          head:true,
+        .select("*", {
+          count: "exact",
+          head: true,
         })
-        .eq(
-          "role",
-          "customer"
-        );
+        .eq("role", "driver");
 
-
-
+      const {
+        count: customers,
+      } = await supabase
+        .from("profiles")
+        .select("*", {
+          count: "exact",
+          head: true,
+        })
+        .eq("role", "customer");
 
       const today =
         new Date()
-        .toISOString()
-        .split("T")[0];
+          .toISOString()
+          .split("T")[0];
 
-
+      const revenue =
+        (bookings || [])
+          .filter(
+            (b) =>
+              b.status === "Completed"
+          )
+          .reduce(
+            (sum, b) =>
+              sum +
+              Number(
+                b.total_amount ||
+                b.amount ||
+                0
+              ),
+            0
+          );
 
       setStats({
 
         total:
           bookings?.length || 0,
 
-
         today:
           bookings?.filter(
-            b =>
-            b.created_at?.startsWith(today)
+            (b) =>
+              b.created_at?.startsWith(today)
           ).length || 0,
-
 
         pending:
           bookings?.filter(
-            b=>b.status==="Pending"
+            (b) =>
+              b.status === "Pending"
           ).length || 0,
-
 
         completed:
           bookings?.filter(
-            b=>b.status==="Completed"
+            (b) =>
+              b.status === "Completed"
           ).length || 0,
-
 
         cancelled:
           bookings?.filter(
-            b=>b.status==="Cancelled"
+            (b) =>
+              b.status === "Cancelled"
           ).length || 0,
-
 
         drivers:
           drivers || 0,
 
-
         customers:
           customers || 0,
 
-
-
-        revenue:
-          bookings
-          ?.filter(
-            b=>b.status==="Completed"
-          )
-          .reduce(
-            (sum,b)=>
-            sum + Number(b.amount || 0),
-            0
-          ) || 0,
-
+        revenue,
       });
 
-
-
-    }catch(err){
+    } catch (err) {
 
       console.log(
-        "Stats Error",
+        "Stats Error:",
         err.message
       );
 
     }
-
   }
 
-
-
-
-
-
-  const card={
-
-    flex:"1 1 200px",
-
-    background:"#fff",
-
-    padding:20,
-
-    borderRadius:12,
-
-    boxShadow:
-    "0 2px 8px rgba(0,0,0,.1)",
-
-    textAlign:"center",
-
+  const card = {
+    flex: "1 1 200px",
+    background: "#fff",
+    padding: 20,
+    borderRadius: 12,
+    boxShadow: "0 2px 8px rgba(0,0,0,.1)",
+    textAlign: "center",
   };
-
-
-
-
-
-  return(
+  return (
 
     <div>
-
 
       <button
         onClick={loadStats}
         style={{
-          marginBottom:15,
-          padding:10,
-          border:"none",
-          borderRadius:8,
-          background:"#16a34a",
-          color:"#fff",
+          marginBottom: 15,
+          padding: 10,
+          border: "none",
+          borderRadius: 8,
+          background: "#16a34a",
+          color: "#fff",
+          cursor: "pointer",
+          fontWeight: "bold",
         }}
       >
         🔄 Refresh Stats
       </button>
 
-
-
-
       <div
-
         style={{
-
-          display:"flex",
-
-          gap:20,
-
-          flexWrap:"wrap",
-
-          marginBottom:25,
-
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 20,
         }}
-
       >
 
-
         <div style={card}>
-          📋 Total
+          <h3>📋 Total Bookings</h3>
           <h1>{stats.total}</h1>
         </div>
 
-
         <div style={card}>
-          📅 Today
+          <h3>📅 Today's Bookings</h3>
           <h1>{stats.today}</h1>
         </div>
 
-
         <div style={card}>
-          ⏳ Pending
+          <h3>⏳ Pending</h3>
           <h1>{stats.pending}</h1>
         </div>
 
-
         <div style={card}>
-          ✅ Completed
+          <h3>✅ Completed</h3>
           <h1>{stats.completed}</h1>
         </div>
 
-
         <div style={card}>
-          ❌ Cancelled
+          <h3>❌ Cancelled</h3>
           <h1>{stats.cancelled}</h1>
         </div>
 
-
         <div style={card}>
-          👨‍🌾 Customers
+          <h3>👨‍🌾 Customers</h3>
           <h1>{stats.customers}</h1>
         </div>
 
-
         <div style={card}>
-          🚜 Drivers
+          <h3>🚜 Drivers</h3>
           <h1>{stats.drivers}</h1>
         </div>
 
-
         <div style={card}>
-          💰 Revenue
+          <h3>💰 Total Revenue</h3>
           <h1>₹{stats.revenue}</h1>
         </div>
-
 
       </div>
 
