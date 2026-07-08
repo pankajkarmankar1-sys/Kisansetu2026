@@ -6,95 +6,165 @@ export default function ConfirmBooking({
   onConfirm,
   back,
 }) {
+
   const [loading, setLoading] = useState(false);
 
+
+  const servicePrice =
+    Number(
+      bookingData?.selectedService?.price || 0
+    );
+
+
   const amount =
-    (bookingData?.selectedService?.normalPrice || 0) *
-    Number(bookingData?.acres || 0);
+    servicePrice *
+    Number(
+      bookingData?.acres || 0
+    );
+
 
   const handleConfirm = async () => {
+
     try {
+
       setLoading(true);
+
 
       const {
         data: { user },
       } = await supabase.auth.getUser();
 
+
       if (!user) {
-        setLoading(false);
+
         alert("Please login first");
+
+        setLoading(false);
+
         return;
+
       }
 
+
       const booking = {
-        customer_id: user.id,
+
+        customer_id:
+          user.id,
+
 
         service_name:
-          bookingData?.selectedService?.name || "",
+          bookingData?.selectedService?.name_hi ||
+          bookingData?.selectedService?.name ||
+          "",
+
 
         service_id:
-          bookingData?.selectedService?.id || null,
+          bookingData?.selectedService?.service_id ||
+          null,
+
 
         acres:
-          Number(bookingData?.acres || 0),
+          Number(
+            bookingData?.acres || 0
+          ),
+
 
         booking_date:
           bookingData?.date || null,
 
+
         amount,
 
-        total_amount: amount,
+
+        total_amount:
+          amount,
+
 
         payment_status:
-          bookingData?.payment_status || "Pending",
+          bookingData?.payment_status ||
+          "Pending",
 
-        status: "Pending",
+
+        status:
+          "Pending",
+
 
         note:
           bookingData?.note || "",
 
+
         farm_location:
           bookingData?.selKhet || null,
 
+
         created_at:
           new Date().toISOString(),
-      };
 
-      const { data, error } = await supabase
+      };
+            const { data, error } = await supabase
         .from("bookings")
         .insert([booking])
         .select()
         .single();
 
+
       if (error) throw error;
+
+
 
       await supabase
         .from("notifications")
         .insert([
           {
             user_id: user.id,
-            title: "✅ Booking Created",
-            message: `Your ${booking.service_name} booking has been created successfully.`,
-            created_at: new Date().toISOString(),
+
+            title:
+              "✅ Booking Created",
+
+            message:
+              `Your ${booking.service_name} booking has been created successfully.`,
+
+            created_at:
+              new Date().toISOString(),
           },
         ]);
 
+
+
       alert("✅ Booking Successful");
 
+
+
       if (onConfirm) {
+
         onConfirm(data);
+
       }
 
+
     } catch (err) {
-      console.error("Booking Error:", err);
+
+      console.error(
+        "Booking Error:",
+        err
+      );
+
+
       alert(err.message);
 
+
     } finally {
+
       setLoading(false);
+
     }
+
   };
 
+
+
   return (
+
     <div
       style={{
         background: "#F8FAFC",
@@ -102,11 +172,18 @@ export default function ConfirmBooking({
         padding: 20,
       }}
     >
+
       <button onClick={back}>
         ← Back
       </button>
 
-      <h2>✅ Confirm Booking</h2>
+
+
+      <h2>
+        ✅ Confirm Booking
+      </h2>
+
+
 
       <div
         style={{
@@ -116,18 +193,67 @@ export default function ConfirmBooking({
           marginTop: 20,
         }}
       >
-        <p>🚜 Service: {bookingData?.selectedService?.name || "-"}</p>
-        <p>🌾 Acres: {bookingData?.acres || 0}</p>
-        <p>📅 Date: {bookingData?.date || "-"}</p>
-        <p>💰 Amount: ₹{amount}</p>
-        <p>💳 Payment: {bookingData?.payment_status || "Pending"}</p>
-        <p>📍 Farm: {bookingData?.selKhet?.name || "-"}</p>
-        <p>📝 Note: {bookingData?.note || "-"}</p>
-      </div>
 
-      <button
+        <p>
+          🚜 Service:
+          {" "}
+          {
+            bookingData?.selectedService?.name_hi ||
+            bookingData?.selectedService?.name ||
+            "-"
+          }
+        </p>
+
+
+        <p>
+          🌾 Acres:
+          {" "}
+          {bookingData?.acres || 0}
+        </p>
+
+
+        <p>
+          📅 Date:
+          {" "}
+          {bookingData?.date || "-"}
+        </p>
+
+
+        <p>
+          💰 Amount:
+          {" "}
+          ₹{amount}
+        </p>
+
+
+        <p>
+          💳 Payment:
+          {" "}
+          {bookingData?.payment_status || "Pending"}
+        </p>
+
+
+        <p>
+          📍 Farm:
+          {" "}
+          {bookingData?.selKhet?.name || "-"}
+        </p>
+
+
+        <p>
+          📝 Note:
+          {" "}
+          {bookingData?.note || "-"}
+        </p>
+
+
+      </div>
+            <button
+
         onClick={handleConfirm}
+
         disabled={loading}
+
         style={{
           marginTop: 20,
           width: "100%",
@@ -139,9 +265,21 @@ export default function ConfirmBooking({
           fontSize: 18,
           fontWeight: "bold",
         }}
+
       >
-        {loading ? "Booking..." : "✅ Confirm Booking"}
+
+        {
+          loading
+            ? "Booking..."
+            : "✅ Confirm Booking"
+        }
+
+
       </button>
+
+
     </div>
+
   );
+
 }
