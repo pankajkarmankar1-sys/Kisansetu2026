@@ -1,27 +1,28 @@
 <svg 
 xmlns="http://www.w3.org/2000/svg" 
-viewBox="0 0 512 512"
->
+viewBox="0 0 512 512">
 
-<!-- Background -->
 <defs>
-  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%" stop-color="#86efac"/>
-    <stop offset="100%" stop-color="#16a34a"/>
-  </linearGradient>
 
-  <linearGradient id="tractor" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0%" stop-color="#22c55e"/>
-    <stop offset="100%" stop-color="#15803d"/>
-  </linearGradient>
+<linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="#22c55e"/>
+<stop offset="100%" stop-color="#14532d"/>
+</linearGradient>
+
+<linearGradient id="tractor" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0%" stop-color="#65a30d"/>
+<stop offset="100%" stop-color="#166534"/>
+</linearGradient>
+
 </defs>
 
 
+<!-- Rounded App Background -->
 <rect
 width="512"
 height="512"
-rx="100"
-fill="url(#sky)"
+rx="120"
+fill="url(#bg)"
 />
 
 
@@ -30,45 +31,48 @@ fill="url(#sky)"
 cx="390"
 cy="120"
 r="55"
-fill="#fde047"
+fill="#facc15"
 />
 
 
-<!-- Farm Land -->
+<!-- Mountains -->
 <path
-d="M0 330 Q256 250 512 330 V512 H0Z"
-fill="#92400e"
+d="M0 270 L120 150 L230 270 L350 130 L512 270"
+fill="#15803d"
+/>
+
+
+<!-- Farm Ground -->
+<path
+d="M0 340 Q256 260 512 340 V512 H0Z"
+fill="#854d0e"
 />
 
 <path
-d="M0 390 Q256 310 512 390 V512 H0Z"
+d="M0 410 Q256 320 512 410 V512 H0Z"
 fill="#65a30d"
 />
 
 
-<!-- Tractor Main Body -->
-<rect
-x="140"
-y="250"
-width="210"
-height="100"
-rx="20"
+<!-- Tractor Body -->
+<path
+d="M120 250 H350 Q380 250 400 290 V350 H120Z"
 fill="url(#tractor)"
 />
 
 
-<!-- Cabin -->
+<!-- Tractor Cabin -->
 <path
-d="M210 250 V170 Q210 140 240 140 H320 Q340 140 340 170 V250Z"
+d="M210 250 V160 Q210 130 245 130 H330 Q350 130 350 160 V250Z"
 fill="#166534"
 />
 
 
-<!-- Cabin Glass -->
+<!-- Glass -->
 <rect
 x="245"
-y="165"
-width="70"
+y="160"
+width="75"
 height="65"
 rx="8"
 fill="#bfdbfe"
@@ -77,62 +81,61 @@ fill="#bfdbfe"
 
 <!-- Exhaust -->
 <rect
-x="320"
-y="120"
-width="12"
-height="55"
+x="330"
+y="90"
+width="14"
+height="70"
 fill="#374151"
 />
 
 
 <!-- Big Wheel -->
 <circle
-cx="190"
+cx="185"
 cy="370"
-r="70"
+r="72"
 fill="#111827"
 />
 
 <circle
-cx="190"
+cx="185"
 cy="370"
-r="35"
-fill="#9ca3af"
+r="32"
+fill="#d1d5db"
 />
 
 
 <!-- Small Wheel -->
 <circle
-cx="370"
+cx="380"
 cy="370"
 r="45"
 fill="#111827"
 />
 
 <circle
-cx="370"
+cx="380"
 cy="370"
 r="20"
-fill="#9ca3af"
+fill="#d1d5db"
 />
 
 
-<!-- Head Light -->
+<!-- Head Lamp -->
 <circle
-cx="350"
-cy="275"
+cx="400"
+cy="290"
 r="12"
-fill="#facc15"
+fill="#fde047"
 />
 
 
-<!-- Front Bumper -->
+<!-- Front Grill -->
 <rect
-x="350"
-y="300"
-width="50"
-height="15"
-rx="5"
+x="405"
+y="315"
+width="35"
+height="8"
 fill="#374151"
 />
 
