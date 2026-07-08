@@ -1,23 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 
-export default function DriverHistory({ driver }) {
+export default function CustomerHistory({ user }) {
 
-  const [history, setHistory] = useState([]);
+  const [bookings, setBookings] = useState([]);
 
   useEffect(() => {
-    if (driver?.id) {
-      loadHistory();
+    if (user?.id) {
+      loadBookings();
     }
-  }, [driver]);
+  }, [user]);
 
-  async function loadHistory() {
+  async function loadBookings() {
 
     const { data, error } = await supabase
       .from("bookings")
       .select("*")
-      .eq("driver_id", driver.id)
-      .in("status", ["Completed", "Rejected"])
+      .eq("customer_id", user.id)
       .order("created_at", {
         ascending: false,
       });
@@ -27,19 +26,19 @@ export default function DriverHistory({ driver }) {
       return;
     }
 
-    setHistory(data || []);
+    setBookings(data || []);
   }
 
   return (
     <div>
 
-      <h2>📜 Booking History</h2>
+      <h2>📋 My Bookings</h2>
 
-      {history.length === 0 && (
-        <p>No history found.</p>
+      {bookings.length === 0 && (
+        <p>No bookings found.</p>
       )}
 
-      {history.map((booking) => (
+      {bookings.map((booking) => (
 
         <div
           key={booking.id}
@@ -55,11 +54,7 @@ export default function DriverHistory({ driver }) {
           <h3>{booking.service_name}</h3>
 
           <p>
-            <b>Customer:</b> {booking.customer_name || "-"}
-          </p>
-
-          <p>
-            <b>Date:</b> {booking.booking_date || "-"}
+            <b>Date:</b> {booking.booking_date}
           </p>
 
           <p>
@@ -67,8 +62,25 @@ export default function DriverHistory({ driver }) {
           </p>
 
           <p>
+            <b>Driver:</b> {booking.driver_name || "Not Assigned"}
+          </p>
+
+          <p>
             <b>Amount:</b> ₹{booking.total_amount || 0}
           </p>
+
+          {booking.driver_phone && (
+            <a href={`tel:${booking.driver_phone}`}>
+              <button
+                style={{
+                  marginTop: 10,
+                  padding: "10px 20px",
+                }}
+              >
+                📞 Call Driver
+              </button>
+            </a>
+          )}
 
         </div>
 
