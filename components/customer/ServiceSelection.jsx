@@ -1,5 +1,5 @@
-import React from "react";
-import { SERVICES } from "../../data/services";
+import React, { useEffect, useState } from "react";
+import { supabase } from "../../lib/supabase";
 import { S } from "../../styles";
 
 export default function ServiceSelection({
@@ -15,6 +15,48 @@ export default function ServiceSelection({
   next,
   back,
 }) {
+
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+
+  useEffect(() => {
+    loadServices();
+  }, []);
+
+
+  async function loadServices() {
+
+    try {
+
+      const { data, error } = await supabase
+        .from("services")
+        .select("*")
+        .eq("active", true)
+        .order("name");
+
+
+      if (error) {
+        console.log(error);
+        return;
+      }
+
+
+      setServices(data || []);
+
+
+    } catch (err) {
+
+      console.log(err);
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
+  }
+
 
   return (
     <div
@@ -44,10 +86,7 @@ export default function ServiceSelection({
         </p>
 
       </div>
-
-
-
-      <div style={{ padding: 15 }}>
+            <div style={{ padding: 15 }}>
 
 
         {selKhet && (
@@ -107,42 +146,67 @@ export default function ServiceSelection({
           </h3>
 
 
+          {
+            loading ? (
 
-          {SERVICES.map((service) => (
+              <p>
+                Loading services...
+              </p>
 
-            <button
-              key={service.id}
-              onClick={() => {
+            ) : (
 
-                setSelectedService(service);
+              services.map((service) => (
 
-                setPaymentDone(false);
+                <button
 
-              }}
+                  key={service.service_id}
 
-              style={{
-                display: "block",
-                width: "100%",
-                marginBottom: 10,
-                padding: 12,
-              }}
-            >
+                  onClick={() => {
 
-              {service.icon}
-              {" "}
-              {service.name}
+                    setSelectedService(service);
 
-            </button>
+                    setPaymentDone(false);
 
-          ))}
+                  }}
+
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    marginBottom: 10,
+                    padding: 12,
+                    borderRadius: 8,
+                    border: "1px solid #ddd",
+                    background:
+                      selectedService?.service_id === service.service_id
+                        ? "#dcfce7"
+                        : "#fff",
+                  }}
+
+                >
+
+                  {service.icon}
+                  {" "}
+                  {service.name_hi || service.name}
+
+                  <br />
+
+                  <small>
+                    ₹{service.price_subscriber} (Subscriber)
+                    {" | "}
+                    ₹{service.price} (Normal)
+                  </small>
+
+
+                </button>
+
+              ))
+
+            )
+          }
 
 
         </div>
-
-
-
-
-        <button
+                      <button
 
           style={S.btnG}
 
@@ -162,4 +226,5 @@ export default function ServiceSelection({
 
     </div>
   );
+
 }
