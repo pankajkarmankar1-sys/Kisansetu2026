@@ -1,32 +1,53 @@
+// components/maps/RouteMap.jsx
+
 import React from "react";
 
 import MapView from "./MapView";
 import FarmMarker from "./FarmMarker";
 import DriverMarker from "./DriverMarker";
 
+
 export default function RouteMap({
 
-  farm,
+  farm = null,
 
-  driver,
+  driver = null,
 
 }) {
+
 
   return (
 
     <MapView>
 
-      <FarmMarker
 
-        farm={farm}
+      {
+        farm && (
 
-      />
+          <FarmMarker
 
-      <DriverMarker
+            farm={farm}
 
-        driver={driver}
+          />
 
-      />
+        )
+      }
+
+
+
+      {
+        driver && (
+
+          <DriverMarker
+
+            driver={driver}
+
+          />
+
+        )
+      }
+
+
 
     </MapView>
 
