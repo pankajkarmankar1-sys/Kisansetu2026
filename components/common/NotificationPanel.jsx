@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getNotifications } from "../../lib/notificationService";
+import { getNotifications } from "../../lib/NotificationService";
 
 export default function NotificationPanel({ user }) {
 
