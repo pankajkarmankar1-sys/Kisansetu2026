@@ -1,165 +1,114 @@
 import { useState, useEffect } from "react";
 import { sbGetUser, sbSaveUser } from "../../lib/database";
 
-export default function Profile({ phone }) {
+export default function Profile({ user }) {
 
-  const [user, setUser] = useState({
+  const [profile, setProfile] = useState({
     name: "",
     village: "",
     farmAddress: "",
     acres: "",
   });
 
-
   useEffect(() => {
-
-    if (phone) {
+    if (user?.id) {
       loadProfile();
     }
-
-  }, [phone]);
-
-
+  }, [user]);
 
   async function loadProfile() {
-
     try {
-
-      const data = await sbGetUser(phone);
-
+      const data = await sbGetUser(user.id);
 
       if (data) {
-
-        setUser({
+        setProfile({
           name: data.name || "",
           village: data.village || "",
           farmAddress: data.farm_address || "",
           acres: data.acres || "",
         });
-
       }
-
-
     } catch (e) {
-
-      console.error(
-        "Profile Load Error:",
-        e
-      );
-
+      console.error("Profile Load Error:", e);
     }
-
   }
-
-
 
   async function save() {
-
     try {
-
       await sbSaveUser({
-        phone,
-        ...user,
+        id: user.id,
+        phone: user.phone || "",
+        ...profile,
       });
 
-
-      alert(
-        "Profile Updated Successfully"
-      );
-
-
+      alert("✅ Profile Updated Successfully");
     } catch (e) {
-
-      alert(
-        e.message
-      );
-
+      alert(e.message);
     }
-
   }
 
-
-
   return (
+    <div style={{ padding: 20 }}>
 
-    <div
-      style={{
-        padding: 20,
-      }}
-    >
-
-      <h2>
-        👤 My Profile
-      </h2>
-
+      <h2>👤 My Profile</h2>
 
       <input
         placeholder="Name"
-        value={user.name}
+        value={profile.name}
         onChange={(e) =>
-          setUser({
-            ...user,
+          setProfile({
+            ...profile,
             name: e.target.value,
           })
         }
       />
 
-
       <br /><br />
-
 
       <input
         placeholder="Village"
-        value={user.village}
+        value={profile.village}
         onChange={(e) =>
-          setUser({
-            ...user,
+          setProfile({
+            ...profile,
             village: e.target.value,
           })
         }
       />
 
-
       <br /><br />
-
 
       <input
         placeholder="Farm Address"
-        value={user.farmAddress}
+        value={profile.farmAddress}
         onChange={(e) =>
-          setUser({
-            ...user,
+          setProfile({
+            ...profile,
             farmAddress: e.target.value,
           })
         }
       />
 
-
       <br /><br />
-
 
       <input
         type="number"
         placeholder="Total Acres"
-        value={user.acres}
+        value={profile.acres}
         onChange={(e) =>
-          setUser({
-            ...user,
+          setProfile({
+            ...profile,
             acres: e.target.value,
           })
         }
       />
 
-
       <br /><br />
-
 
       <button onClick={save}>
         Save Profile
       </button>
 
-
     </div>
-
   );
 }
