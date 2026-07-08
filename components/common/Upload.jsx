@@ -16,7 +16,13 @@ export default function Upload({
 
   const handleFile = (e) => {
     const selected = e.target.files?.[0];
-    if (selected) onChange(selected);
+
+    if (selected) {
+      onChange(selected);
+    }
+
+    // Same file dobara select ho sake
+    e.target.value = "";
   };
 
   return (
@@ -47,13 +53,16 @@ export default function Upload({
           width: "100%",
           padding: "14px",
           borderRadius: "10px",
-          border: "2px dashed #2d8a4e",
+          border: error
+            ? "2px dashed #dc2626"
+            : "2px dashed #2d8a4e",
           background: "#f7fff8",
           cursor: "pointer",
           fontWeight: "bold",
+          transition: "0.3s",
         }}
       >
-        {file ? "✅ " + file.name : "📂 Select File"}
+        {file ? `✅ ${file.name}` : "📂 Select File"}
       </button>
 
       {file && (
@@ -62,6 +71,7 @@ export default function Upload({
             marginTop: 8,
             color: "#166534",
             fontSize: 13,
+            wordBreak: "break-word",
           }}
         >
           Selected: {file.name}
@@ -72,8 +82,9 @@ export default function Upload({
         <div
           style={{
             marginTop: 5,
-            color: "red",
+            color: "#dc2626",
             fontSize: 12,
+            fontWeight: 500,
           }}
         >
           {error}
