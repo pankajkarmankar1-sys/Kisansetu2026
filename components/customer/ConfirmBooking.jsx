@@ -21,42 +21,32 @@ export default function ConfirmBooking({
       } = await supabase.auth.getUser();
 
       if (!user) {
+        setLoading(false);
         alert("Please login first");
         return;
       }
 
       const booking = {
         customer_id: user.id,
-
         service_name:
           bookingData?.selectedService?.name || "",
-
         service_id:
           bookingData?.selectedService?.id || null,
-
         acres:
           Number(bookingData?.acres || 0),
-
         booking_date:
           bookingData?.date || null,
-
         amount,
-
         payment_status:
           bookingData?.payment_status || "Pending",
-
         status: "Pending",
-
         note:
           bookingData?.note || "",
-
         farm_location:
           bookingData?.selKhet || null,
-
         created_at:
           new Date().toISOString(),
       };
-
 
       const { data, error } = await supabase
         .from("bookings")
@@ -64,62 +54,31 @@ export default function ConfirmBooking({
         .select()
         .single();
 
+      if (error) throw error;
 
-      if (error) {
-        throw error;
-      }
-
-
-      // Customer Notification
       await supabase
         .from("notifications")
         .insert([
           {
             user_id: user.id,
             title: "✅ Booking Created",
-            message:
-              `Your ${booking.service_name} booking has been created successfully.`,
-            created_at:
-              new Date().toISOString(),
+            message: `Your ${booking.service_name} booking has been created successfully.`,
+            created_at: new Date().toISOString(),
           },
         ]);
 
-
-      console.log(
-        "Booking Created:",
-        data
-      );
-
-
-      alert(
-        "✅ Booking Successful"
-      );
-
+      alert("✅ Booking Successful");
 
       if (onConfirm) {
         onConfirm(data);
       }
-
-
     } catch (err) {
-
-      console.error(
-        "Booking Error:",
-        err
-      );
-
-      alert(
-        err.message
-      );
-
-
+      console.error("Booking Error:", err);
+      alert(err.message);
     } finally {
-
       setLoading(false);
-
     }
   };
-
 
   return (
     <div
@@ -129,16 +88,11 @@ export default function ConfirmBooking({
         padding: 20,
       }}
     >
-
       <button onClick={back}>
         ← Back
       </button>
 
-
-      <h2>
-        ✅ Confirm Booking
-      </h2>
-
+      <h2>✅ Confirm Booking</h2>
 
       <div
         style={{
@@ -148,57 +102,14 @@ export default function ConfirmBooking({
           marginTop: 20,
         }}
       >
-
-        <p>
-          🚜 Service:
-          {" "}
-          {bookingData?.selectedService?.name || "-"}
-        </p>
-
-
-        <p>
-          🌾 Acres:
-          {" "}
-          {bookingData?.acres || 0}
-        </p>
-
-
-        <p>
-          📅 Date:
-          {" "}
-          {bookingData?.date || "-"}
-        </p>
-
-
-        <p>
-          💰 Amount:
-          {" "}
-          ₹{amount}
-        </p>
-
-
-        <p>
-          💳 Payment:
-          {" "}
-          {bookingData?.payment_status || "Pending"}
-        </p>
-
-
-        <p>
-          📍 Farm:
-          {" "}
-          {bookingData?.selKhet?.name || "-"}
-        </p>
-
-
-        <p>
-          📝 Note:
-          {" "}
-          {bookingData?.note || "-"}
-        </p>
-
+        <p>🚜 Service: {bookingData?.selectedService?.name || "-"}</p>
+        <p>🌾 Acres: {bookingData?.acres || 0}</p>
+        <p>📅 Date: {bookingData?.date || "-"}</p>
+        <p>💰 Amount: ₹{amount}</p>
+        <p>💳 Payment: {bookingData?.payment_status || "Pending"}</p>
+        <p>📍 Farm: {bookingData?.selKhet?.name || "-"}</p>
+        <p>📝 Note: {bookingData?.note || "-"}</p>
       </div>
-
 
       <button
         onClick={handleConfirm}
@@ -215,14 +126,8 @@ export default function ConfirmBooking({
           fontWeight: "bold",
         }}
       >
-        {
-          loading
-          ? "Booking..."
-          : "✅ Confirm Booking"
-        }
+        {loading ? "Booking..." : "✅ Confirm Booking"}
       </button>
-
-
     </div>
   );
 }
