@@ -1,64 +1,178 @@
-import React, { useEffect } from "react";
+// components/tracking/DriverLocation.jsx
+
+import React, {
+  useEffect,
+  useState,
+} from "react";
+
 
 export default function DriverLocation({
+
   driver,
+
   onLocationChange,
+
 }) {
+
+
+  const [status, setStatus] =
+    useState("Waiting for GPS...");
+
+
 
   useEffect(() => {
 
-    if (!navigator.geolocation) return;
 
-    const watchId = navigator.geolocation.watchPosition(
+    if (!navigator.geolocation) {
 
-      (position) => {
+      setStatus(
+        "GPS not supported"
+      );
 
-        const location = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        };
+      return;
 
-        onLocationChange(location);
+    }
 
-      },
 
-      (error) => {
 
-        console.error(error);
+    const watchId =
+      navigator.geolocation.watchPosition(
 
-      },
 
-      {
-        enableHighAccuracy: true,
-        maximumAge: 5000,
-        timeout: 10000,
-      }
+        (position) => {
 
-    );
 
-    return () => navigator.geolocation.clearWatch(watchId);
+          const location = {
+
+            lat:
+              position.coords.latitude,
+
+            lng:
+              position.coords.longitude,
+
+          };
+
+
+          setStatus(
+            "GPS Active 🟢"
+          );
+
+
+          if(onLocationChange){
+
+            onLocationChange(
+              location
+            );
+
+          }
+
+
+        },
+
+
+        (error) => {
+
+
+          console.error(
+            error
+          );
+
+
+          setStatus(
+            "Location permission denied"
+          );
+
+
+        },
+
+
+        {
+
+          enableHighAccuracy:true,
+
+          maximumAge:5000,
+
+          timeout:10000,
+
+        }
+
+
+      );
+
+
+
+
+    return () => {
+
+      navigator.geolocation.clearWatch(
+        watchId
+      );
+
+    };
+
 
   }, [onLocationChange]);
 
+
+
+
+
   return (
+
     <div
+
       style={{
-        background: "#fff",
-        border: "1px solid #ddd",
-        borderRadius: 12,
-        padding: 15,
-        marginTop: 15,
+
+        background:"#fff",
+
+        border:"1px solid #ddd",
+
+        borderRadius:12,
+
+        padding:15,
+
+        marginTop:15,
+
       }}
+
     >
-      <h3>📍 Driver Live Location</h3>
+
+      <h3>
+        📍 Driver Live Location
+      </h3>
+
+
 
       <p>
-        Driver: <b>{driver?.name || "Unknown Driver"}</b>
+
+        Driver:
+
+        {" "}
+
+        <b>
+
+          {
+            driver?.name ||
+            "Unknown Driver"
+          }
+
+        </b>
+
       </p>
 
+
+
       <p>
-        GPS tracking is active...
+
+        {
+          status
+        }
+
       </p>
+
+
     </div>
+
   );
+
 }
