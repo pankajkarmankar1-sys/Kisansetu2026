@@ -1,72 +1,283 @@
 import React from "react";
 
-export default function ChatMessage({ message, own = false }) {
-  const time = message?.created_at
-    ? new Date(message.created_at).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : "";
+
+export default function ChatMessage({
+
+  message,
+
+  own = false,
+
+}) {
+
+
+  const time =
+    message?.created_at
+
+    ?
+
+    new Date(
+      message.created_at
+    )
+    .toLocaleTimeString([],{
+
+      hour:"2-digit",
+
+      minute:"2-digit",
+
+    })
+
+    :
+
+    "";
+
+
+
 
   return (
+
     <div
+
       style={{
-        display: "flex",
-        justifyContent: own ? "flex-end" : "flex-start",
-        marginBottom: 12,
+
+        display:"flex",
+
+        justifyContent:
+        own
+        ?"flex-end"
+        :"flex-start",
+
+        marginBottom:12,
+
       }}
+
     >
+
+
       <div
+
         style={{
-          maxWidth: "75%",
-          padding: "10px 14px",
-          borderRadius: 14,
-          background: own ? "#2e7d32" : "#ffffff",
-          color: own ? "#ffffff" : "#222222",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.15)",
-          wordBreak: "break-word",
+
+          maxWidth:"75%",
+
+          padding:"10px 14px",
+
+          borderRadius:14,
+
+          background:
+          own
+          ?"#16a34a"
+          :"#fff",
+
+          color:
+          own
+          ?"#fff"
+          :"#222",
+
+          boxShadow:
+          "0 1px 3px rgba(0,0,0,0.15)",
+
+          wordBreak:"break-word",
+
         }}
+
       >
-        {message?.sender_name && (
+
+
+
+        <div
+
+          style={{
+
+            fontSize:12,
+
+            fontWeight:"bold",
+
+            marginBottom:5,
+
+          }}
+
+        >
+
+          {
+            own
+            ?"You"
+            :
+            message?.sender_name ||
+            "User"
+          }
+
+
+        </div>
+
+
+
+
+        {
+          message?.message &&
+
           <div
+
             style={{
-              fontSize: 12,
-              fontWeight: "bold",
-              marginBottom: 4,
-              opacity: 0.8,
+
+              fontSize:15,
+
+              lineHeight:1.5,
+
+              whiteSpace:"pre-wrap",
+
             }}
+
           >
-            {own ? "You" : message.sender_name}
+
+            {message.message}
+
           </div>
-        )}
+
+        }
+
+
+
+
+
+        {
+          message?.file_url &&
+
+
+          <div style={{
+            marginTop:8
+          }}>
+
+
+            {
+              message.file_type
+              ?.includes("image")
+
+              ?
+
+              <img
+
+                src={
+                  message.file_url
+                }
+
+                alt="file"
+
+                style={{
+
+                  width:150,
+
+                  borderRadius:10,
+
+                }}
+
+              />
+
+
+              :
+
+
+              <a
+
+                href={
+                  message.file_url
+                }
+
+                target="_blank"
+
+                rel="noreferrer"
+
+              >
+
+                📎 Open File
+
+              </a>
+
+            }
+
+
+          </div>
+
+        }
+
+
+
+
+
+        {
+          message?.audio_url &&
+
+          <audio
+
+            controls
+
+            src={
+              message.audio_url
+            }
+
+            style={{
+
+              width:200,
+
+              marginTop:8,
+
+            }}
+
+          />
+
+        }
+
+
+
+
 
         <div
-          style={{
-            fontSize: 15,
-            lineHeight: 1.5,
-            whiteSpace: "pre-wrap",
-          }}
-        >
-          {message?.message}
-        </div>
 
-        <div
           style={{
-            marginTop: 6,
-            fontSize: 11,
-            textAlign: "right",
-            opacity: 0.7,
+
+            marginTop:6,
+
+            fontSize:11,
+
+            textAlign:"right",
+
+            opacity:0.7,
+
           }}
+
         >
+
           {time}
-          {own &&
-            (message?.status === "read"
-              ? " ✓✓"
-              : message?.status === "delivered"
-              ? " ✓✓"
-              : " ✓")}
+
+
+          {
+
+            own &&
+
+            (
+              message?.status==="read"
+
+              ?
+
+              " ✓✓"
+
+              :
+
+              " ✓"
+
+            )
+
+          }
+
+
         </div>
+
+
+
       </div>
+
+
     </div>
+
   );
+
 }
