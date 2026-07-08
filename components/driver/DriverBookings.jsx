@@ -2,29 +2,26 @@
 
 if (booking.customer_id) {
 
-  let message = "";
+  let message = "Booking status updated.";
 
-  switch (status) {
+  if (status === "Accepted") {
+    message = "🚜 Driver accepted your booking.";
+  }
 
-    case "Accepted":
-      message = "🚜 Driver accepted your booking.";
-      break;
+  else if (status === "In Progress") {
+    message = "🚜 Your tractor work has started.";
+  }
 
-    case "In Progress":
-      message = "🚜 Your tractor work has started.";
-      break;
+  else if (status === "Completed") {
+    message = "✅ Your tractor service is completed.";
+  }
 
-    case "Completed":
-      message = "✅ Your tractor service is completed.";
-      break;
+  else if (status === "Rejected") {
+    message = "❌ Driver rejected your booking.";
+  }
 
-    case "Rejected":
-      message = "❌ Driver rejected your booking.";
-      break;
-
-    default:
-      message = `Booking status updated to ${status}.`;
-      break;
+  else if (status === "Cancelled") {
+    message = "❌ Your booking has been cancelled.";
   }
 
   await supabase
@@ -37,4 +34,5 @@ if (booking.customer_id) {
         created_at: new Date().toISOString(),
       },
     ]);
+
 }
