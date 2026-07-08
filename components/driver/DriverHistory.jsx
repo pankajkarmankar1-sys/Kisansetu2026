@@ -1,162 +1,74 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 
 export default function DriverHistory({ driver }) {
 
   const [history, setHistory] = useState([]);
-  const [loading, setLoading] = useState(true);
-
 
   useEffect(() => {
-
-    if (!driver?.id) return;
-
-    loadHistory();
-
+    if (driver?.id) {
+      loadHistory();
+    }
   }, [driver]);
-
-
 
   async function loadHistory() {
 
-    try {
+    const { data, error } = await supabase
+      .from("bookings")
+      .select("*")
+      .eq("driver_id", driver.id)
+      .in("status", ["Completed", "Rejected"])
+      .order("created_at", {
+        ascending: false,
+      });
 
-      setLoading(true);
-
-      const { data, error } = await supabase
-        .from("bookings")
-        .select("*")
-        .eq("driver_id", driver.id)
-        .eq("status", "Completed")
-        .order("created_at", {
-          ascending: false,
-        });
-
-
-      if (error) {
-        throw error;
-      }
-
-
-      setHistory(data || []);
-
-
-    } catch (error) {
-
-      console.error(
-        "History Error:",
-        error.message
-      );
-
-
-    } finally {
-
-      setLoading(false);
-
+    if (error) {
+      alert(error.message);
+      return;
     }
+
+    setHistory(data || []);
   }
-
-
-
-  if (!driver?.id) {
-    return (
-      <p>
-        Driver login nahi hai
-      </p>
-    );
-  }
-
-
 
   return (
-    <div
-      style={{
-        padding: 20,
-      }}
-    >
+    <div>
 
-      <h2>
-        📜 Driver History
-      </h2>
+      <h2>📜 Booking History</h2>
 
-
-      {loading && (
-        <p>
-          Loading...
-        </p>
+      {history.length === 0 && (
+        <p>No history found.</p>
       )}
-
-
-
-      {!loading && history.length === 0 && (
-        <p>
-          No completed bookings.
-        </p>
-      )}
-
-
 
       {history.map((booking) => (
 
         <div
           key={booking.id}
           style={{
-            border: "1px solid #ddd",
-            borderRadius: 12,
+            background: "#fff",
             padding: 15,
             marginBottom: 15,
-            background: "#fff",
+            borderRadius: 10,
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
           }}
         >
 
-          <h3>
-            🚜 {booking.service_name || "-"}
-          </h3>
-
+          <h3>{booking.service_name}</h3>
 
           <p>
-            👤 Customer:
-            {" "}
-            {booking.customer_name || "-"}
+            <b>Customer:</b> {booking.customer_name || "-"}
           </p>
-
 
           <p>
-            📞 Phone:
-            {" "}
-            {booking.customer_phone || "-"}
+            <b>Date:</b> {booking.booking_date || "-"}
           </p>
-
 
           <p>
-            📅 Date:
-            {" "}
-            {booking.booking_date || "-"}
+            <b>Status:</b> {booking.status}
           </p>
-
 
           <p>
-            🌾 Acres:
-            {" "}
-            {booking.acres || 0}
+            <b>Amount:</b> ₹{booking.total_amount || 0}
           </p>
-
-
-          <p>
-            💰 Amount:
-            {" "}
-            ₹{booking.amount || 0}
-          </p>
-
-
-          <p>
-            ✅ Status:
-            {" "}
-            <b style={{ color: "green" }}>
-              {booking.status}
-            </b>
-          </p>
-
 
         </div>
 
