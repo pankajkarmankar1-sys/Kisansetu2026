@@ -2,38 +2,71 @@
 
 import { formatPhone } from "../utils/supabaseHelpers";
 
+
 export async function sendOTP(phone) {
+
   const mobile = formatPhone(phone);
 
-  console.log("Sending OTP to:", mobile);
+  if (!mobile) {
+    return {
+      success: false,
+      message: "Phone number required",
+    };
+  }
 
-  // Future:
-  // Supabase Auth OTP
-  // Firebase OTP
-  // MSG91 API
+
+  console.log(
+    "Sending OTP to:",
+    mobile
+  );
+
+
+  // TODO:
+  // Supabase Auth OTP integration
+
 
   return {
     success: true,
     message: "OTP Sent Successfully",
   };
+
 }
 
+
+
 export async function verifyOTP(phone, otp) {
+
   const mobile = formatPhone(phone);
 
-  console.log("Verify OTP", mobile, otp);
 
-  // Future:
-  // Supabase Verify OTP
-
-  if (otp === "123456") {
+  if (!mobile || !otp) {
     return {
-      success: true,
+      success: false,
+      message: "Phone and OTP required",
     };
   }
+
+
+  console.log(
+    "Verify OTP:",
+    mobile
+  );
+
+
+  // Development Test OTP
+  if (otp === "123456") {
+
+    return {
+      success: true,
+      message: "OTP Verified",
+    };
+
+  }
+
 
   return {
     success: false,
     message: "Invalid OTP",
   };
+
 }
