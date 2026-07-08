@@ -1,103 +1,65 @@
 import React from "react";
 import { useRouter } from "next/router";
+import { supabase } from "../../lib/supabase";
 
 import AdminSidebar from "./AdminSidebar";
 import StatsCards from "./StatsCards";
 import BookingList from "./BookingList";
 import DriverList from "./DriverList";
 
-
 export default function AdminDashboard() {
 
   const router = useRouter();
 
-
-  function logout(){
-
+  async function logout() {
+    await supabase.auth.signOut();
     localStorage.clear();
-
     router.replace("/");
-
   }
 
-
-
   return (
-
     <div
       style={{
-        display:"flex",
-        minHeight:"100vh",
-        background:"#f4f6f8",
+        display: "flex",
+        minHeight: "100vh",
+        background: "#f4f6f8",
       }}
     >
-
-
-      <AdminSidebar
-        onLogout={logout}
-      />
-
-
+      <AdminSidebar onLogout={logout} />
 
       <div
-
         style={{
-          flex:1,
-          padding:20,
-          overflowY:"auto",
+          flex: 1,
+          padding: 20,
+          overflowY: "auto",
         }}
-
       >
-
-
         <h1
           style={{
-            marginBottom:20,
+            marginBottom: 20,
           }}
         >
-
           👨‍💼 Admin Dashboard
-
         </h1>
-
-
-
 
         <StatsCards />
 
-
-
-
         <div
           style={{
-            marginTop:30,
+            marginTop: 30,
           }}
         >
-
           <BookingList />
-
         </div>
-
-
-
 
         <div
           style={{
-            marginTop:30,
+            marginTop: 30,
           }}
         >
-
           <DriverList />
-
         </div>
-
-
-
       </div>
-
-
     </div>
-
   );
-
 }
