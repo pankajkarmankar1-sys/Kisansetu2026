@@ -1,21 +1,51 @@
-// components/maps/LocationSelector.jsx
-
-import React, { useState } from "react";
-import chandrapur from "../../data/chandrapur";
+import React, { useEffect, useState } from "react";
+import { supabase } from "../../lib/supabase";
 
 export default function LocationSelector({ onSelect }) {
+  const [talukas, setTalukas] = useState([]);
+  const [villages, setVillages] = useState([]);
+
   const [taluka, setTaluka] = useState("");
   const [village, setVillage] = useState("");
+
   const [loading, setLoading] = useState(false);
 
-  const talukas = Object.keys(chandrapur.talukas);
+  useEffect(() => {
+    loadTalukas();
+  }, []);
 
-  const villages =
-    taluka && chandrapur.talukas[taluka]
-      ? chandrapur.talukas[taluka]
-      : [];
+  async function loadTalukas() {
+    const { data, error } = await supabase
+      .from("villages")
+      .select("taluka");
 
-  function saveLocation(data) {
+    if (error) {
+      console.log(error);
+      return;
+    }
+
+    const uniqueTalukas = [
+      ...new Set(data.map((item) => item.taluka)),
+    ];
+
+    setTalukas(uniqueTalukas.sort());
+  }
+
+  async function loadVillages(selectedTaluka) {
+    const { data, error } = await supabase
+      .from("villages")
+      .select("village")
+      .eq("taluka", selectedTaluka)
+      .order("village");
+
+    if (error) {
+      console.log(error);
+      return;
+    }
+
+    setVillages(data);
+  }
+    function saveLocation(data) {
     localStorage.setItem(
       "location",
       JSON.stringify(data)
@@ -28,20 +58,21 @@ export default function LocationSelector({ onSelect }) {
 
   function handleSave() {
     if (!taluka || !village) {
-      alert("Taluka aur Village select kare.");
+      alert("Please select Taluka and Village");
       return;
     }
 
     saveLocation({
-      state: chandrapur.state,
-      district: chandrapur.district,
+      state: "Maharashtra",
+      district: "Chandrapur",
       taluka,
       village,
     });
   }
-    function useCurrentLocation() {
+
+  function useCurrentLocation() {
     if (!navigator.geolocation) {
-      alert("GPS available nahi hai.");
+      alert("GPS is not available.");
       return;
     }
 
@@ -50,8 +81,8 @@ export default function LocationSelector({ onSelect }) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         saveLocation({
-          state: chandrapur.state,
-          district: chandrapur.district,
+          state: "Maharashtra",
+          district: "Chandrapur",
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
         });
@@ -69,7 +100,15 @@ export default function LocationSelector({ onSelect }) {
     );
   }
 
-  return (
+  useEffect(() => {
+    if (taluka) {
+      loadVillages(taluka);
+      setVillage("");
+    } else {
+      setVillages([]);
+    }
+  }, [taluka]);
+    return (
     <div
       style={{
         maxWidth: 400,
@@ -83,19 +122,16 @@ export default function LocationSelector({ onSelect }) {
       <h2>📍 Select Farm Location</h2>
 
       <div style={{ marginBottom: 10 }}>
-        <strong>State:</strong> {chandrapur.state}
+        <strong>State:</strong> Maharashtra
       </div>
 
       <div style={{ marginBottom: 15 }}>
-        <strong>District:</strong> {chandrapur.district}
+        <strong>District:</strong> Chandrapur
       </div>
 
       <select
         value={taluka}
-        onChange={(e) => {
-          setTaluka(e.target.value);
-          setVillage("");
-        }}
+        onChange={(e) => setTaluka(e.target.value)}
         style={{
           width: "100%",
           padding: 10,
@@ -109,8 +145,9 @@ export default function LocationSelector({ onSelect }) {
             {item}
           </option>
         ))}
-      </select> 
-            <select
+      </select>
+
+      <select
         value={village}
         onChange={(e) => setVillage(e.target.value)}
         disabled={!taluka}
@@ -123,8 +160,11 @@ export default function LocationSelector({ onSelect }) {
         <option value="">Select Village</option>
 
         {villages.map((item) => (
-          <option key={item} value={item}>
-            {item}
+          <option
+            key={item.village}
+            value={item.village}
+          >
+            {item.village}
           </option>
         ))}
       </select>
@@ -138,7 +178,6 @@ export default function LocationSelector({ onSelect }) {
           color: "#fff",
           border: "none",
           borderRadius: 8,
-          cursor: "pointer",
           marginBottom: 10,
         }}
       >
@@ -155,7 +194,6 @@ export default function LocationSelector({ onSelect }) {
           color: "#fff",
           border: "none",
           borderRadius: 8,
-          cursor: "pointer",
         }}
       >
         {loading ? "Getting GPS..." : "📍 Use GPS"}
