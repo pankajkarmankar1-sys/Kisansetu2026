@@ -1,22 +1,74 @@
-import { createContext, useContext, useState } from "react";
+// context/BookingContext.js
 
-const BookingContext = createContext();
+import {
+  createContext,
+  useContext,
+  useState,
+} from "react";
 
-export function BookingProvider({ children }) {
-  const [bookings, setBookings] = useState([]);
+
+const BookingContext =
+  createContext(null);
+
+
+
+export function BookingProvider({
+  children
+}) {
+
+  const [bookings, setBookings] =
+    useState([]);
+
+
+  const [currentBooking, setCurrentBooking] =
+    useState(null);
+
+
+  const [loading, setLoading] =
+    useState(false);
+
+
 
   return (
+
     <BookingContext.Provider
+
       value={{
+
         bookings,
+
         setBookings,
+
+
+        currentBooking,
+
+        setCurrentBooking,
+
+
+        loading,
+
+        setLoading,
+
       }}
+
     >
+
       {children}
+
     </BookingContext.Provider>
+
   );
+
 }
 
-export function useBookingContext() {
-  return useContext(BookingContext);
+
+
+
+
+export function useBookingContext(){
+
+  return useContext(
+    BookingContext
+  );
+
 }
