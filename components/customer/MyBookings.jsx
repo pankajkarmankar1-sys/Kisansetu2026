@@ -21,7 +21,7 @@ export default function MyBookings() {
       .on(
         "postgres_changes",
         {
-          event:"*",
+          event:"UPDATE",
           schema:"public",
           table:"bookings",
         },
@@ -73,7 +73,20 @@ export default function MyBookings() {
         error
       } = await supabase
         .from("bookings")
-        .select("*")
+        .select(`
+id,
+booking_code,
+service_name,
+booking_date,
+status,
+amount,
+payment_status,
+driver_name,
+driver_phone,
+acres,
+note,
+created_at
+`)
         .eq(
           "customer_id",
           user.id
