@@ -1,9 +1,24 @@
-import { Html, Head, Main, NextScript } from "next/document";
-export default function Document() {
+import { useRouter } from "next/router";
+import DocumentsUpload from "../components/customer/DocumentsUpload";
+
+
+export default function DocumentsPage(){
+
+  const router = useRouter();
+
+
   return (
-    <Html lang="hi">
-      <Head><link rel="icon" href="/favicon.svg"/></Head>
-      <body><Main/><NextScript/></body>
-    </Html>
+
+    <DocumentsUpload
+
+      onDone={()=>{
+
+        router.replace("/dashboard");
+
+      }}
+
+    />
+
   );
+
 }
