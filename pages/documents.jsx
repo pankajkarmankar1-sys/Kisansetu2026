@@ -8,20 +8,22 @@ export default function DocumentsPage() {
 
   const router = useRouter();
 
-  const [status, setStatus] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [status,setStatus] = useState("");
+  const [reason,setReason] = useState("");
+  const [loading,setLoading] = useState(true);
 
 
 
-  useEffect(() => {
+  useEffect(()=>{
 
     checkStatus();
 
-  }, []);
+  },[]);
 
 
 
-  async function checkStatus() {
+
+  async function checkStatus(){
 
 
     const {
@@ -41,11 +43,14 @@ export default function DocumentsPage() {
 
 
 
+
     const {
       data:profile
     } = await supabase
       .from("profiles")
-      .select("document_status")
+      .select(
+        "document_status,document_reject_reason"
+      )
       .eq(
         "auth_user_id",
         user.id
@@ -54,14 +59,22 @@ export default function DocumentsPage() {
 
 
 
+
     setStatus(
       profile?.document_status || "pending"
     );
 
 
+    setReason(
+      profile?.document_reject_reason || ""
+    );
+
+
     setLoading(false);
 
+
   }
+
 
 
 
@@ -75,6 +88,7 @@ export default function DocumentsPage() {
 
 
 
+
   if(loading){
 
     return <h2>Loading...</h2>;
@@ -84,13 +98,19 @@ export default function DocumentsPage() {
 
 
 
+
   return (
 
-    <div style={{padding:20}}>
+    <div
+      style={{
+        padding:20
+      }}
+    >
+
 
 
       {
-        status === "approved" && (
+        status==="approved" && (
 
           <div>
 
@@ -98,31 +118,17 @@ export default function DocumentsPage() {
               ✅ Documents Approved
             </h2>
 
+            <p>
+              Ab aap service booking kar sakte hain.
+            </p>
+
+
             <button
               onClick={done}
             >
               Go Dashboard
             </button>
 
-          </div>
-
-        )
-      }
-
-
-
-      {
-        status === "pending" && (
-
-          <div>
-
-            <h2>
-              ⏳ Documents Verification Pending
-            </h2>
-
-            <p>
-              Admin approval ka wait kare.
-            </p>
 
           </div>
 
@@ -131,29 +137,82 @@ export default function DocumentsPage() {
 
 
 
+
+
+
       {
-        status === "rejected" && (
+        (status==="pending" ||
+         status==="rejected") && (
+
 
           <div>
 
-            <h2>
-              ❌ Documents Rejected
-            </h2>
 
-            <p>
-              Kripya documents dobara upload kare.
-            </p>
+            {
+              status==="pending" && (
+
+                <>
+
+                <h2>
+                  📄 Upload Documents
+                </h2>
+
+                <p>
+                  Aadhaar aur 7/12 upload kare.
+                </p>
+
+                </>
+
+              )
+            }
+
+
+
+
+            {
+              status==="rejected" && (
+
+                <>
+
+                <h2>
+                  ❌ Documents Rejected
+                </h2>
+
+
+                <p>
+                  Reason:
+                  {" "}
+                  {reason}
+                </p>
+
+
+                <p>
+                  Documents dobara upload kare.
+                </p>
+
+                </>
+
+              )
+            }
+
+
+
 
 
             <DocumentUpload
+
               onDone={done}
+
             />
+
 
 
           </div>
 
+
         )
       }
+
 
 
 
