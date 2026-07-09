@@ -1,12 +1,20 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+
 import AdminDashboard from "../../components/admin/AdminDashboard";
 import { supabase } from "../../lib/supabase";
 
 
 export default function AdminPage() {
 
+
   const router = useRouter();
+
+  const [loading,setLoading] = useState(true);
+
+  const [allowed,setAllowed] = useState(false);
+
+
 
 
   useEffect(()=>{
@@ -17,28 +25,137 @@ export default function AdminPage() {
 
 
 
+
+
   async function checkAdmin(){
 
-    const {
-      data:{
-        user
+
+    try{
+
+
+      const {
+        data:{
+          user
+        }
+
+      } = await supabase.auth.getUser();
+
+
+
+
+      if(!user){
+
+        router.replace("/");
+
+        return;
+
       }
-    } = await supabase.auth.getUser();
 
 
-    if(!user){
+
+
+
+      const {
+        data:profile,
+        error
+      } = await supabase
+
+      .from("profiles")
+
+      .select("role")
+
+      .eq("id",user.id)
+
+      .single();
+
+
+
+
+
+      if(error){
+
+        console.log(error);
+
+        router.replace("/");
+
+        return;
+
+      }
+
+
+
+
+
+      if(profile?.role !== "admin"){
+
+
+        alert("Access denied");
+
+        router.replace("/");
+
+        return;
+
+      }
+
+
+
+
+
+      setAllowed(true);
+
+
+
+    }
+
+    catch(err){
+
+      console.log(err);
 
       router.replace("/");
 
-      return;
+    }
+
+    finally{
+
+      setLoading(false);
 
     }
 
 
+  }
 
-    // Future role check yaha add karenge
+
+
+
+
+
+
+  if(loading){
+
+    return (
+
+      <div style={{
+        padding:20
+      }}>
+
+        Checking Admin Access...
+
+      </div>
+
+    );
 
   }
+
+
+
+
+
+  if(!allowed){
+
+    return null;
+
+  }
+
 
 
 
@@ -48,5 +165,6 @@ export default function AdminPage() {
     <AdminDashboard />
 
   );
+
 
 }
