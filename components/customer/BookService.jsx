@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
 import ServiceSelection from "./ServiceSelection";
+import FarmSelection from "./FarmSelection";
 import PaymentSummary from "./PaymentSummary";
 import DateSelection from "./DateSelection";
 import ConfirmBooking from "./ConfirmBooking";
@@ -28,15 +29,23 @@ export default function BookService({
 
   const [bookingData,setBookingData] = useState(null);
 
-  const [step,setStep] = useState("service");
+  const [step,setStep] = useState("farm");
 
 
-
+{
+  step === "farm" && (
+    <FarmSelection
+      selKhet={selKhet}
+      setSelKhet={setSelKhet}
+      next={() => setStep("service")}
+      back={back}
+    />
+  )
+}
 
   return (
 
-    <div>
-
+  <div>
 
       {
       step==="service" && (
