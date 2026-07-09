@@ -26,6 +26,7 @@ export default function FarmerDocuments() {
         .from("profiles")
         .select(`
           id,
+          auth_user_id,
           name,
           phone,
           aadhaar_front,
@@ -33,8 +34,10 @@ export default function FarmerDocuments() {
           satbara_7_12,
           document_status
         `)
-        .eq("role","farmer")
-        .order("created_at",{ascending:false});
+        .eq("role", "farmer")
+        .order("created_at", {
+          ascending:false
+        });
 
 
       if(error)
@@ -61,15 +64,32 @@ export default function FarmerDocuments() {
 
 
 
-  async function updateStatus(id,status) {
+  async function updateStatus(id, status) {
 
     try {
+
 
       const {
         data:{
           user
         }
       } = await supabase.auth.getUser();
+
+
+
+      const {
+        data:farmer,
+        error:farmerError
+      } = await supabase
+        .from("profiles")
+        .select("auth_user_id,name")
+        .eq("id", id)
+        .single();
+
+
+
+      if(farmerError)
+        throw farmerError;
 
 
 
@@ -81,9 +101,11 @@ export default function FarmerDocuments() {
 
           document_status:status,
 
-          verified_by:user?.id || null,
+          verified_by:
+            user?.id || null,
 
-          verified_at:new Date().toISOString()
+          verified_at:
+            new Date().toISOString()
 
         })
         .eq("id",id);
@@ -95,7 +117,37 @@ export default function FarmerDocuments() {
 
 
 
+
+      await supabase
+        .from("notifications")
+        .insert([{
+
+          user_id:
+            farmer.auth_user_id,
+
+
+          title:
+            status === "approved"
+            ?
+            "✅ Documents Approved"
+            :
+            "❌ Documents Rejected",
+
+
+
+          message:
+            status === "approved"
+            ?
+            "Aapke Aadhaar aur 7/12 documents approve ho gaye hain. Ab booking kar sakte hain."
+            :
+            "Documents reject hue hain. Kripya documents dobara upload karein."
+
+        }]);
+
+
+
       loadDocuments();
+
 
 
     }
@@ -112,7 +164,11 @@ export default function FarmerDocuments() {
 
   if(loading){
 
-    return <h3>Loading Documents...</h3>;
+    return (
+      <h3>
+        Loading Documents...
+      </h3>
+    );
 
   }
 
@@ -120,15 +176,24 @@ export default function FarmerDocuments() {
 
   return (
 
-    <div
-      style={{
-        padding:20
-      }}
-    >
+    <div>
 
       <h2>
         📄 Farmer Documents Verification
       </h2>
+
+
+
+      {
+        farmers.length === 0 && (
+
+          <p>
+            No farmer documents found
+          </p>
+
+        )
+      }
+
 
 
       {
@@ -140,7 +205,7 @@ export default function FarmerDocuments() {
             style={{
               background:"#fff",
               padding:15,
-              marginBottom:15,
+              marginTop:15,
               borderRadius:10,
               border:"1px solid #ddd"
             }}
@@ -166,52 +231,58 @@ export default function FarmerDocuments() {
 
 
             {
-              farmer.aadhaar_front &&
+              farmer.aadhaar_front && (
 
-              <a
-                href={farmer.aadhaar_front}
-                target="_blank"
-              >
-                Aadhaar Front
-              </a>
+                <p>
+                  <a
+                    href={farmer.aadhaar_front}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    📄 Aadhaar Front
+                  </a>
+                </p>
 
+              )
             }
 
-
-            <br/>
 
 
             {
-              farmer.aadhaar_back &&
+              farmer.aadhaar_back && (
 
-              <a
-                href={farmer.aadhaar_back}
-                target="_blank"
-              >
-                Aadhaar Back
-              </a>
+                <p>
+                  <a
+                    href={farmer.aadhaar_back}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    📄 Aadhaar Back
+                  </a>
+                </p>
 
+              )
             }
 
 
-            <br/>
 
 
             {
-              farmer.satbara_7_12 &&
+              farmer.satbara_7_12 && (
 
-              <a
-                href={farmer.satbara_7_12}
-                target="_blank"
-              >
-                7/12 Document
-              </a>
+                <p>
+                  <a
+                    href={farmer.satbara_7_12}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    📄 7/12 Document
+                  </a>
+                </p>
 
+              )
             }
 
-
-
-            <br/><br/>
 
 
 
@@ -224,15 +295,16 @@ export default function FarmerDocuments() {
               }
               style={{
                 padding:10,
+                marginRight:10,
                 background:"#16a34a",
                 color:"#fff",
                 border:"none",
-                borderRadius:8,
-                marginRight:10
+                borderRadius:8
               }}
             >
               ✅ Approve
             </button>
+
 
 
 
@@ -255,11 +327,13 @@ export default function FarmerDocuments() {
             </button>
 
 
+
           </div>
 
 
         ))
       }
+
 
 
     </div>
