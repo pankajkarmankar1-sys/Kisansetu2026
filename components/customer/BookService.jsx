@@ -246,26 +246,14 @@ export default function BookService({
 
 
         <ConfirmBooking
-
-
-          user={user}
-
-
-          bookingData={bookingData}
-
-
-          onConfirm={()=>
-            setStep("success")
-          }
-
-
-          back={()=>
-            setStep("date")
-          }
-
-
-        />
-
+  user={user}
+  bookingData={bookingData}
+  onConfirm={(savedBooking) => {
+    setBookingData(savedBooking);
+    setStep("success");
+  }}
+  back={() => setStep("date")}
+/>
       }
 
 
