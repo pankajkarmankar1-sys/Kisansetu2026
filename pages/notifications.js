@@ -12,21 +12,25 @@ export default function NotificationsPage() {
 
 
   useEffect(() => {
+
     loadUser();
+
   }, []);
 
 
 
   async function loadUser() {
 
+
     const {
-      data: {
-        user: authUser
+      data:{
+        user:authUser
       }
     } = await supabase.auth.getUser();
 
 
-    if (!authUser) {
+
+    if(!authUser){
 
       router.replace("/");
 
@@ -36,54 +40,92 @@ export default function NotificationsPage() {
 
 
 
-    const { data } = await supabase
+    const {
+      data:profile
+    } = await supabase
       .from("profiles")
       .select("*")
       .eq(
-        "id",
+        "auth_user_id",
         authUser.id
       )
-      .single();
+      .maybeSingle();
 
 
 
     setUser(
-      data || {
+
+      profile ||
+
+      {
+
         id: authUser.id,
-        name: "User",
+
+        auth_user_id: authUser.id,
+
+        name:"User"
+
       }
+
     );
 
+
   }
+
+
 
 
 
   return (
 
     <div
+
       style={{
+
         padding:20,
+
         background:"#f5f7fb",
+
         minHeight:"100vh",
+
       }}
+
     >
 
+
       <button
+
         onClick={() => router.back()}
+
         style={{
+
           padding:10,
+
           marginBottom:20,
+
         }}
+
       >
+
         ← Back
+
       </button>
+
+
 
 
       {
         user && (
-          <NotificationPanel user={user} />
+
+          <NotificationPanel
+
+            user={user}
+
+          />
+
         )
       }
+
 
 
     </div>
