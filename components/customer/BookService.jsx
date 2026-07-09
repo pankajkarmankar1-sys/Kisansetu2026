@@ -6,6 +6,7 @@ import DateSelection from "./DateSelection";
 import ConfirmBooking from "./ConfirmBooking";
 import BookingSuccess from "./BookingSuccess";
 
+
 export default function BookService({
   user,
   selKhet,
@@ -13,90 +14,186 @@ export default function BookService({
   onNext,
   back,
 }) {
-  const [selectedService, setSelectedService] = useState(null);
-  const [acres, setAcres] = useState("");
-  const [paymentDone, setPaymentDone] = useState(false);
 
-  const [date, setDate] = useState("");
-  const [note, setNote] = useState("");
 
-  const [bookingData, setBookingData] = useState(null);
+  const [selectedService,setSelectedService] = useState(null);
 
-  const [step, setStep] = useState("service");
+  const [acres,setAcres] = useState("");
+
+  const [paymentDone,setPaymentDone] = useState(false);
+
+  const [date,setDate] = useState("");
+
+  const [note,setNote] = useState("");
+
+  const [bookingData,setBookingData] = useState(null);
+
+  const [step,setStep] = useState("service");
+
+
+
 
   return (
+
     <div>
-      {step === "service" && (
+
+
+      {
+      step==="service" && (
+
         <ServiceSelection
+
           user={user}
+
           selKhet={selKhet}
+
           setSelKhet={setSelKhet}
+
           selectedService={selectedService}
+
           setSelectedService={setSelectedService}
+
           acres={acres}
+
           setAcres={setAcres}
+
           paymentDone={paymentDone}
+
           setPaymentDone={setPaymentDone}
-          next={() => setStep("payment")}
+
+          next={()=>setStep("payment")}
+
           back={back}
-        />
-      )}
 
-      {step === "payment" && (
+        />
+
+      )
+      }
+
+
+
+
+      {
+      step==="payment" && (
+
         <PaymentSummary
-          selectedService={selectedService}
-          acres={acres}
-          paymentDone={paymentDone}
-          setPaymentDone={setPaymentDone}
-          next={() => setStep("date")}
-          back={() => setStep("service")}
-        />
-      )}
 
-      {step === "date" && (
+          selectedService={selectedService}
+
+          acres={acres}
+
+          paymentDone={paymentDone}
+
+          setPaymentDone={setPaymentDone}
+
+          next={()=>setStep("date")}
+
+          back={()=>setStep("service")}
+
+        />
+
+      )
+      }
+
+
+
+
+      {
+      step==="date" && (
+
         <DateSelection
+
           date={date}
+
           setDate={setDate}
+
           note={note}
+
           setNote={setNote}
-          next={() => {
-            const amount =
-              (selectedService?.normalPrice || 0) *
-              Number(acres || 0);
+
+          next={()=>{
+
 
             setBookingData({
+
               selectedService,
+
               acres,
+
               date,
+
               note,
+
               selKhet,
-              amount,
-              payment_status: paymentDone
-                ? "Paid"
-                : "Pending",
+
+              payment_status:
+              paymentDone
+              ?
+              "Paid"
+              :
+              "Pending",
+
             });
 
+
+
             setStep("confirm");
+
+
           }}
-          back={() => setStep("payment")}
-        />
-      )}
 
-      {step === "confirm" && (
+
+          back={()=>setStep("payment")}
+
+        />
+
+      )
+      }
+
+
+
+
+
+      {
+      step==="confirm" && (
+
         <ConfirmBooking
-          user={user}
-          bookingData={bookingData}
-          onConfirm={() => setStep("success")}
-          back={() => setStep("date")}
-        />
-      )}
 
-      {step === "success" && (
-        <BookingSuccess
+          user={user}
+
           bookingData={bookingData}
-          onDone={onNext}
+
+          onConfirm={()=>setStep("success")}
+
+          back={()=>setStep("date")}
+
         />
-      )}
+
+      )
+      }
+
+
+
+
+
+      {
+      step==="success" && (
+
+        <BookingSuccess
+
+          bookingData={bookingData}
+
+          onDone={onNext}
+
+        />
+
+      )
+      }
+
+
+
     </div>
+
   );
+
 }
