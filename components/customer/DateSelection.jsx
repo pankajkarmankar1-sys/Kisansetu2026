@@ -9,87 +9,187 @@ export default function DateSelection({
   back,
 }) {
 
+
   const minDate = new Date();
-  minDate.setDate(minDate.getDate() + 1);
+
+  minDate.setDate(
+    minDate.getDate() + 1
+  );
+
+
+  function handleNext(){
+
+    if(!date){
+
+      alert("Please select booking date");
+
+      return;
+
+    }
+
+
+    next();
+
+  }
+
+
+
 
   return (
+
     <div
       style={{
-        padding: 20,
-        background: "#F8FAFC",
-        minHeight: "100vh",
+        padding:20,
+        background:"#F8FAFC",
+        minHeight:"100vh",
       }}
     >
 
-      <h2>📅 Select Booking Date</h2>
+
+      <h2>
+        📅 Select Booking Date
+      </h2>
+
+
+
 
       <div
         style={{
-          background: "#fff",
-          padding: 15,
-          borderRadius: 12,
+          background:"#fff",
+          padding:15,
+          borderRadius:12,
         }}
       >
+
+
 
         <label>
           Booking Date
         </label>
 
-        <br />
+
 
         <input
+
           type="date"
-          min={minDate.toISOString().split("T")[0]}
+
+          min={
+            minDate
+            .toISOString()
+            .split("T")[0]
+          }
+
+
           value={date}
-          onChange={(e) => setDate(e.target.value)}
+
+
+          onChange={(e)=>
+            setDate(e.target.value)
+          }
+
+
           style={{
-            padding: 10,
-            width: "100%",
-            marginTop: 10,
+            padding:10,
+            width:"100%",
+            marginTop:10,
           }}
+
         />
 
 
-        <br /><br />
+
+
+
+        <br/>
+        <br/>
+
+
 
 
         <textarea
+
           rows={4}
+
           placeholder="Customer Note (Optional)"
+
           value={note}
-          onChange={(e) => setNote(e.target.value)}
+
+          onChange={(e)=>
+            setNote(e.target.value)
+          }
+
+
           style={{
-            width: "100%",
-            padding: 10,
+            width:"100%",
+            padding:10,
+            borderRadius:8,
           }}
+
         />
+
+
 
       </div>
 
 
+
+
+
+
       <button
+
         onClick={back}
+
         style={{
-          marginTop: 20,
-          padding: 12,
+
+          marginTop:20,
+
+          padding:12,
+
+          width:"48%",
+
         }}
+
       >
+
         ← Back
+
       </button>
+
+
+
 
 
       <button
-        onClick={next}
+
+        onClick={handleNext}
+
         disabled={!date}
+
+
         style={{
-          marginTop: 20,
-          marginLeft: 10,
-          padding: 12,
+
+          marginTop:20,
+
+          marginLeft:"4%",
+
+          padding:12,
+
+          width:"48%",
+
         }}
+
       >
+
         Continue →
+
       </button>
+
+
+
 
     </div>
+
   );
+
 }
