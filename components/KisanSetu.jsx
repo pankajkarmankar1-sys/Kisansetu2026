@@ -1,9 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { supabase } from "../lib/supabase";
+import { createClient } from "@supabase/supabase-js";
 
-const supa = supabase;
+const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://dzzxapuektnamgabdxlq.supabase.co";
+const SUPA_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "YOUR_KEY";
+
+const supa = createClient(SUPA_URL, SUPA_KEY);
 // ─── Supabase Auth Helpers ────────────────────────────────────────────────
 async function sbSendOTP(phone){
 
