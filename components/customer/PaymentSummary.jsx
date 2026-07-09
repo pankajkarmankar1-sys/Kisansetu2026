@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
+import PhonePePayment from "../payment/PhonePePayment";
+
 
 export default function PaymentSummary({
   user,
@@ -11,55 +13,140 @@ export default function PaymentSummary({
   back,
 }) {
 
-  const [isSubscriber, setIsSubscriber] = useState(false);
+
+  const [isSubscriber,setIsSubscriber] = useState(false);
+  const [showPayment,setShowPayment] = useState(false);
 
 
-  useEffect(() => {
+
+  useEffect(()=>{
+
     checkSubscription();
-  }, []);
+
+  },[]);
 
 
 
-  async function checkSubscription() {
-
-    try {
-
-      if (!user?.id) return;
 
 
-      const { data, error } = await supabase
+  async function checkSubscription(){
+
+
+    try{
+
+
+      if(!user?.id)
+        return;
+
+
+
+      const {
+        data,
+        error
+      } = await supabase
         .from("subscriptions")
         .select("*")
-        .eq("user_id", user.id)
-        .eq("status", "active")
+        .eq(
+          "user_id",
+          user.id
+        )
+        .eq(
+          "status",
+          "active"
+        )
         .maybeSingle();
 
 
-      if (!error && data) {
+
+
+      if(!error && data){
+
         setIsSubscriber(true);
+
       }
 
 
-    } catch (err) {
+
+    }
+    catch(err){
 
       console.log(err);
 
     }
+
 
   }
 
 
 
 
+
+
   const price =
+
     isSubscriber
-      ? Number(selectedService?.price_subscriber || 0)
-      : Number(selectedService?.price || 0);
+
+    ?
+
+    Number(
+      selectedService?.price_subscriber || 0
+    )
+
+    :
+
+    Number(
+      selectedService?.price || 0
+    );
+
+
+
 
 
 
   const amount =
-    price * Number(acres || 0);
+
+    price *
+
+    Number(
+      acres || 0
+    );
+
+
+
+
+
+
+
+  if(showPayment && !paymentDone){
+
+
+    return (
+
+      <PhonePePayment
+
+        amount={amount}
+
+
+        onSuccess={()=>{
+
+          setPaymentDone(true);
+
+          setShowPayment(false);
+
+        }}
+
+
+        onBack={()=>setShowPayment(false)}
+
+      />
+
+    );
+
+
+  }
+
+
+
 
 
 
@@ -67,12 +154,19 @@ export default function PaymentSummary({
   return (
 
     <div
+
       style={{
+
         padding:20,
+
         background:"#F8FAFC",
+
         minHeight:"100vh",
+
       }}
+
     >
+
 
 
       <h2>
@@ -81,22 +175,34 @@ export default function PaymentSummary({
 
 
 
+
+
       <div
+
         style={{
+
           background:"#fff",
+
           padding:15,
+
           borderRadius:12,
+
         }}
+
       >
+
 
 
         <p>
           🚜 Service:
           {" "}
-          {selectedService?.name_hi ||
+          {
+          selectedService?.name_hi ||
           selectedService?.name ||
-          "-"}
+          "-"
+          }
         </p>
+
 
 
 
@@ -108,13 +214,19 @@ export default function PaymentSummary({
 
 
 
+
         <p>
           👑 Plan:
           {" "}
-          {isSubscriber
-            ? "Subscriber"
-            : "Normal"}
+          {
+          isSubscriber
+          ?
+          "Subscriber"
+          :
+          "Normal"
+          }
         </p>
+
 
 
 
@@ -126,6 +238,7 @@ export default function PaymentSummary({
 
 
 
+
         <h2>
           Total:
           {" "}
@@ -134,13 +247,19 @@ export default function PaymentSummary({
 
 
 
+
         <p>
           Status:
           {" "}
-          {paymentDone
-          ? "✅ Paid"
-          : "⏳ Pending"}
+          {
+          paymentDone
+          ?
+          "✅ Paid"
+          :
+          "⏳ Pending"
+          }
         </p>
+
 
 
       </div>
@@ -148,51 +267,108 @@ export default function PaymentSummary({
 
 
 
-      {!paymentDone ? (
+
+
+      {
+      !paymentDone
+
+      ?
+
+      (
 
         <button
-          onClick={() => setPaymentDone(true)}
+
+          onClick={()=>
+            setShowPayment(true)
+          }
+
           style={{
+
             marginTop:20,
+
             padding:12,
+
             width:"100%",
+
+            background:"#16a34a",
+
+            color:"#fff",
+
+            border:"none",
+
+            borderRadius:10,
+
           }}
+
         >
+
           💳 Pay Now
+
         </button>
 
-      ) : (
+      )
+
+
+      :
+
+      (
 
         <button
+
           onClick={next}
+
           style={{
+
             marginTop:20,
+
             padding:12,
+
             width:"100%",
+
           }}
+
         >
+
           Continue →
+
         </button>
 
-      )}
+      )
+
+      }
+
+
 
 
 
 
       <button
+
         onClick={back}
+
         style={{
+
           marginTop:15,
+
           padding:12,
+
           width:"100%",
+
         }}
+
       >
+
         ← Back
+
       </button>
+
+
+
 
 
     </div>
 
   );
+
 
 }
