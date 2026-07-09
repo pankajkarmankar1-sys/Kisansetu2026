@@ -1,7 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
 
+import { supabase } from "../lib/supabase";
 const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://dzzxapuektnamgabdxlq.supabase.co";
 const SUPA_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6enhhcHVla3RuYW1nYWJkeGxxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3NDY3MTQsImV4cCI6MjA5NzMyMjcxNH0.j1X9GrQDaFIfEoKyIdauzb-m1_v51pkN6nVcJeob-fM";
 let supa;
@@ -14,13 +14,48 @@ try {
 
 // ─── Supabase Auth Helpers ────────────────────────────────────────────────
 async function sbSendOTP(phone){
-  const {error}=await supa.auth.signInWithOtp({phone:"+91"+phone});
-  if(error) throw error;
+
+  const mobile = "+91" + phone;
+
+  const { error } =
+    await supabase.auth.signInWithOtp({
+      phone: mobile,
+      options:{
+        channel:"sms"
+      }
+    });
+
+  if(error){
+    throw error;
+  }
+
 }
+
+
+
 async function sbVerifyOTP(phone,otp){
-  const {data,error}=await supa.auth.verifyOtp({phone:"+91"+phone,token:otp,type:"sms"});
-  if(error) throw error;
+
+  const mobile = "+91" + phone;
+
+  const { data,error } =
+    await supabase.auth.verifyOtp({
+
+      phone: mobile,
+
+      token: otp,
+
+      type:"sms"
+
+    });
+
+
+  if(error){
+    throw error;
+  }
+
+
   return data;
+
 }
 
 // ─── DB Helpers ───────────────────────────────────────────────────────────
