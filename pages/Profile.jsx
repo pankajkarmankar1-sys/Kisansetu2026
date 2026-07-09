@@ -1,23 +1,249 @@
 import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import { supabase } from "../lib/supabase";
 import Profile from "../components/customer/Profile";
 
+
 export default function ProfilePage() {
-  const [user, setUser] = useState(null);
 
-  useEffect(() => {
+
+  const router = useRouter();
+
+
+  const [user,setUser] = useState(null);
+
+  const [loading,setLoading] = useState(true);
+
+
+
+
+
+  useEffect(()=>{
+
     loadUser();
-  }, []);
 
-  async function loadUser() {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+  },[]);
 
-    if (user) {
-      setUser(user);
+
+
+
+
+
+
+  async function loadUser(){
+
+
+    try{
+
+
+      const {
+
+        data:{
+          user:authUser
+
+        }
+
+      } = await supabase.auth.getUser();
+
+
+
+
+
+      if(!authUser){
+
+
+        router.replace("/login");
+
+        return;
+
+
+      }
+
+
+
+
+
+
+      const {
+
+        data:profile
+
+      } = await supabase
+
+        .from("profiles")
+
+        .select("*")
+
+        .eq(
+
+          "auth_user_id",
+
+          authUser.id
+
+        )
+
+        .maybeSingle();
+
+
+
+
+
+
+
+      setUser({
+
+
+        id:
+
+          authUser.id,
+
+
+
+
+        phone:
+
+          profile?.phone ||
+
+          authUser.phone,
+
+
+
+
+        name:
+
+          profile?.name ||
+
+          "Kisan",
+
+
+
+
+        role:
+
+          profile?.role ||
+
+          "farmer",
+
+
+
+
+        village:
+
+          profile?.village ||
+
+          "",
+
+
+
+
+        district:
+
+          profile?.district ||
+
+          "",
+
+
+
+
+        taluka:
+
+          profile?.taluka ||
+
+          "",
+
+
+
+
+        state:
+
+          profile?.state ||
+
+          "",
+
+
+
+
+        farm_address:
+
+          profile?.farm_address ||
+
+          "",
+
+
+
+
+        acres:
+
+          profile?.acres ||
+
+          0,
+
+
+
+
+        document_status:
+
+          profile?.document_status ||
+
+          "pending",
+
+
+      });
+
+
+
+
     }
+
+    catch(err){
+
+
+      console.log(err);
+
+
+    }
+
+    finally{
+
+
+      setLoading(false);
+
+
+    }
+
+
   }
 
-  return <Profile user={user} />;
+
+
+
+
+
+
+  if(loading){
+
+
+    return <h2>Loading...</h2>;
+
+
+  }
+
+
+
+
+
+
+  return (
+
+    <Profile
+
+      user={user}
+
+      back={()=>router.back()}
+
+    />
+
+  );
+
+
 }
