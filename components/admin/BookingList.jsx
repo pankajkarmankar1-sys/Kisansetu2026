@@ -2,66 +2,116 @@ import React, { useEffect, useState } from "react";
 import AssignDriver from "./AssignDriver";
 import { supabase } from "../../lib/supabase";
 
-export default function BookingList() {
 
-  const [bookings, setBookings] = useState([]);
-  const [search, setSearch] = useState("");
+export default function BookingList(){
 
 
-  useEffect(() => {
+  const [bookings,setBookings] = useState([]);
+
+  const [search,setSearch] = useState("");
+
+
+
+
+
+  useEffect(()=>{
+
 
     loadBookings();
 
 
+
     const channel = supabase
-      .channel("admin-bookings")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "bookings",
-        },
-        () => {
-          loadBookings();
-        }
-      )
-      .subscribe();
+
+    .channel(
+      "admin-bookings"
+    )
+
+    .on(
+
+      "postgres_changes",
+
+      {
+
+        event:"*",
+
+        schema:"public",
+
+        table:"bookings"
+
+      },
+
+      ()=>{
+
+        loadBookings();
+
+      }
+
+    )
+
+    .subscribe();
 
 
-    return () => {
+
+
+
+    return ()=>{
+
       supabase.removeChannel(channel);
+
     };
 
 
-  }, []);
+  },[]);
 
 
 
 
-  async function loadBookings() {
+
+
+
+
+
+  async function loadBookings(){
+
 
     const {
+
       data,
+
       error
+
     } = await supabase
-      .from("bookings")
-      .select("*")
-      .order(
-        "created_at",
-        {
-          ascending: false,
-        }
-      );
+
+    .from("bookings")
+
+    .select("*")
+
+    .order(
+
+      "created_at",
+
+      {
+        ascending:false
+      }
+
+    );
 
 
-    if (!error) {
+
+
+    if(!error){
 
       setBookings(data || []);
 
     }
 
+
   }
+
+
+
+
 
 
 
@@ -70,72 +120,154 @@ export default function BookingList() {
   async function updateStatus(
     booking,
     status
-  ) {
+  ){
 
 
-    const {
-      error
-    } = await supabase
+    try{
+
+
+      const {
+
+        error
+
+      } = await supabase
+
       .from("bookings")
+
       .update({
-        status: status,
+
+        status
+
       })
+
       .eq(
+
         "id",
+
         booking.id
+
       );
 
 
 
-    if (error) {
 
-      alert(error.message);
-      return;
 
-    }
+      if(error)
+        throw error;
 
 
 
 
 
-    // Customer Notification
 
-    if (booking.customer_id) {
 
-      await supabase
+      if(booking.customer_id){
+
+
+        await supabase
+
         .from("notifications")
-        .insert([
-          {
+
+        .insert([{
+
+          user_id:
+            booking.customer_id,
+
+
+          title:
+            `Booking ${status}`,
+
+
+          message:
+            `Your booking status is ${status}`
+
+
+        }]);
+
+
+      }
+
+
+
+
+
+
+
+      if(booking.driver_id){
+
+
+        const {
+
+          data:driver
+
+        } = await supabase
+
+        .from("profiles")
+
+        .select("auth_user_id")
+
+        .eq(
+
+          "id",
+
+          booking.driver_id
+
+        )
+
+        .maybeSingle();
+
+
+
+
+
+
+        if(driver?.auth_user_id){
+
+
+          await supabase
+
+          .from("notifications")
+
+          .insert([{
 
             user_id:
-              booking.customer_id,
+              driver.auth_user_id,
 
 
             title:
-              status === "Completed"
-                ? "✅ Booking Completed"
-                : "❌ Booking Cancelled",
-
+              `Booking ${status}`,
 
 
             message:
-              status === "Completed"
-                ? "Your farming service booking has been completed."
-                : "Your booking has been cancelled.",
+              `Booking updated to ${status}`
+
+
+          }]);
+
+        }
+
+
+      }
 
 
 
-            created_at:
-              new Date().toISOString(),
 
-          }
-        ]);
+
+
+      loadBookings();
+
+
+    }
+    catch(err){
+
+
+      console.log(err);
+
+      alert(err.message);
+
 
     }
 
-
-
-    loadBookings();
 
   }
 
@@ -144,35 +276,51 @@ export default function BookingList() {
 
 
 
-  async function deleteBooking(id) {
 
 
-    const confirmDelete =
-      window.confirm(
+
+  async function deleteBooking(id){
+
+
+    if(
+      !window.confirm(
         "Delete booking?"
-      );
+      )
+    )
+    return;
 
 
-    if (!confirmDelete)
-      return;
+
 
 
 
     const {
+
       error
+
     } = await supabase
-      .from("bookings")
-      .delete()
-      .eq(
-        "id",
-        id
-      );
+
+    .from("bookings")
+
+    .delete()
+
+    .eq(
+
+      "id",
+
+      id
+
+    );
 
 
 
-    if (error) {
+
+
+
+    if(error){
 
       alert(error.message);
+
       return;
 
     }
@@ -181,7 +329,11 @@ export default function BookingList() {
 
     loadBookings();
 
+
   }
+
+
+
 
 
 
@@ -189,15 +341,22 @@ export default function BookingList() {
 
 
   const filtered =
-    bookings.filter((b) =>
 
-      JSON.stringify(b)
-        .toLowerCase()
-        .includes(
-          search.toLowerCase()
-        )
+  bookings.filter((b)=>
 
-    );
+    JSON.stringify(b)
+
+    .toLowerCase()
+
+    .includes(
+
+      search.toLowerCase()
+
+    )
+
+  );
+
+
 
 
 
@@ -209,17 +368,23 @@ export default function BookingList() {
     <div
 
       style={{
+
         background:"#fff",
+
         padding:20,
-        borderRadius:12,
+
+        borderRadius:12
+
       }}
 
     >
 
 
+
       <h2>
         📋 Booking Management
       </h2>
+
 
 
 
@@ -234,12 +399,13 @@ export default function BookingList() {
           setSearch(e.target.value)
         }
 
-
         style={{
 
           width:"100%",
+
           padding:10,
-          margin:"15px 0",
+
+          margin:"15px 0"
 
         }}
 
@@ -250,217 +416,159 @@ export default function BookingList() {
 
 
 
-      <table
 
-        width="100%"
-
-        border="1"
-
-        cellPadding="8"
-
-        style={{
-          borderCollapse:"collapse",
-        }}
-
-      >
+      {
+        filtered.map((booking)=>(
 
 
-        <thead>
+          <div
 
-          <tr>
+            key={booking.id}
 
-            <th>Customer</th>
+            style={{
 
-            <th>Service</th>
+              padding:15,
 
-            <th>Date</th>
+              marginBottom:15,
 
-            <th>Status</th>
+              border:"1px solid #ddd",
 
-            <th>Driver</th>
+              borderRadius:10
 
-            <th>Assign</th>
+            }}
 
-            <th>Action</th>
-
-
-          </tr>
-
-
-        </thead>
+          >
 
 
 
+            <h3>
+              {booking.service_name}
+            </h3>
 
 
-        <tbody>
+
+            <p>
+              Customer:
+              {" "}
+              {booking.customer_name ||
+              booking.customer_phone ||
+              "-"}
+            </p>
 
 
-        {
-          filtered.map((booking)=>(
+
+            <p>
+              Date:
+              {" "}
+              {booking.booking_date ||
+              booking.date ||
+              "-"}
+            </p>
 
 
-            <tr key={booking.id}>
+
+            <p>
+              Status:
+              {" "}
+              {booking.status}
+            </p>
 
 
-              <td>
 
-                {
-                  booking.customer_name ||
-                  booking.customer_phone ||
-                  "-"
+            <p>
+              Driver:
+              {" "}
+              {booking.driver_name ||
+              "Not Assigned"}
+            </p>
+
+
+
+
+
+
+            <AssignDriver
+              booking={booking}
+            />
+
+
+
+
+
+            <div
+              style={{
+                marginTop:15
+              }}
+            >
+
+
+              <button
+                onClick={()=>
+                  updateStatus(
+                    booking,
+                    "Completed"
+                  )
+                }
+              >
+                ✅ Complete
+              </button>
+
+
+
+
+
+              <button
+
+                style={{
+                  marginLeft:10
+                }}
+
+                onClick={()=>
+                  updateStatus(
+                    booking,
+                    "Cancelled"
+                  )
                 }
 
-              </td>
+              >
+
+                ❌ Cancel
+
+              </button>
 
 
 
 
-              <td>
 
-                {
-                  booking.service_name ||
-                  "-"
+              <button
+
+                style={{
+                  marginLeft:10
+                }}
+
+                onClick={()=>
+                  deleteBooking(
+                    booking.id
+                  )
                 }
 
-              </td>
+              >
 
+                🗑 Delete
 
+              </button>
 
 
-              <td>
+            </div>
 
-                {
-                  booking.booking_date ||
-                  booking.date ||
-                  "-"
-                }
 
-              </td>
 
+          </div>
 
 
+        ))
+      }
 
-              <td>
-
-                {
-                  booking.status ||
-                  "Pending"
-                }
-
-              </td>
-
-
-
-
-
-              <td>
-
-                {
-                  booking.driver_name ||
-                  "Not Assigned"
-                }
-
-              </td>
-
-
-
-
-
-              <td>
-
-                <AssignDriver booking={booking}/>
-
-              </td>
-
-
-
-
-
-
-              <td>
-
-
-                <button
-
-                  onClick={()=>
-                    updateStatus(
-                      booking,
-                      "Completed"
-                    )
-                  }
-
-                >
-
-                  ✅ Complete
-
-                </button>
-
-
-
-
-
-                <button
-
-                  style={{
-                    marginLeft:8,
-                  }}
-
-
-                  onClick={()=>
-                    updateStatus(
-                      booking,
-                      "Cancelled"
-                    )
-                  }
-
-                >
-
-                  ❌ Cancel
-
-                </button>
-
-
-
-
-
-                <button
-
-                  style={{
-                    marginLeft:8,
-                  }}
-
-
-                  onClick={()=>
-                    deleteBooking(
-                      booking.id
-                    )
-                  }
-
-                >
-
-                  🗑 Delete
-
-                </button>
-
-
-
-              </td>
-
-
-
-
-            </tr>
-
-
-          ))
-        }
-
-
-        </tbody>
-
-
-      </table>
 
 
     </div>
