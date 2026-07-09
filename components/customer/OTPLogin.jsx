@@ -1,101 +1,74 @@
 import { useState } from "react";
 import { supabase } from "../../lib/supabase";
 
-
 export default function OTPLogin({
   onSuccess
 }) {
 
-
-  const [phone,setPhone] =
-    useState("");
-
-  const [otp,setOtp] =
-    useState("");
-
-  const [step,setStep] =
-    useState(1);
-
-  const [loading,setLoading] =
-    useState(false);
-
-  const [msg,setMsg] =
-    useState("");
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState("");
 
 
 
+  async function sendOTP() {
 
-
-  async function sendOTP(){
-
-
-    if(phone.length !== 10){
-
-      setMsg(
-        "Enter valid mobile number"
-      );
-
+    if (phone.length !== 10) {
+      setMsg("Enter valid mobile number");
       return;
-
     }
 
 
-
-
-
-    try{
-
+    try {
 
       setLoading(true);
-
       setMsg("");
 
 
+      const { data, error } =
+        await supabase.auth.signInWithOtp({
 
-      const {
-        error
-      } =
-      await supabase.auth.signInWithOtp({
+          phone: "+91" + phone,
 
-        phone:
-          "+91" + phone
+          options: {
+            channel: "sms"
+          }
 
-      });
-
-
+        });
 
 
+      console.log("OTP DATA:", data);
+      console.log("OTP ERROR:", error);
 
-      if(error)
+
+      if (error) {
         throw error;
-
-
-
+      }
 
 
       setStep(2);
-
 
       setMsg(
         "OTP Sent Successfully"
       );
 
 
+    } catch (err) {
 
-    }
-    catch(err){
+      console.log(err);
 
       setMsg(
         err.message
       );
 
-    }
-    finally{
+
+    } finally {
 
       setLoading(false);
 
     }
-
 
   }
 
@@ -103,97 +76,67 @@ export default function OTPLogin({
 
 
 
+  async function verifyOTP() {
 
-
-
-
-  async function verifyOTP(){
-
-
-    try{
-
+    try {
 
       setLoading(true);
-
       setMsg("");
 
 
+      const { error } =
+        await supabase.auth.verifyOtp({
 
+          phone: "+91" + phone,
 
-      const {
-        error
-      } =
-      await supabase.auth.verifyOtp({
+          token: otp,
 
-        phone:
-          "+91"+phone,
+          type: "sms"
 
-
-        token:
-          otp,
-
-
-        type:
-          "sms"
-
-      });
+        });
 
 
 
-
-
-      if(error)
+      if (error) {
         throw error;
-
-
-
-
+      }
 
 
 
       const {
-        data:{
+        data: {
           user
         }
 
       } =
-      await supabase.auth.getUser();
+        await supabase.auth.getUser();
 
 
 
+      if (!user) {
 
-
-      if(!user)
         throw new Error(
           "User not found"
         );
 
-
-
-
-
+      }
 
 
 
 
       let {
-
-        data:profile
+        data: profile
 
       } = await supabase
 
-
         .from("profiles")
 
-
         .select("*")
-
 
         .eq(
           "auth_user_id",
           user.id
         )
-
 
         .maybeSingle();
 
@@ -201,68 +144,50 @@ export default function OTPLogin({
 
 
 
-
-
-
-      // New user profile create
-
-
-      if(!profile){
+      if (!profile) {
 
 
         const {
-          data:newProfile,
-          error:createError
+          data: newProfile,
+          error: createError
 
         } = await supabase
 
-
           .from("profiles")
-
 
           .insert([{
 
             auth_user_id:
               user.id,
 
-
             phone:
               phone,
-
 
             role:
               "farmer",
 
-
             document_status:
               "pending"
 
-
           }])
 
-
           .select()
-
 
           .single();
 
 
 
+        if (createError) {
 
-
-        if(createError)
           throw createError;
 
+        }
 
 
-        profile =
-          newProfile;
+        profile = newProfile;
 
 
       }
-
-
-
 
 
 
@@ -274,10 +199,7 @@ export default function OTPLogin({
 
 
 
-
-
-
-      if(onSuccess){
+      if (onSuccess) {
 
         onSuccess(profile);
 
@@ -285,24 +207,16 @@ export default function OTPLogin({
 
 
 
-
-
-
-
-    }
-    catch(err){
-
+    } catch (err) {
 
       console.log(err);
-
 
       setMsg(
         err.message
       );
 
 
-    }
-    finally{
+    } finally {
 
       setLoading(false);
 
@@ -310,10 +224,6 @@ export default function OTPLogin({
 
 
   }
-
-
-
-
 
 
 
@@ -356,37 +266,36 @@ export default function OTPLogin({
 
 
 
-
-
-
       {
-        step===1 &&
+        step === 1 &&
 
         <>
-
 
           <input
 
             placeholder="Mobile Number"
 
-
             value={phone}
-
 
             maxLength={10}
 
-
             onChange={(e)=>
+
               setPhone(
                 e.target.value.replace(/\D/g,"")
               )
+
             }
 
 
             style={{
+
               width:"100%",
+
               padding:12,
+
               marginTop:20
+
             }}
 
           />
@@ -440,12 +349,8 @@ export default function OTPLogin({
 
 
 
-
-
-
-
       {
-        step===2 &&
+        step === 2 &&
 
         <>
 
@@ -454,17 +359,16 @@ export default function OTPLogin({
 
             placeholder="Enter OTP"
 
-
             value={otp}
-
 
             maxLength={6}
 
-
             onChange={(e)=>
+
               setOtp(
                 e.target.value.replace(/\D/g,"")
               )
+
             }
 
 
@@ -479,7 +383,6 @@ export default function OTPLogin({
             }}
 
           />
-
 
 
 
@@ -530,15 +433,19 @@ export default function OTPLogin({
 
 
 
-
       {
         msg &&
 
         <p
+
           style={{
+
             marginTop:20,
+
             textAlign:"center"
+
           }}
+
         >
 
           {msg}
