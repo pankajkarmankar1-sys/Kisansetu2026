@@ -1,21 +1,27 @@
 import React, { useState } from "react";
 import { supabase } from "../../lib/supabase";
 
+
 export default function DocumentUpload({
   onDone,
 }) {
 
-  const [aadhaarFront, setAadhaarFront] = useState(null);
-  const [aadhaarBack, setAadhaarBack] = useState(null);
-  const [satbara, setSatbara] = useState(null);
 
-  const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState("");
+  const [aadhaarFront,setAadhaarFront] = useState(null);
+  const [aadhaarBack,setAadhaarBack] = useState(null);
+  const [satbara,setSatbara] = useState(null);
+
+  const [loading,setLoading] = useState(false);
+  const [msg,setMsg] = useState("");
 
 
-  async function uploadFile(file, folder) {
 
-    if (!file) return null;
+
+  async function uploadFile(file,folder){
+
+
+    if(!file) return null;
+
 
 
     const {
@@ -25,13 +31,23 @@ export default function DocumentUpload({
     } = await supabase.auth.getUser();
 
 
+
     if(!user){
-      throw new Error("Login required");
+
+      throw new Error(
+        "Login required"
+      );
+
     }
+
+
 
 
     const fileName =
       `${folder}/${user.id}_${Date.now()}_${file.name}`;
+
+
+
 
 
     const {
@@ -44,9 +60,15 @@ export default function DocumentUpload({
       );
 
 
+
     if(error){
+
       throw error;
+
     }
+
+
+
 
 
     const {
@@ -54,18 +76,27 @@ export default function DocumentUpload({
     } =
     supabase.storage
       .from("customer-documents")
-      .getPublicUrl(fileName);
+      .getPublicUrl(
+        fileName
+      );
+
 
 
     return data.publicUrl;
+
 
   }
 
 
 
+
+
+
   async function handleSubmit(){
 
+
     try{
+
 
       if(
         !aadhaarFront ||
@@ -73,14 +104,27 @@ export default function DocumentUpload({
         !satbara
       ){
 
-        setMsg("Please upload all documents");
+        setMsg(
+          "Please upload all documents"
+        );
+
         return;
 
       }
 
 
+
+
+
       setLoading(true);
-      setMsg("Uploading...");
+
+      setMsg(
+        "Uploading..."
+      );
+
+
+
+
 
 
       const frontUrl =
@@ -90,6 +134,7 @@ export default function DocumentUpload({
         );
 
 
+
       const backUrl =
         await uploadFile(
           aadhaarBack,
@@ -97,11 +142,15 @@ export default function DocumentUpload({
         );
 
 
+
       const satbaraUrl =
         await uploadFile(
           satbara,
           "7-12"
         );
+
+
+
 
 
 
@@ -114,6 +163,10 @@ export default function DocumentUpload({
 
 
 
+
+
+
+
       const {
         error
       } =
@@ -121,13 +174,18 @@ export default function DocumentUpload({
       .from("profiles")
       .update({
 
-        aadhaar_front: frontUrl,
+        aadhaar_front:frontUrl,
 
-        aadhaar_back: backUrl,
+        aadhaar_back:backUrl,
 
-        satbara_7_12: satbaraUrl,
+        satbara_7_12:satbaraUrl,
 
-        document_status:"pending"
+
+        document_status:"pending",
+
+
+        document_reject_reason:null
+
 
       })
       .eq(
@@ -137,8 +195,32 @@ export default function DocumentUpload({
 
 
 
+
       if(error)
         throw error;
+
+
+
+
+
+
+      // notify admin
+
+      await supabase
+      .from("notifications")
+      .insert({
+
+        user_id:user.id,
+
+        title:
+        "📄 Documents Submitted",
+
+        message:
+        "Aadhaar and 7/12 documents submitted for verification."
+
+      });
+
+
 
 
 
@@ -147,9 +229,13 @@ export default function DocumentUpload({
       );
 
 
+
       if(onDone){
+
         onDone();
+
       }
+
 
 
     }
@@ -157,7 +243,10 @@ export default function DocumentUpload({
 
       console.log(err);
 
-      setMsg(err.message);
+      setMsg(
+        err.message
+      );
+
 
     }
     finally{
@@ -166,7 +255,11 @@ export default function DocumentUpload({
 
     }
 
+
   }
+
+
+
 
 
 
@@ -183,19 +276,28 @@ export default function DocumentUpload({
       </h2>
 
 
+
+
       <p>
         Aadhaar Front
       </p>
 
       <input
+
         type="file"
+
         accept="image/*,.pdf"
+
         onChange={(e)=>
           setAadhaarFront(
             e.target.files[0]
           )
         }
+
       />
+
+
+
 
 
       <p>
@@ -203,14 +305,22 @@ export default function DocumentUpload({
       </p>
 
       <input
+
         type="file"
+
         accept="image/*,.pdf"
+
         onChange={(e)=>
           setAadhaarBack(
             e.target.files[0]
           )
         }
+
       />
+
+
+
+
 
 
       <p>
@@ -218,19 +328,31 @@ export default function DocumentUpload({
       </p>
 
       <input
+
         type="file"
+
         accept="image/*,.pdf"
+
         onChange={(e)=>
           setSatbara(
             e.target.files[0]
           )
         }
+
       />
 
 
+
+
+
+
+
       <button
+
         onClick={handleSubmit}
+
         disabled={loading}
+
         style={{
           marginTop:20,
           width:"100%",
@@ -240,6 +362,7 @@ export default function DocumentUpload({
           border:"none",
           borderRadius:10
         }}
+
       >
 
         {
@@ -251,6 +374,8 @@ export default function DocumentUpload({
         }
 
       </button>
+
+
 
 
       <p>
