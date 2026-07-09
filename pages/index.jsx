@@ -1,17 +1,25 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
 
-export default function Page() {
+
+export default function Page(){
+
 
   const router = useRouter();
 
 
+
+
   function selectRole(role){
+
 
     localStorage.setItem(
       "role",
       role
     );
+
+
+
 
 
     if(role==="farmer"){
@@ -21,20 +29,31 @@ export default function Page() {
     }
 
 
+
+
+
     if(role==="driver"){
 
-      router.push("/driver");
+      router.push("/driver/login");
 
     }
+
+
+
 
 
     if(role==="admin"){
 
-      router.push("/admin");
+      router.push("/admin/login");
 
     }
 
+
+
   }
+
+
+
 
 
 
@@ -43,21 +62,25 @@ export default function Page() {
 
     <>
 
+
       <Head>
 
-        <title>KisanSetu</title>
+        <title>
+          KisanSetu
+        </title>
+
 
         <meta
+
           name="viewport"
+
           content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"
+
         />
 
-        <meta
-          name="theme-color"
-          content="#16a34a"
-        />
 
       </Head>
+
 
 
 
@@ -71,9 +94,9 @@ export default function Page() {
 
           padding:20,
 
-          background:"linear-gradient(135deg,#14532d,#16a34a)",
+          background:"#16a34a",
 
-          color:"white",
+          color:"#fff",
 
           textAlign:"center"
 
@@ -88,9 +111,13 @@ export default function Page() {
         </h1>
 
 
-        <p>
+
+        <h3>
           Select Login Type
-        </p>
+        </h3>
+
+
+
 
 
 
@@ -103,9 +130,11 @@ export default function Page() {
 
         >
 
-          👨‍🌾 Farmer
+          👨‍🌾 Farmer Login
 
         </button>
+
+
 
 
 
@@ -119,9 +148,11 @@ export default function Page() {
 
         >
 
-          🚜 Driver
+          🚜 Driver Login
 
         </button>
+
+
 
 
 
@@ -135,14 +166,17 @@ export default function Page() {
 
         >
 
-          👨‍💼 Admin
+          👨‍💼 Admin Login
 
         </button>
 
 
 
 
+
+
       </div>
+
 
 
     </>
@@ -153,20 +187,30 @@ export default function Page() {
 
 
 
+
+
 const btn={
+
 
   width:"100%",
 
+
   padding:15,
+
 
   margin:"10px 0",
 
+
   borderRadius:12,
+
 
   border:"none",
 
+
   fontSize:18,
 
+
   cursor:"pointer"
+
 
 };
