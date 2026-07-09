@@ -8,17 +8,20 @@ export default function RegistrationPage() {
   const phone =
     router.query.phone || "";
 
+
   function handleDone() {
 
-    router.replace("/dashboard");
+    router.replace("/documents");
 
   }
+
 
   function back() {
 
     router.replace("/login");
 
   }
+
 
   return (
 
