@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 
 export default function ConfirmBooking({
@@ -10,17 +10,44 @@ export default function ConfirmBooking({
   const [loading, setLoading] = useState(false);
 
 
-  const servicePrice =
-    Number(
-      bookingData?.selectedService?.price || 0
-    );
+  const [amount, setAmount] = useState(0);
 
+React.useEffect(() => {
+  async function calculateAmount() {
 
-  const amount =
-    servicePrice *
-    Number(
-      bookingData?.acres || 0
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return;
+
+    const { data: subscription } = await supabase
+      .from("subscriptions")
+      .select("*")
+      .eq("user_phone", user.phone)
+      .eq("status", "Active")
+      .gte(
+        "expiry_date",
+        new Date().toISOString().split("T")[0]
+      )
+      .maybeSingle();
+
+    const price = subscription
+      ? Number(
+          bookingData?.selectedService?.price_subscriber || 0
+        )
+      : Number(
+          bookingData?.selectedService?.price || 0
+        );
+
+    setAmount(
+      price *
+        Number(bookingData?.acres || 0)
     );
+  }
+
+  calculateAmount();
+}, [bookingData]);
 
 
 
