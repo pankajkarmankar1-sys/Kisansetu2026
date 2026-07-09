@@ -22,13 +22,10 @@ export default function OTPLogin({ onSuccess }) {
         phone: "+91" + phone,
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       setStep(2);
       setMsg("OTP Sent Successfully");
-
     } catch (err) {
       setMsg(err.message);
     } finally {
@@ -47,9 +44,7 @@ export default function OTPLogin({ onSuccess }) {
         type: "sms",
       });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       const {
         data: { user },
@@ -59,33 +54,21 @@ export default function OTPLogin({ onSuccess }) {
         throw new Error("User not found");
       }
 
-      const { data: profile } = await supabase
+      const {
+        data: profile,
+        error: profileError,
+      } = await supabase
         .from("profiles")
-        .select("id")
+        .select("*")
         .eq("auth_user_id", user.id)
         .maybeSingle();
 
-      if (!profile) {
-        const { error: insertError } = await supabase
-          .from("profiles")
-          .insert([
-            {
-              auth_user_id: user.id,
-              phone: user.phone,
-              role: "kisan",
-              name: "Kisan",
-            },
-          ]);
-
-        if (insertError) {
-          throw insertError;
-        }
-      }
+      if (profileError) throw profileError;
 
       setMsg("Login Success");
 
       if (onSuccess) {
-        onSuccess();
+        onSuccess(profile);
       }
 
     } catch (err) {
@@ -94,9 +77,25 @@ export default function OTPLogin({ onSuccess }) {
       setLoading(false);
     }
   }
+
   return (
-    <div style={{ padding: 20 }}>
-      <h2>KisanSetu Login</h2>
+    <div
+      style={{
+        maxWidth: 400,
+        margin: "40px auto",
+        padding: 20,
+        background: "#fff",
+        borderRadius: 12,
+        boxShadow: "0 2px 10px rgba(0,0,0,.1)",
+      }}
+    >
+      <h2
+        style={{
+          textAlign: "center",
+        }}
+      >
+        🚜 KisanSetu Login
+      </h2>
 
       {step === 1 && (
         <>
@@ -107,14 +106,25 @@ export default function OTPLogin({ onSuccess }) {
             onChange={(e) =>
               setPhone(e.target.value.replace(/\D/g, ""))
             }
+            style={{
+              width: "100%",
+              padding: 12,
+              marginTop: 20,
+            }}
           />
-
-          <br />
-          <br />
 
           <button
             onClick={sendOTP}
             disabled={loading}
+            style={{
+              width: "100%",
+              padding: 12,
+              marginTop: 20,
+              background: "#16a34a",
+              color: "#fff",
+              border: "none",
+              borderRadius: 8,
+            }}
           >
             {loading ? "Sending..." : "Send OTP"}
           </button>
@@ -130,23 +140,41 @@ export default function OTPLogin({ onSuccess }) {
             onChange={(e) =>
               setOtp(e.target.value.replace(/\D/g, ""))
             }
+            style={{
+              width: "100%",
+              padding: 12,
+              marginTop: 20,
+            }}
           />
-
-          <br />
-          <br />
 
           <button
             onClick={verifyOTP}
             disabled={loading}
+            style={{
+              width: "100%",
+              padding: 12,
+              marginTop: 20,
+              background: "#16a34a",
+              color: "#fff",
+              border: "none",
+              borderRadius: 8,
+            }}
           >
             {loading ? "Verifying..." : "Verify OTP"}
           </button>
         </>
       )}
 
-      <br />
-
-      <p>{msg}</p>
+      {msg && (
+        <p
+          style={{
+            marginTop: 20,
+            textAlign: "center",
+          }}
+        >
+          {msg}
+        </p>
+      )}
     </div>
   );
 }
