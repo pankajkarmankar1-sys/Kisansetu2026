@@ -8,61 +8,74 @@ export default function ConfirmBooking({
 }) {
 
   const [loading, setLoading] = useState(false);
-
-
   const [amount, setAmount] = useState(0);
+  const [servicePrice, setServicePrice] = useState(0);
+  const [isSubscriber, setIsSubscriber] = useState(false);
 
-React.useEffect(() => {
+  useEffect(() => {
+    calculateAmount();
+  }, [bookingData]);
+
   async function calculateAmount() {
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) return;
-
-    const { data: subscription } = await supabase
-      .from("subscriptions")
-      .select("*")
-      .eq("user_phone", user.phone)
-      .eq("status", "Active")
-      .gte(
-        "expiry_date",
-        new Date().toISOString().split("T")[0]
-      )
-      .maybeSingle();
-
-    const price = subscription
-      ? Number(
-          bookingData?.selectedService?.price_subscriber || 0
-        )
-      : Number(
-          bookingData?.selectedService?.price || 0
-        );
-
-    setAmount(
-      price *
-        Number(bookingData?.acres || 0)
-    );
-  }
-
-  calculateAmount();
-}, [bookingData]);
-
-
-
-  const handleConfirm = async () => {
-
     try {
-
-      setLoading(true);
-
 
       const {
         data: { user },
       } = await supabase.auth.getUser();
 
+      if (!user) return;
 
+      const { data: subscription } = await supabase
+        .from("subscriptions")
+        .select("*")
+        .eq("user_phone", user.phone)
+        .eq("status", "Active")
+        .gte(
+          "expiry_date",
+          new Date().toISOString().split("T")[0]
+        )
+        .maybeSingle();
+
+      const subscriber =
+        !!subscription;
+
+      setIsSubscriber(subscriber);
+
+      const price = subscriber
+        ? Number(
+            bookingData?.selectedService?.price_subscriber || 0
+          )
+        : Number(
+            bookingData?.selectedService?.price || 0
+          );
+
+      setServicePrice(price);
+
+      setAmount(
+        price *
+        Number(
+          bookingData?.acres || 0
+        )
+      );
+
+    } catch (err) {
+
+      console.log(err);
+
+    }
+
+  }
+
+  async function handleConfirm() {
+
+    try {
+
+      setLoading(true);
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (!user) {
 
@@ -74,54 +87,44 @@ React.useEffect(() => {
 
       }
 
-
-
-      const booking = {
+      await calculateAmount();
+            const booking = {
 
         customer_id:
           user.id,
-
 
         service_name:
           bookingData?.selectedService?.name_hi ||
           bookingData?.selectedService?.name ||
           "",
 
-
         service_id:
           bookingData?.selectedService?.service_id ||
           null,
-
 
         acres:
           Number(
             bookingData?.acres || 0
           ),
 
-
-        amount,
-
+        amount:
+          amount,
 
         total_amount:
           amount,
-
 
         payment_status:
           bookingData?.payment_status ||
           "Pending",
 
-
         status:
           "Pending",
-
 
         note:
           bookingData?.note ||
           null,
 
       };
-
-
 
       const { data, error } =
         await supabase
@@ -130,15 +133,11 @@ React.useEffect(() => {
           .select()
           .single();
 
-
-
       if (error) {
 
         throw error;
 
       }
-
-
 
       await supabase
         .from("notifications")
@@ -148,23 +147,16 @@ React.useEffect(() => {
             user_id:
               user.id,
 
-
             title:
               "✅ Booking Created",
-
 
             message:
               `${booking.service_name} booking created successfully`,
 
-
           },
         ]);
 
-
-
       alert("✅ Booking Successful");
-
-
 
       if (onConfirm) {
 
@@ -172,34 +164,24 @@ React.useEffect(() => {
 
       }
 
-
-
     } catch (err) {
-
 
       console.error(
         "Booking Error:",
         err
       );
 
-
       alert(
         err.message
       );
 
-
     } finally {
-
 
       setLoading(false);
 
-
     }
 
-  };
-
-
-
+  }
 
   return (
 
@@ -211,20 +193,14 @@ React.useEffect(() => {
       }}
     >
 
-
       <button onClick={back}>
         ← Back
       </button>
 
-
-
       <h2>
         ✅ Confirm Booking
       </h2>
-
-
-
-      <div
+            <div
         style={{
           background:"#fff",
           padding:15,
@@ -233,60 +209,46 @@ React.useEffect(() => {
         }}
       >
 
-
         <p>
-          🚜 Service:
-          {" "}
-          {
-            bookingData?.selectedService?.name_hi ||
+          🚜 Service:{" "}
+          {bookingData?.selectedService?.name_hi ||
             bookingData?.selectedService?.name ||
-            "-"
-          }
+            "-"}
         </p>
 
-
-
         <p>
-          🌾 Acres:
-          {" "}
+          🌾 Acres:{" "}
           {bookingData?.acres || 0}
         </p>
 
-
-
         <p>
-          💰 Amount:
-          {" "}
-          ₹{amount}
+          💵 Rate: ₹{servicePrice} / Acre
         </p>
 
-
+        <p>
+          👑 Subscription:{" "}
+          {isSubscriber ? "✅ Active" : "❌ Not Active"}
+        </p>
 
         <p>
-          💳 Payment:
-          {" "}
+          💰 Total Amount: ₹{amount}
+        </p>
+
+        <p>
+          💳 Payment:{" "}
           {bookingData?.payment_status || "Pending"}
         </p>
 
-
-
         <p>
-          📝 Note:
-          {" "}
+          📝 Note:{" "}
           {bookingData?.note || "-"}
         </p>
 
-
       </div>
 
-
-
       <button
-
         onClick={handleConfirm}
-
         disabled={loading}
-
         style={{
           marginTop:20,
           width:"100%",
@@ -298,19 +260,11 @@ React.useEffect(() => {
           fontSize:18,
           fontWeight:"bold",
         }}
-
       >
-
-        {
-          loading
+        {loading
           ? "Booking..."
-          : "✅ Confirm Booking"
-        }
-
-
+          : "✅ Confirm Booking"}
       </button>
-
-
 
     </div>
 
