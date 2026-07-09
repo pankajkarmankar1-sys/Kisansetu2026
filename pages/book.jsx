@@ -1,109 +1,55 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-
-import BookService from "../components/customer/BookService";
 import { supabase } from "../lib/supabase";
-
+import BookService from "../components/customer/BookService";
 
 export default function BookPage() {
-
   const router = useRouter();
 
-  const [user,setUser] = useState(null);
+  const [user, setUser] = useState(null);
+  const [selKhet, setSelKhet] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const [selKhet,setSelKhet] = useState(null);
-
-
-
-
-
-  useEffect(()=>{
-
+  useEffect(() => {
     loadUser();
+  }, []);
 
-  },[]);
+  async function loadUser() {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-
-
-
-
-  async function loadUser(){
-
-    const {
-      data:{
-        user
+      if (!user) {
+        router.replace("/");
+        return;
       }
 
-    } = await supabase.auth.getUser();
+      setUser(user);
 
+      const savedFarm = localStorage.getItem("selectedFarm");
 
-
-    if(!user){
-
-      router.replace("/");
-
-      return;
-
+      if (savedFarm) {
+        setSelKhet(JSON.parse(savedFarm));
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
     }
-
-
-    setUser(user);
-
-
-    const savedFarm =
-      localStorage.getItem("selectedFarm");
-
-
-    if(savedFarm){
-
-      setSelKhet(
-        JSON.parse(savedFarm)
-      );
-
-    }
-
-
   }
 
-
-
-
-
-
-
-  if(!user){
-
-    return <div>Loading...</div>;
-
+  if (loading) {
+    return <div style={{ padding: 20 }}>Loading...</div>;
   }
-
-
-
-
-
 
   return (
-
     <BookService
-
       user={user}
-
       selKhet={selKhet}
-
       setSelKhet={setSelKhet}
-
-
-      onNext={()=>
-        router.push("/dashboard")
-      }
-
-
-      back={()=>
-        router.back()
-      }
-
+      onNext={() => router.push("/dashboard")}
+      back={() => router.back()}
     />
-
   );
-
 }
