@@ -1,33 +1,27 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-
 import Dashboard from "../components/customer/Dashboard";
 import { supabase } from "../lib/supabase";
-
 
 export default function DashboardPage() {
 
   const router = useRouter();
 
-  const [user,setUser] = useState(null);
-
-  const [loading,setLoading] = useState(true);
-
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
 
-  useEffect(()=>{
+  useEffect(() => {
 
     loadUser();
 
-  },[]);
+  }, []);
 
 
 
+  async function loadUser() {
 
-  async function loadUser(){
-
-    try{
-
+    try {
 
       const {
         data:{
@@ -39,8 +33,7 @@ export default function DashboardPage() {
 
       if(!user){
 
-        router.replace("/");
-
+        router.replace("/login");
         return;
 
       }
@@ -50,14 +43,10 @@ export default function DashboardPage() {
       const {
         data:profile
       } = await supabase
-
-      .from("profiles")
-
-      .select("*")
-
-      .eq("auth_user_id",user.id)
-
-      .maybeSingle();
+        .from("profiles")
+        .select("*")
+        .eq("auth_user_id", user.id)
+        .maybeSingle();
 
 
 
@@ -65,12 +54,13 @@ export default function DashboardPage() {
 
         id:user.id,
 
-        phone:user.phone,
-
         name:
-        profile?.name ||
-        "Kisan"
+          profile?.name ||
+          "Kisan",
 
+        phone:
+          profile?.phone ||
+          user.phone,
 
       });
 
@@ -88,10 +78,7 @@ export default function DashboardPage() {
 
     }
 
-
   }
-
-
 
 
 
@@ -105,15 +92,11 @@ export default function DashboardPage() {
 
 
 
-
-
-
   if(loading){
 
-    return <div>Loading...</div>;
+    return <h2>Loading...</h2>;
 
   }
-
 
 
 
@@ -127,21 +110,17 @@ export default function DashboardPage() {
         router.push("/book")
       }
 
-
       onBookings={()=>
         router.push("/bookings")
       }
 
-
       onProfile={()=>
-        router.push("/Profile")
+        router.push("/profile")
       }
-
 
       onNotifications={()=>
         router.push("/notifications")
       }
-
 
       onLogout={logout}
 
