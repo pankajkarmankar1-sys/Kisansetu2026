@@ -1,11 +1,38 @@
-import React from "react";
+import React, { useState } from "react";
 import SubscriptionStatus from "./SubscriptionStatus";
+import EditProfile from "./EditProfile";
 
 
 export default function Profile({
   user,
   back,
 }) {
+
+
+  const [edit,setEdit] = useState(false);
+
+
+
+  if(edit){
+
+    return (
+
+      <EditProfile
+
+        user={user}
+
+        onDone={()=>setEdit(false)}
+
+        back={()=>setEdit(false)}
+
+      />
+
+    );
+
+  }
+
+
+
 
 
   return (
@@ -48,10 +75,42 @@ export default function Profile({
 
 
 
-
       <h1>
         👤 Farmer Profile
       </h1>
+
+
+
+
+
+      <button
+
+        onClick={()=>setEdit(true)}
+
+        style={{
+
+          width:"100%",
+
+          padding:14,
+
+          marginTop:15,
+
+          background:"#2563eb",
+
+          color:"#fff",
+
+          border:"none",
+
+          borderRadius:10,
+
+        }}
+
+      >
+
+        ✏️ Edit Profile
+
+      </button>
+
 
 
 
@@ -77,136 +136,92 @@ export default function Profile({
 
 
         <p>
-
           👨‍🌾 Name:
-
           {" "}
-
           {user?.name || "-"}
-
         </p>
 
 
 
 
         <p>
-
-          📱 Mobile:
-
+          📱 Phone:
           {" "}
-
           {user?.phone || "-"}
-
         </p>
 
 
 
 
         <p>
-
           🏠 State:
-
           {" "}
-
           {user?.state || "-"}
-
         </p>
 
 
 
 
         <p>
-
           📍 District:
-
           {" "}
-
           {user?.district || "-"}
-
         </p>
 
 
 
 
         <p>
-
           📍 Taluka:
-
           {" "}
-
           {user?.taluka || "-"}
-
         </p>
 
 
 
 
         <p>
-
           🌱 Village:
-
           {" "}
-
           {user?.village || "-"}
-
         </p>
 
 
 
 
         <p>
-
-          🌾 Farm Address:
-
+          🚜 Farm Address:
           {" "}
-
           {user?.farm_address || "-"}
-
         </p>
 
 
 
 
         <p>
-
-          📐 Acres:
-
+          🌾 Acres:
           {" "}
-
           {user?.acres || 0}
-
         </p>
 
 
 
 
         <p>
-
-          📄 Documents:
-
+          📄 Document Status:
           {" "}
-
           {
-
           user?.document_status === "approved"
-
           ?
-
           "✅ Approved"
-
           :
-
           "⏳ Pending"
-
           }
-
         </p>
-
 
 
 
       </div>
-
 
 
 
@@ -217,6 +232,7 @@ export default function Profile({
         user={user}
 
       />
+
 
 
 
