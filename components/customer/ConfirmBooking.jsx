@@ -12,170 +12,221 @@ export default function ConfirmBooking({
   const [servicePrice, setServicePrice] = useState(0);
   const [isSubscriber, setIsSubscriber] = useState(false);
 
+
   useEffect(() => {
     calculateAmount();
   }, [bookingData]);
+
 
   async function calculateAmount() {
 
     try {
 
       const {
-        data: { user },
+        data:{user}
       } = await supabase.auth.getUser();
 
-      if (!user) return;
 
-      const { data: subscription } = await supabase
+      if(!user) return;
+
+
+      const {data:subscription} =
+        await supabase
         .from("subscriptions")
         .select("*")
-        .eq("user_phone", user.phone)
-        .eq("status", "Active")
-        .gte(
-          "expiry_date",
-          new Date().toISOString().split("T")[0]
-        )
+        .eq("user_id", user.id)
+        .eq("status","active")
         .maybeSingle();
 
-      const subscriber =
-        !!subscription;
+
+
+      const subscriber = !!subscription;
 
       setIsSubscriber(subscriber);
 
-      const price = subscriber
-        ? Number(
-            bookingData?.selectedService?.price_subscriber || 0
-          )
-        : Number(
-            bookingData?.selectedService?.price || 0
-          );
+
+
+      const price =
+        subscriber
+        ?
+        Number(
+          bookingData?.selectedService?.price_subscriber || 0
+        )
+        :
+        Number(
+          bookingData?.selectedService?.price || 0
+        );
+
 
       setServicePrice(price);
 
-      setAmount(
+
+      const total =
         price *
         Number(
           bookingData?.acres || 0
-        )
-      );
+        );
 
-    } catch (err) {
+
+      setAmount(total);
+
+
+      return total;
+
+
+    }
+    catch(err){
 
       console.log(err);
+
+      return 0;
 
     }
 
   }
 
-  async function handleConfirm() {
 
-    try {
+
+
+
+  async function handleConfirm(){
+
+    try{
+
 
       setLoading(true);
 
+
+
       const {
-        data: { user },
+        data:{user}
       } = await supabase.auth.getUser();
 
-      if (!user) {
+
+
+      if(!user){
 
         alert("Please login first");
-
-        setLoading(false);
 
         return;
 
       }
 
-      await calculateAmount();
-            const booking = {
+
+
+      const finalAmount =
+        await calculateAmount();
+
+
+
+
+      const booking = {
+
 
         customer_id:
           user.id,
+
+
+        service_id:
+          bookingData?.selectedService?.service_id || null,
+
 
         service_name:
           bookingData?.selectedService?.name_hi ||
           bookingData?.selectedService?.name ||
           "",
 
-        service_id:
-          bookingData?.selectedService?.service_id ||
-          null,
 
         acres:
           Number(
             bookingData?.acres || 0
           ),
 
+
+
         amount:
-          amount,
+          finalAmount,
+
 
         total_amount:
-          amount,
+          finalAmount,
+
+
 
         payment_status:
-          bookingData?.payment_status ||
           "Pending",
+
 
         status:
           "Pending",
 
+
+
         note:
-          bookingData?.note ||
-          null,
+          bookingData?.note || null,
 
       };
 
-      const { data, error } =
-        await supabase
-          .from("bookings")
-          .insert([booking])
-          .select()
-          .single();
 
-      if (error) {
 
+
+
+      const {
+        data,
+        error
+      } =
+      await supabase
+      .from("bookings")
+      .insert([booking])
+      .select()
+      .single();
+
+
+
+      if(error)
         throw error;
 
-      }
+
+
+
 
       await supabase
-        .from("notifications")
-        .insert([
-          {
+      .from("notifications")
+      .insert([{
 
-            user_id:
-              user.id,
+        user_id:user.id,
 
-            title:
-              "✅ Booking Created",
+        title:"✅ Booking Created",
 
-            message:
-              `${booking.service_name} booking created successfully`,
+        message:
+        `${booking.service_name} booking created successfully`
 
-          },
-        ]);
+      }]);
+
+
+
 
       alert("✅ Booking Successful");
 
-      if (onConfirm) {
+
+
+      if(onConfirm){
 
         onConfirm(data);
 
       }
 
-    } catch (err) {
 
-      console.error(
-        "Booking Error:",
-        err
-      );
 
-      alert(
-        err.message
-      );
+    }
+    catch(err){
 
-    } finally {
+      console.error(err);
+
+      alert(err.message);
+
+    }
+    finally{
 
       setLoading(false);
 
@@ -183,72 +234,105 @@ export default function ConfirmBooking({
 
   }
 
-  return (
+
+
+
+
+  return(
 
     <div
       style={{
         background:"#F8FAFC",
         minHeight:"100vh",
-        padding:20,
+        padding:20
       }}
     >
+
 
       <button onClick={back}>
         ← Back
       </button>
 
+
+
       <h2>
         ✅ Confirm Booking
       </h2>
-            <div
+
+
+
+
+      <div
         style={{
           background:"#fff",
           padding:15,
           borderRadius:12,
-          marginTop:20,
+          marginTop:20
         }}
       >
 
-        <p>
-          🚜 Service:{" "}
-          {bookingData?.selectedService?.name_hi ||
-            bookingData?.selectedService?.name ||
-            "-"}
-        </p>
 
         <p>
-          🌾 Acres:{" "}
+          🚜 Service:
+          {" "}
+          {
+          bookingData?.selectedService?.name_hi ||
+          bookingData?.selectedService?.name ||
+          "-"
+          }
+        </p>
+
+
+
+        <p>
+          🌾 Acres:
+          {" "}
           {bookingData?.acres || 0}
         </p>
 
-        <p>
-          💵 Rate: ₹{servicePrice} / Acre
-        </p>
+
 
         <p>
-          👑 Subscription:{" "}
-          {isSubscriber ? "✅ Active" : "❌ Not Active"}
+          💵 Rate:
+          {" "}
+          ₹{servicePrice}/Acre
         </p>
 
-        <p>
-          💰 Total Amount: ₹{amount}
-        </p>
+
 
         <p>
-          💳 Payment:{" "}
-          {bookingData?.payment_status || "Pending"}
+          👑 Subscription:
+          {" "}
+          {
+          isSubscriber
+          ?
+          "✅ Active"
+          :
+          "❌ Not Active"
+          }
         </p>
 
-        <p>
-          📝 Note:{" "}
-          {bookingData?.note || "-"}
-        </p>
+
+
+        <h2>
+          💰 Total:
+          {" "}
+          ₹{amount}
+        </h2>
+
 
       </div>
 
+
+
+
+
       <button
+
         onClick={handleConfirm}
+
         disabled={loading}
+
         style={{
           marginTop:20,
           width:"100%",
@@ -258,13 +342,23 @@ export default function ConfirmBooking({
           background:"#16a34a",
           color:"#fff",
           fontSize:18,
-          fontWeight:"bold",
+          fontWeight:"bold"
         }}
+
       >
-        {loading
-          ? "Booking..."
-          : "✅ Confirm Booking"}
+
+        {
+        loading
+        ?
+        "Booking..."
+        :
+        "✅ Confirm Booking"
+        }
+
+
       </button>
+
+
 
     </div>
 
