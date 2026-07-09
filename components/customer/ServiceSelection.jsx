@@ -1,55 +1,98 @@
-import React, { useEffect, useState } from "react";
+ import React, { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { S } from "../../styles";
 
+
 export default function ServiceSelection({
+
   user,
   selKhet,
-  setSelKhet,
-  selectedService,
   setSelectedService,
+  selectedService,
   acres,
   setAcres,
-  paymentDone,
-  setPaymentDone,
   next,
   back,
+
 }) {
 
-  const [services, setServices] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isSubscriber, setIsSubscriber] = useState(false);
+
+  const [services,setServices] =
+    useState([]);
 
 
-  useEffect(() => {
+  const [loading,setLoading] =
+    useState(true);
+
+
+  const [isSubscriber,setIsSubscriber] =
+    useState(false);
+
+
+
+
+
+  useEffect(()=>{
+
     loadServices();
+
     checkSubscription();
-  }, []);
+
+  },[]);
 
 
-  async function loadServices() {
-
-    try {
-
-      const { data, error } = await supabase
-        .from("services")
-        .select("*")
-        .eq("active", true)
-        .order("name");
 
 
-      if (error) {
-        console.log(error);
-        return;
-      }
 
-      setServices(data || []);
 
-    } catch (err) {
+
+  async function loadServices(){
+
+
+    try{
+
+
+      const {
+
+        data,
+
+        error
+
+      } = await supabase
+
+      .from("services")
+
+      .select("*")
+
+      .eq(
+        "active",
+        true
+      )
+
+      .order(
+        "name"
+      );
+
+
+
+
+      if(error)
+        throw error;
+
+
+
+      setServices(
+        data || []
+      );
+
+
+    }
+    catch(err){
 
       console.log(err);
 
-    } finally {
+    }
+    finally{
 
       setLoading(false);
 
@@ -59,48 +102,115 @@ export default function ServiceSelection({
 
 
 
-  async function checkSubscription() {
-
-    try {
-
-      if (!user?.id) return;
 
 
-      const { data, error } = await supabase
-        .from("subscriptions")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("status", "active")
-        .single();
 
 
-      if (!error && data) {
-        setIsSubscriber(true);
-      }
 
 
-    } catch (err) {
+  async function checkSubscription(){
+
+
+    try{
+
+
+      if(!user?.id)
+        return;
+
+
+
+
+
+      const {
+
+        data
+
+      } = await supabase
+
+      .from("subscriptions")
+
+      .select("id")
+
+      .eq(
+        "user_id",
+        user.id
+      )
+
+      .eq(
+        "status",
+        "active"
+      )
+
+      .maybeSingle();
+
+
+
+
+
+      setIsSubscriber(
+        !!data
+      );
+
+
+    }
+    catch(err){
 
       console.log(err);
 
     }
 
+
   }
 
 
 
-  const price =
-    selectedService
-      ? (
-        isSubscriber
-          ? Number(selectedService.price_subscriber || 0)
-          : Number(selectedService.price || 0)
-      )
-      : 0;
 
 
-  const totalAmount =
-    Number(acres || 0) * price;
+
+
+
+  const price = selectedService
+
+  ?
+
+  (
+
+    isSubscriber
+
+    ?
+
+    Number(
+      selectedService.price_subscriber || 0
+    )
+
+    :
+
+    Number(
+      selectedService.price || 0
+    )
+
+  )
+
+  :
+
+  0;
+
+
+
+
+
+  const total =
+
+    Number(acres || 0)
+
+    *
+
+    price;
+
+
+
+
+
 
 
 
@@ -108,328 +218,291 @@ export default function ServiceSelection({
 
     <div
       style={{
+        padding:20,
         background:"#F8FAFC",
         minHeight:"100vh"
       }}
     >
 
 
-      <div style={S.hdr}>
-
-        <button
-          style={S.bkb}
-          onClick={back}
-        >
-          ← Back
-        </button>
+      <button onClick={back}>
+        ← Back
+      </button>
 
 
-        <h2>
-          🚜 Book Service
-        </h2>
+
+      <h2>
+        🚜 Select Service
+      </h2>
 
 
-        <p>
-          Select Farm • Service • Acres
-        </p>
+
+      {
+        selKhet &&
+
+        <div style={S.card}>
+
+          <h3>
+            🌾 Farm
+          </h3>
+
+          <p>
+            {selKhet.name}
+          </p>
+
+
+        </div>
+
+      }
+
+
+
+
+
+
+
+      <div style={S.card}>
+
+
+        <h3>
+          🌱 Acres
+        </h3>
+
+
+        <input
+
+          type="number"
+
+          value={acres}
+
+          min="0.1"
+
+          onChange={(e)=>
+            setAcres(e.target.value)
+          }
+
+          style={{
+            width:"100%",
+            padding:12
+          }}
+
+        />
+
 
       </div>
 
 
 
-      <div style={{padding:15}}>
-
-
-
-        {!selKhet && (
-
-          <div
-            style={{
-              background:"#FEF2F2",
-              color:"#B91C1C",
-              padding:12,
-              borderRadius:8,
-              marginBottom:15
-            }}
-          >
-
-            ⚠️ Please select a farm first.
-
-          </div>
-
-        )}
 
 
 
 
-        {selKhet && (
 
-          <div style={S.card}>
-
-            <h3>
-              🌾 Selected Farm
-            </h3>
+      <div style={S.card}>
 
 
-            <p>
-              <b>Name:</b> {selKhet.name}
-            </p>
-
-
-            <p>
-              <b>Village:</b>{" "}
-              {selKhet.selected712?.village || selKhet.village}
-            </p>
-
-
-            <p>
-              <b>Total Farm:</b>{" "}
-              {selKhet.selected712?.acres || selKhet.acres} Acre
-            </p>
-
-
-          </div>
-
-        )}
+        <h3>
+          Choose Service
+        </h3>
 
 
 
 
-        <div style={S.card}>
+        {
+          loading
+
+          ?
+
+          <p>
+            Loading...
+          </p>
 
 
-          <label>
-            Booking Acres
-          </label>
+          :
 
 
-          <input
-
-            type="number"
-
-            min="0.1"
-
-            step="0.1"
-
-            placeholder="Enter Acres"
-
-            value={acres}
-
-            onChange={(e)=>{
-
-              let value=e.target.value;
+          services.map(service=>(
 
 
-              const max =
-                selKhet?.selected712?.acres ||
-                selKhet?.acres;
+            <button
 
 
-              if(max && Number(value)>Number(max)){
-                value=max;
+              key={service.service_id}
+
+
+              onClick={()=>{
+
+                setSelectedService(service);
+
+              }}
+
+
+
+              style={{
+
+                width:"100%",
+
+                padding:15,
+
+                marginBottom:10,
+
+                textAlign:"left",
+
+                borderRadius:10,
+
+                border:
+
+                selectedService?.service_id === service.service_id
+
+                ?
+
+                "2px solid green"
+
+                :
+
+                "1px solid #ddd"
+
+              }}
+
+
+
+            >
+
+
+              <b>
+
+                {service.icon}
+
+                {" "}
+
+                {service.name_hi || service.name}
+
+              </b>
+
+
+
+              <br/>
+
+              ₹
+
+              {
+
+                isSubscriber
+
+                ?
+
+                service.price_subscriber
+
+                :
+
+                service.price
+
               }
 
 
-              setAcres(value);
+              {
 
-            }}
+                isSubscriber
 
-          />
+                ?
+
+                " / Acre (Subscriber)"
+
+                :
+
+                " / Acre (Normal)"
+
+              }
 
 
-        </div>
+            </button>
+
+
+          ))
+
+        }
+
+
+      </div>
 
 
 
+
+
+
+
+
+
+      {
+        selectedService &&
 
 
         <div style={S.card}>
 
 
           <h3>
-            Select Service
+            Summary
           </h3>
 
 
-
-          {
-            loading ? (
-
-              <p>
-                Loading services...
-              </p>
-
-            )
-
-            :
-
-            services.map((service)=>(
+          <p>
+            Service:
+            {" "}
+            {selectedService.name_hi}
+          </p>
 
 
-              <button
-
-                key={service.service_id}
-
-                onClick={()=>{
-
-                  setSelectedService(service);
-
-                  setPaymentDone(false);
-
-                }}
+          <p>
+            Rate:
+            {" "}
+            ₹{price}/Acre
+          </p>
 
 
-                style={{
-
-                  display:"block",
-
-                  width:"100%",
-
-                  marginBottom:10,
-
-                  padding:12,
-
-                  borderRadius:8,
-
-                  border:
-                  selectedService?.service_id === service.service_id
-                  ?
-                  "2px solid green"
-                  :
-                  "1px solid #ddd",
-
-
-                  background:
-                  selectedService?.service_id === service.service_id
-                  ?
-                  "#dcfce7"
-                  :
-                  "#fff",
-
-
-                  textAlign:"left"
-
-                }}
-
-              >
-
-
-                <b>
-                  {service.icon}{" "}
-                  {service.name_hi || service.name}
-                </b>
-
-
-                <br/>
-
-
-                <small>
-
-                  ₹
-                  {
-                    isSubscriber
-                    ?
-                    service.price_subscriber
-                    :
-                    service.price
-                  }
-
-                  {" / Acre "}
-
-
-                  {
-                    isSubscriber
-                    ?
-                    "(Subscriber)"
-                    :
-                    "(Normal)"
-                  }
-
-
-                </small>
+          <p>
+            Acres:
+            {" "}
+            {acres}
+          </p>
 
 
 
-              </button>
+          <h2>
+            Total ₹{total}
+          </h2>
 
-
-            ))
-
-          }
 
 
         </div>
 
+      }
 
 
 
 
-        {
-          selectedService && (
-
-            <div style={S.card}>
 
 
-              <h3>
-                Booking Summary
-              </h3>
 
 
-              <p>
-                <b>Service:</b>{" "}
-                {selectedService.name_hi || selectedService.name}
-              </p>
+      <button
 
+        onClick={next}
 
-              <p>
-                <b>Rate:</b> ₹{price}/Acre
-              </p>
-
-
-              <p>
-                <b>Acres:</b> {acres || 0}
-              </p>
-
-
-              <h2>
-                💰 Total: ₹{totalAmount}
-              </h2>
-
-
-            </div>
-
-          )
+        disabled={
+          !selKhet ||
+          !selectedService ||
+          !acres
         }
 
 
+        style={S.btnG}
 
+      >
 
+        Continue →
 
+      </button>
 
-        <button
-
-          style={S.btnG}
-
-          disabled={
-            !selKhet ||
-            !selectedService ||
-            !acres ||
-            Number(acres)<=0
-          }
-
-
-          onClick={next}
-
-        >
-
-          Continue →
-
-        </button>
-
-
-
-
-      </div>
 
 
     </div>
