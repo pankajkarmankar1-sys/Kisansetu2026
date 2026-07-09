@@ -5,6 +5,9 @@ export default function FarmerDocuments() {
 
   const [farmers, setFarmers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [reason, setReason] = useState("");
+  const [selectedId, setSelectedId] = useState(null);
+
 
 
   useEffect(() => {
@@ -17,54 +20,45 @@ export default function FarmerDocuments() {
 
   async function loadDocuments() {
 
-    try {
+    const {
+      data,
+      error
+    } = await supabase
+      .from("profiles")
+      .select(`
+        id,
+        auth_user_id,
+        name,
+        phone,
+        aadhaar_front,
+        aadhaar_back,
+        satbara_7_12,
+        document_status,
+        document_reject_reason
+      `)
+      .eq("role","farmer")
+      .order("created_at", {
+        ascending:false
+      });
 
-      const {
-        data,
-        error
-      } = await supabase
-        .from("profiles")
-        .select(`
-          id,
-          auth_user_id,
-          name,
-          phone,
-          aadhaar_front,
-          aadhaar_back,
-          satbara_7_12,
-          document_status
-        `)
-        .eq("role", "farmer")
-        .order("created_at", {
-          ascending:false
-        });
 
-
-      if(error)
-        throw error;
-
+    if(!error){
 
       setFarmers(data || []);
 
-
     }
-    catch(err){
 
-      console.log(err);
 
-    }
-    finally{
-
-      setLoading(false);
-
-    }
+    setLoading(false);
 
   }
 
 
 
 
-  async function updateStatus(id, status) {
+
+  async function updateStatus(id,status,rejectReason="") {
+
 
     try {
 
@@ -78,42 +72,36 @@ export default function FarmerDocuments() {
 
 
       const {
-        data:farmer,
-        error:farmerError
+        data:farmer
       } = await supabase
         .from("profiles")
         .select("auth_user_id,name")
-        .eq("id", id)
+        .eq("id",id)
         .single();
 
 
 
-      if(farmerError)
-        throw farmerError;
 
-
-
-      const {
-        error
-      } = await supabase
+      await supabase
         .from("profiles")
         .update({
 
           document_status:status,
 
-          verified_by:
-            user?.id || null,
+          document_reject_reason:
+            status==="rejected"
+            ?
+            rejectReason
+            :
+            null,
+
+          verified_by:user?.id || null,
 
           verified_at:
             new Date().toISOString()
 
         })
         .eq("id",id);
-
-
-
-      if(error)
-        throw error;
 
 
 
@@ -127,24 +115,27 @@ export default function FarmerDocuments() {
 
 
           title:
-            status === "approved"
+            status==="approved"
             ?
             "✅ Documents Approved"
             :
             "❌ Documents Rejected",
 
 
-
           message:
-            status === "approved"
+            status==="approved"
             ?
-            "Aapke Aadhaar aur 7/12 documents approve ho gaye hain. Ab booking kar sakte hain."
+            "Aapke documents approve ho gaye hain. Ab booking kar sakte hain."
             :
-            "Documents reject hue hain. Kripya documents dobara upload karein."
+            `Documents reject hue. Reason: ${rejectReason}`
 
         }]);
 
 
+
+      setReason("");
+
+      setSelectedId(null);
 
       loadDocuments();
 
@@ -164,13 +155,10 @@ export default function FarmerDocuments() {
 
   if(loading){
 
-    return (
-      <h3>
-        Loading Documents...
-      </h3>
-    );
+    return <h3>Loading...</h3>;
 
   }
+
 
 
 
@@ -181,19 +169,6 @@ export default function FarmerDocuments() {
       <h2>
         📄 Farmer Documents Verification
       </h2>
-
-
-
-      {
-        farmers.length === 0 && (
-
-          <p>
-            No farmer documents found
-          </p>
-
-        )
-      }
-
 
 
       {
@@ -223,66 +198,39 @@ export default function FarmerDocuments() {
 
 
             <p>
-              Status:
-              {" "}
-              {farmer.document_status}
+              Status: {farmer.document_status}
             </p>
 
 
 
-            {
-              farmer.aadhaar_front && (
-
-                <p>
-                  <a
-                    href={farmer.aadhaar_front}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    📄 Aadhaar Front
-                  </a>
-                </p>
-
-              )
-            }
+            <p>
+              <a
+                href={farmer.aadhaar_front}
+                target="_blank"
+              >
+                Aadhaar Front
+              </a>
+            </p>
 
 
-
-            {
-              farmer.aadhaar_back && (
-
-                <p>
-                  <a
-                    href={farmer.aadhaar_back}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    📄 Aadhaar Back
-                  </a>
-                </p>
-
-              )
-            }
+            <p>
+              <a
+                href={farmer.aadhaar_back}
+                target="_blank"
+              >
+                Aadhaar Back
+              </a>
+            </p>
 
 
-
-
-            {
-              farmer.satbara_7_12 && (
-
-                <p>
-                  <a
-                    href={farmer.satbara_7_12}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    📄 7/12 Document
-                  </a>
-                </p>
-
-              )
-            }
-
+            <p>
+              <a
+                href={farmer.satbara_7_12}
+                target="_blank"
+              >
+                7/12 Document
+              </a>
+            </p>
 
 
 
@@ -294,12 +242,12 @@ export default function FarmerDocuments() {
                 )
               }
               style={{
-                padding:10,
-                marginRight:10,
                 background:"#16a34a",
                 color:"#fff",
+                padding:10,
                 border:"none",
-                borderRadius:8
+                borderRadius:8,
+                marginRight:10
               }}
             >
               ✅ Approve
@@ -310,15 +258,12 @@ export default function FarmerDocuments() {
 
             <button
               onClick={()=>
-                updateStatus(
-                  farmer.id,
-                  "rejected"
-                )
+                setSelectedId(farmer.id)
               }
               style={{
-                padding:10,
                 background:"#dc2626",
                 color:"#fff",
+                padding:10,
                 border:"none",
                 borderRadius:8
               }}
@@ -328,12 +273,57 @@ export default function FarmerDocuments() {
 
 
 
+            {
+              selectedId===farmer.id && (
+
+                <div
+                  style={{
+                    marginTop:15
+                  }}
+                >
+
+                  <input
+                    placeholder="Reject reason"
+                    value={reason}
+                    onChange={(e)=>
+                      setReason(e.target.value)
+                    }
+                    style={{
+                      width:"100%",
+                      padding:10
+                    }}
+                  />
+
+
+                  <button
+                    onClick={()=>
+                      updateStatus(
+                        farmer.id,
+                        "rejected",
+                        reason
+                      )
+                    }
+                    style={{
+                      marginTop:10,
+                      padding:10
+                    }}
+                  >
+                    Submit Reject
+                  </button>
+
+
+                </div>
+
+              )
+            }
+
+
+
           </div>
 
 
         ))
       }
-
 
 
     </div>
