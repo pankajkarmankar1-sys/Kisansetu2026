@@ -11,13 +11,20 @@ export default function Registration({
 }) {
 
 
-  const [name, setName] = useState("");
-  const [farmAddress, setFarmAddress] = useState("");
-  const [acres, setAcres] = useState("");
-  const [location, setLocation] = useState(null);
+  const [name,setName] = useState("");
+
+  const [farmAddress,setFarmAddress] = useState("");
+
+  const [acres,setAcres] = useState("");
+
+  const [location,setLocation] = useState(null);
+
 
   const [loading,setLoading] = useState(false);
+
   const [error,setError] = useState("");
+
+
 
 
 
@@ -30,44 +37,68 @@ export default function Registration({
 
 
 
+
+
+
   async function handleSubmit(e){
 
     e.preventDefault();
+
 
     setError("");
 
 
 
+
+
     if(!name){
 
-      setError("Please enter your name");
+      setError(
+        "Please enter your name"
+      );
+
       return;
 
     }
+
 
 
     if(!farmAddress){
 
-      setError("Please enter farm address");
+      setError(
+        "Please enter farm address"
+      );
+
       return;
 
     }
+
 
 
     if(!acres || Number(acres)<=0){
 
-      setError("Please enter valid acres");
+      setError(
+        "Enter valid acres"
+      );
+
       return;
 
     }
+
 
 
     if(!location){
 
-      setError("Please select location");
+      setError(
+        "Please select location"
+      );
+
       return;
 
     }
+
+
+
 
 
 
@@ -78,11 +109,14 @@ export default function Registration({
 
 
 
+
       const {
         data:{
           user
         }
-      } = await supabase.auth.getUser();
+      } =
+      await supabase.auth.getUser();
+
 
 
 
@@ -90,7 +124,7 @@ export default function Registration({
       if(!user){
 
         throw new Error(
-          "Please login again"
+          "Login expired"
         );
 
       }
@@ -98,40 +132,41 @@ export default function Registration({
 
 
 
+
+
       const {
         error
-      } = await supabase
+      } =
+      await supabase
+
         .from("profiles")
+
         .upsert({
 
-          auth_user_id:user.id,
-
-          phone:phone || user.phone,
-
-
-          role:"farmer",
-
-          name:name,
+          auth_user_id:
+            user.id,
 
 
-          village:
-            location.village || "",
+
+          phone:
+            phone ||
+            user.phone,
 
 
-          state:
-            location.state || "",
+
+          role:
+            "farmer",
 
 
-          district:
-            location.district || "",
 
+          name:
+            name,
 
-          taluka:
-            location.taluka || "",
 
 
           farm_address:
             farmAddress,
+
 
 
           acres:
@@ -139,8 +174,25 @@ export default function Registration({
 
 
 
-          // IMPORTANT
-          document_status:"pending",
+
+          village:
+            location.village || "",
+
+
+
+          state:
+            location.state || "",
+
+
+
+          district:
+            location.district || "",
+
+
+
+          taluka:
+            location.taluka || "",
+
 
 
 
@@ -150,18 +202,49 @@ export default function Registration({
             null,
 
 
+
           longitude:
             location.longitude ||
             location.lng ||
             null,
 
-        });
+
+
+          document_status:
+            "pending",
+
+
+        },
+
+        {
+
+          onConflict:
+            "auth_user_id"
+
+        }
+
+      );
+
+
+
 
 
 
 
       if(error)
         throw error;
+
+
+
+
+
+
+
+      alert(
+        "✅ Registration Complete"
+      );
+
+
 
 
 
@@ -173,8 +256,14 @@ export default function Registration({
 
 
 
+
+
+
+
     }
     catch(err){
+
+      console.log(err);
 
       setError(
         err.message
@@ -187,7 +276,12 @@ export default function Registration({
 
     }
 
+
+
   }
+
+
+
 
 
 
@@ -201,13 +295,19 @@ export default function Registration({
       }}
     >
 
+
       <h2>
         👨‍🌾 Farmer Registration
       </h2>
 
 
 
+
+
       <form onSubmit={handleSubmit}>
+
+
+
 
 
         <input
@@ -220,13 +320,11 @@ export default function Registration({
             setName(e.target.value)
           }
 
-          style={{
-            width:"100%",
-            padding:12,
-            marginBottom:12
-          }}
+          style={input}
 
         />
+
+
 
 
 
@@ -241,13 +339,11 @@ export default function Registration({
             setFarmAddress(e.target.value)
           }
 
-          style={{
-            width:"100%",
-            padding:12,
-            marginBottom:12
-          }}
+          style={input}
 
         />
+
+
 
 
 
@@ -257,7 +353,7 @@ export default function Registration({
 
           type="number"
 
-          placeholder="Total Acres"
+          placeholder="Farm Acres"
 
           value={acres}
 
@@ -265,13 +361,11 @@ export default function Registration({
             setAcres(e.target.value)
           }
 
-          style={{
-            width:"100%",
-            padding:12,
-            marginBottom:12
-          }}
+          style={input}
 
         />
+
+
 
 
 
@@ -282,6 +376,8 @@ export default function Registration({
           onSelect={handleLocation}
 
         />
+
+
 
 
 
@@ -305,21 +401,25 @@ export default function Registration({
 
 
 
+
+
+
         {
-          error && (
+          error &&
 
-            <p
-              style={{
-                color:"red"
-              }}
-            >
+          <p
+            style={{
+              color:"red"
+            }}
+          >
 
-              {error}
+            {error}
 
-            </p>
+          </p>
 
-          )
         }
+
+
 
 
 
@@ -331,15 +431,7 @@ export default function Registration({
 
           disabled={loading}
 
-          style={{
-            width:"100%",
-            padding:14,
-            marginTop:20,
-            background:"#16a34a",
-            color:"#fff",
-            border:"none",
-            borderRadius:10
-          }}
+          style={button}
 
         >
 
@@ -358,29 +450,31 @@ export default function Registration({
 
 
 
+
         {
-          back && (
+          back &&
 
-            <button
+          <button
 
-              type="button"
+            type="button"
 
-              onClick={back}
+            onClick={back}
 
-              style={{
-                width:"100%",
-                padding:14,
-                marginTop:10
-              }}
+            style={{
+              ...button,
+              background:"#ddd",
+              color:"#000"
+            }}
 
-            >
+          >
 
-              ← Back
+            ← Back
 
-            </button>
+          </button>
 
-          )
         }
+
+
 
 
 
@@ -392,3 +486,42 @@ export default function Registration({
   );
 
 }
+
+
+
+
+
+const input={
+
+  width:"100%",
+
+  padding:12,
+
+  marginBottom:12,
+
+  borderRadius:8,
+
+  border:"1px solid #ccc"
+
+};
+
+
+
+
+const button={
+
+  width:"100%",
+
+  padding:14,
+
+  marginTop:15,
+
+  background:"#16a34a",
+
+  color:"#fff",
+
+  border:"none",
+
+  borderRadius:10
+
+};
