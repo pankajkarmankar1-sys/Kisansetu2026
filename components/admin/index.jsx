@@ -10,9 +10,12 @@ export default function AdminPage() {
 
   const router = useRouter();
 
+
   const [loading,setLoading] = useState(true);
 
   const [allowed,setAllowed] = useState(false);
+
+
 
 
 
@@ -27,6 +30,9 @@ export default function AdminPage() {
 
 
 
+
+
+
   async function checkAdmin(){
 
 
@@ -34,8 +40,10 @@ export default function AdminPage() {
 
 
       const {
+
         data:{
           user
+
         }
 
       } = await supabase.auth.getUser();
@@ -43,42 +51,66 @@ export default function AdminPage() {
 
 
 
+
       if(!user){
 
-        router.replace("/");
+
+        router.replace("/login");
 
         return;
 
       }
+
+
 
 
 
 
 
       const {
+
         data:profile,
+
         error
+
       } = await supabase
 
       .from("profiles")
 
       .select("role")
 
-      .eq("id",user.id)
+      .eq(
 
-      .single();
+        "auth_user_id",
+
+        user.id
+
+      )
+
+      .maybeSingle();
 
 
 
 
 
-      if(error){
+
+
+      if(error || !profile){
+
 
         console.log(error);
 
+
+        alert(
+          "Profile not found"
+        );
+
+
         router.replace("/");
 
+
         return;
+
 
       }
 
@@ -86,16 +118,25 @@ export default function AdminPage() {
 
 
 
-      if(profile?.role !== "admin"){
 
 
-        alert("Access denied");
+      if(profile.role !== "admin"){
+
+
+        alert(
+          "Access denied"
+        );
+
 
         router.replace("/");
 
+
         return;
 
+
       }
+
+
 
 
 
@@ -105,19 +146,26 @@ export default function AdminPage() {
 
 
 
+
+
     }
 
     catch(err){
 
+
       console.log(err);
 
+
       router.replace("/");
+
 
     }
 
     finally{
 
+
       setLoading(false);
+
 
     }
 
@@ -132,11 +180,10 @@ export default function AdminPage() {
 
   if(loading){
 
+
     return (
 
-      <div style={{
-        padding:20
-      }}>
+      <div style={{padding:20}}>
 
         Checking Admin Access...
 
@@ -150,11 +197,17 @@ export default function AdminPage() {
 
 
 
+
+
   if(!allowed){
+
 
     return null;
 
+
   }
+
+
 
 
 
