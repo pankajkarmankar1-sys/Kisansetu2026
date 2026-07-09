@@ -6,11 +6,14 @@ export default function Dashboard({
   onBookings,
   onProfile,
   onNotifications,
+  onSubscription,
   onLogout,
 }) {
 
+
   const documentsApproved =
     user?.document_status === "approved";
+
 
 
   return (
@@ -31,6 +34,8 @@ export default function Dashboard({
       <h2>
         Welcome {user?.name || "User"}
       </h2>
+
+
 
 
       {
@@ -56,6 +61,8 @@ export default function Dashboard({
 
 
 
+
+
       <div
         style={{
           display:"grid",
@@ -63,6 +70,7 @@ export default function Dashboard({
           marginTop:25,
         }}
       >
+
 
 
         <button
@@ -78,6 +86,25 @@ export default function Dashboard({
 
 
 
+
+
+        <button
+          onClick={onSubscription}
+          style={{
+            padding:15,
+            background:"#f59e0b",
+            color:"#fff",
+            border:"none",
+            borderRadius:10,
+          }}
+        >
+          👑 Subscription
+        </button>
+
+
+
+
+
         <button
           onClick={onBookings}
           style={{
@@ -86,6 +113,7 @@ export default function Dashboard({
         >
           📋 My Bookings
         </button>
+
 
 
 
@@ -100,6 +128,7 @@ export default function Dashboard({
 
 
 
+
         <button
           onClick={onNotifications}
           style={{
@@ -108,6 +137,7 @@ export default function Dashboard({
         >
           🔔 Notifications
         </button>
+
 
 
 
@@ -122,6 +152,7 @@ export default function Dashboard({
         >
           Logout
         </button>
+
 
 
       </div>
