@@ -54,13 +54,35 @@ export default function DashboardPage() {
 
         id:user.id,
 
+
         name:
           profile?.name ||
           "Kisan",
 
+
         phone:
           profile?.phone ||
           user.phone,
+
+
+        document_status:
+          profile?.document_status ||
+          "pending",
+
+
+        aadhaar_front:
+          profile?.aadhaar_front ||
+          null,
+
+
+        aadhaar_back:
+          profile?.aadhaar_back ||
+          null,
+
+
+        satbara_7_12:
+          profile?.satbara_7_12 ||
+          null,
 
       });
 
@@ -106,21 +128,39 @@ export default function DashboardPage() {
 
       user={user}
 
-      onBook={()=>
-        router.push("/book")
-      }
+
+      onBook={()=>{
+
+        if(user?.document_status !== "approved"){
+
+          alert(
+            "Documents approval ke baad booking open hogi"
+          );
+
+          return;
+
+        }
+
+
+        router.push("/book");
+
+      }}
+
 
       onBookings={()=>
         router.push("/bookings")
       }
 
+
       onProfile={()=>
         router.push("/profile")
       }
 
+
       onNotifications={()=>
         router.push("/notifications")
       }
+
 
       onLogout={logout}
 
