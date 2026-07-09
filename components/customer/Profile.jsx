@@ -1,114 +1,228 @@
-import { useState, useEffect } from "react";
-import { sbGetUser, sbSaveUser } from "../../lib/database";
+import React from "react";
+import SubscriptionStatus from "./SubscriptionStatus";
 
-export default function Profile({ user }) {
 
-  const [profile, setProfile] = useState({
-    name: "",
-    village: "",
-    farmAddress: "",
-    acres: "",
-  });
+export default function Profile({
+  user,
+  back,
+}) {
 
-  useEffect(() => {
-    if (user?.id) {
-      loadProfile();
-    }
-  }, [user]);
-
-  async function loadProfile() {
-    try {
-      const data = await sbGetUser(user.id);
-
-      if (data) {
-        setProfile({
-          name: data.name || "",
-          village: data.village || "",
-          farmAddress: data.farm_address || "",
-          acres: data.acres || "",
-        });
-      }
-    } catch (e) {
-      console.error("Profile Load Error:", e);
-    }
-  }
-
-  async function save() {
-    try {
-      await sbSaveUser({
-        id: user.id,
-        phone: user.phone || "",
-        ...profile,
-      });
-
-      alert("✅ Profile Updated Successfully");
-    } catch (e) {
-      alert(e.message);
-    }
-  }
 
   return (
-    <div style={{ padding: 20 }}>
 
-      <h2>👤 My Profile</h2>
+    <div
 
-      <input
-        placeholder="Name"
-        value={profile.name}
-        onChange={(e) =>
-          setProfile({
-            ...profile,
-            name: e.target.value,
-          })
-        }
-      />
+      style={{
 
-      <br /><br />
+        padding:20,
 
-      <input
-        placeholder="Village"
-        value={profile.village}
-        onChange={(e) =>
-          setProfile({
-            ...profile,
-            village: e.target.value,
-          })
-        }
-      />
+        background:"#f5f7fb",
 
-      <br /><br />
+        minHeight:"100vh",
 
-      <input
-        placeholder="Farm Address"
-        value={profile.farmAddress}
-        onChange={(e) =>
-          setProfile({
-            ...profile,
-            farmAddress: e.target.value,
-          })
-        }
-      />
+      }}
 
-      <br /><br />
+    >
 
-      <input
-        type="number"
-        placeholder="Total Acres"
-        value={profile.acres}
-        onChange={(e) =>
-          setProfile({
-            ...profile,
-            acres: e.target.value,
-          })
-        }
-      />
 
-      <br /><br />
 
-      <button onClick={save}>
-        Save Profile
+      <button
+
+        onClick={back}
+
+        style={{
+
+          padding:10,
+
+          marginBottom:20,
+
+        }}
+
+      >
+
+        ← Back
+
       </button>
 
+
+
+
+
+
+      <h1>
+        👤 Farmer Profile
+      </h1>
+
+
+
+
+
+
+      <div
+
+        style={{
+
+          background:"#fff",
+
+          padding:20,
+
+          borderRadius:12,
+
+          marginTop:20,
+
+        }}
+
+      >
+
+
+
+        <p>
+
+          👨‍🌾 Name:
+
+          {" "}
+
+          {user?.name || "-"}
+
+        </p>
+
+
+
+
+        <p>
+
+          📱 Mobile:
+
+          {" "}
+
+          {user?.phone || "-"}
+
+        </p>
+
+
+
+
+        <p>
+
+          🏠 State:
+
+          {" "}
+
+          {user?.state || "-"}
+
+        </p>
+
+
+
+
+        <p>
+
+          📍 District:
+
+          {" "}
+
+          {user?.district || "-"}
+
+        </p>
+
+
+
+
+        <p>
+
+          📍 Taluka:
+
+          {" "}
+
+          {user?.taluka || "-"}
+
+        </p>
+
+
+
+
+        <p>
+
+          🌱 Village:
+
+          {" "}
+
+          {user?.village || "-"}
+
+        </p>
+
+
+
+
+        <p>
+
+          🌾 Farm Address:
+
+          {" "}
+
+          {user?.farm_address || "-"}
+
+        </p>
+
+
+
+
+        <p>
+
+          📐 Acres:
+
+          {" "}
+
+          {user?.acres || 0}
+
+        </p>
+
+
+
+
+        <p>
+
+          📄 Documents:
+
+          {" "}
+
+          {
+
+          user?.document_status === "approved"
+
+          ?
+
+          "✅ Approved"
+
+          :
+
+          "⏳ Pending"
+
+          }
+
+        </p>
+
+
+
+
+      </div>
+
+
+
+
+
+
+      <SubscriptionStatus
+
+        user={user}
+
+      />
+
+
+
+
     </div>
+
   );
+
 }
