@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import OTPLogin from "../components/customer/OTPLogin";
 
 export default function LoginPage() {
+
   const router = useRouter();
 
   function handleSuccess(profile) {
@@ -18,19 +19,30 @@ export default function LoginPage() {
       return;
     }
 
-    // Farmer
+    if (!profile || !profile.name) {
 
-    if (!profile || !profile.name || profile.name === "Kisan") {
-      router.replace("/registration");
+      const phone =
+        profile?.phone || "";
+
+      router.replace(
+        `/registration?phone=${phone}`
+      );
+
       return;
+
     }
 
     router.replace("/dashboard");
+
   }
 
+
   return (
+
     <OTPLogin
       onSuccess={handleSuccess}
     />
+
   );
+
 }
