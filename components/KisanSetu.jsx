@@ -1,17 +1,9 @@
 "use client";
+
 import { useState, useRef, useEffect } from "react";
-
 import { supabase } from "../lib/supabase";
-const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://dzzxapuektnamgabdxlq.supabase.co";
-const SUPA_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6enhhcHVla3RuYW1nYWJkeGxxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3NDY3MTQsImV4cCI6MjA5NzMyMjcxNH0.j1X9GrQDaFIfEoKyIdauzb-m1_v51pkN6nVcJeob-fM";
-let supa;
-try {
-  supa = createClient(SUPA_URL, SUPA_KEY);
-} catch (e) {
-  console.error("Supabase init failed:", e);
-  supa = { auth: { signInWithOtp: async()=>({error:{message:"Supabase not configured"}}), verifyOtp: async()=>({error:{message:"Supabase not configured"}}) }, from: ()=>({ upsert: async()=>({error:null}), select: ()=>({eq:()=>({maybeSingle: async()=>({data:null})})}) }) };
-}
 
+const supa = supabase;
 // ─── Supabase Auth Helpers ────────────────────────────────────────────────
 async function sbSendOTP(phone){
 
