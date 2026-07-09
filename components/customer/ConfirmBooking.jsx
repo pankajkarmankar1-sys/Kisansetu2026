@@ -123,7 +123,43 @@ export default function ConfirmBooking({
       const booking = {
 
 
-        customer_id:
+        customer_id:customer_name:
+  user.user_metadata?.name || "Kisan",
+
+customer_phone:
+  user.phone || "",
+
+farm_name:
+  bookingData?.selKhet?.name || "",
+
+state:
+  bookingData?.selKhet?.state || "",
+
+district:
+  bookingData?.selKhet?.district || "",
+
+taluka:
+  bookingData?.selKhet?.taluka || "",
+
+village:
+  bookingData?.selKhet?.village || "",
+
+survey_no:
+  bookingData?.selKhet?.surveyNo || "",
+
+farm_acres:
+  Number(
+    bookingData?.selKhet?.acres || 0
+  ),
+
+farm_lat:
+  bookingData?.selKhet?.location?.lat || null,
+
+farm_lng:
+  bookingData?.selKhet?.location?.lng || null,
+
+booking_date:
+  bookingData?.date || null,
           user.id,
 
 
