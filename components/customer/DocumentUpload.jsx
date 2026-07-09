@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { supabase } from "../../lib/supabase";
 
 
-export default function DocumentUpload({
+export default function DocumentsUpload({
   onDone,
 }) {
 
@@ -17,10 +17,12 @@ export default function DocumentUpload({
 
 
 
+
   async function uploadFile(file,folder){
 
 
-    if(!file) return null;
+    if(!file)
+      return null;
 
 
 
@@ -28,17 +30,18 @@ export default function DocumentUpload({
       data:{
         user
       }
-    } = await supabase.auth.getUser();
+    } =
+    await supabase.auth.getUser();
 
 
 
-    if(!user){
 
+
+    if(!user)
       throw new Error(
         "Login required"
       );
 
-    }
 
 
 
@@ -50,9 +53,11 @@ export default function DocumentUpload({
 
 
 
+
     const {
       error
-    } = await supabase.storage
+    } =
+    await supabase.storage
       .from("customer-documents")
       .upload(
         fileName,
@@ -61,11 +66,11 @@ export default function DocumentUpload({
 
 
 
-    if(error){
 
+
+    if(error)
       throw error;
 
-    }
 
 
 
@@ -82,10 +87,13 @@ export default function DocumentUpload({
 
 
 
+
     return data.publicUrl;
 
 
   }
+
+
 
 
 
@@ -116,11 +124,13 @@ export default function DocumentUpload({
 
 
 
+
       setLoading(true);
 
       setMsg(
         "Uploading..."
       );
+
 
 
 
@@ -135,6 +145,7 @@ export default function DocumentUpload({
 
 
 
+
       const backUrl =
         await uploadFile(
           aadhaarBack,
@@ -143,11 +154,14 @@ export default function DocumentUpload({
 
 
 
+
       const satbaraUrl =
         await uploadFile(
           satbara,
           "7-12"
         );
+
+
 
 
 
@@ -174,17 +188,24 @@ export default function DocumentUpload({
       .from("profiles")
       .update({
 
-        aadhaar_front:frontUrl,
-
-        aadhaar_back:backUrl,
-
-        satbara_7_12:satbaraUrl,
+        aadhaar_front:
+          frontUrl,
 
 
-        document_status:"pending",
+        aadhaar_back:
+          backUrl,
 
 
-        document_reject_reason:null
+        satbara_7_12:
+          satbaraUrl,
+
+
+        document_status:
+          "pending",
+
+
+        document_reject_reason:
+          null
 
 
       })
@@ -192,6 +213,9 @@ export default function DocumentUpload({
         "auth_user_id",
         user.id
       );
+
+
+
 
 
 
@@ -204,29 +228,38 @@ export default function DocumentUpload({
 
 
 
-      // notify admin
+
 
       await supabase
       .from("notifications")
-      .insert({
+      .insert([{
 
-        user_id:user.id,
+        user_id:
+          user.id,
+
 
         title:
-        "📄 Documents Submitted",
+          "📄 Documents Submitted",
+
 
         message:
-        "Aadhaar and 7/12 documents submitted for verification."
+          "Your documents are submitted. Admin verification pending."
 
-      });
+
+      }]);
+
+
+
 
 
 
 
 
       setMsg(
-        "Documents uploaded successfully"
+        "✅ Documents uploaded successfully"
       );
+
+
 
 
 
@@ -238,10 +271,15 @@ export default function DocumentUpload({
 
 
 
+
+
+
     }
     catch(err){
 
+
       console.log(err);
+
 
       setMsg(
         err.message
@@ -251,12 +289,16 @@ export default function DocumentUpload({
     }
     finally{
 
+
       setLoading(false);
+
 
     }
 
 
   }
+
+
 
 
 
@@ -271,6 +313,8 @@ export default function DocumentUpload({
       }}
     >
 
+
+
       <h2>
         📄 Upload Documents
       </h2>
@@ -278,9 +322,11 @@ export default function DocumentUpload({
 
 
 
+
       <p>
         Aadhaar Front
       </p>
+
 
       <input
 
@@ -300,9 +346,11 @@ export default function DocumentUpload({
 
 
 
+
       <p>
         Aadhaar Back
       </p>
+
 
       <input
 
@@ -326,6 +374,7 @@ export default function DocumentUpload({
       <p>
         7/12 Document
       </p>
+
 
       <input
 
@@ -353,14 +402,23 @@ export default function DocumentUpload({
 
         disabled={loading}
 
+
         style={{
+
           marginTop:20,
+
           width:"100%",
+
           padding:14,
+
           background:"#16a34a",
+
           color:"#fff",
+
           border:"none",
+
           borderRadius:10
+
         }}
 
       >
@@ -373,14 +431,21 @@ export default function DocumentUpload({
           "✅ Submit Documents"
         }
 
+
       </button>
 
 
 
 
-      <p>
-        {msg}
-      </p>
+
+      {
+        msg &&
+
+        <p>
+          {msg}
+        </p>
+      }
+
 
 
     </div>
