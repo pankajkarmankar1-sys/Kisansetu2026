@@ -29,40 +29,20 @@ export default function BookPage() {
 
 
       const {
-        data:{
-          user:authUser
-        }
-      } = await supabase.auth.getUser();
+  data: profile,
+  error: profileError,
+} = await supabase
+  .from("profiles")
+  .select("document_status")
+  .eq("auth_user_id", authUser.id)
+  .limit(1)
+  .single();
 
-
-
-      if(!authUser){
-
-        router.replace("/");
-
-        return;
-
-      }
-
-
-
-      setUser(authUser);
-
-
-
-
-      // Check farmer document approval
-
-      const {
-        data:profile
-      } = await supabase
-        .from("profiles")
-        .select("document_status")
-        .eq(
-          "auth_user_id",
-          authUser.id
-        )
-        .maybeSingle();
+if (profileError) {
+  console.log(profileError);
+  router.replace("/documents");
+  return;
+}
 
 
 
