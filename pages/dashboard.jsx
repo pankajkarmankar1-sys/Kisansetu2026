@@ -62,21 +62,30 @@ export default function DashboardPage() {
 
 
       const {
+  data: profile,
+  error: profileError,
+} = await supabase
+  .from("profiles")
+  .select(`
+    name,
+    phone,
+    document_status,
+    aadhaar_front,
+    aadhaar_back,
+    satbara_7_12,
+    state,
+    district,
+    taluka,
+    village,
+    farm_address,
+    acres
+  `)
+  .eq("auth_user_id", user.id)
+  .maybeSingle();
 
-        data:profile
-
-      } = await supabase
-
-        .from("profiles")
-
-        .select("*")
-
-        .eq(
-          "auth_user_id",
-          user.id
-        )
-
-        .maybeSingle();
+if (profileError) {
+  console.log(profileError);
+}
 
 
 
