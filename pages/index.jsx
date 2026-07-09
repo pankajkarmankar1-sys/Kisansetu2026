@@ -4,22 +4,15 @@ import { useRouter } from "next/router";
 
 export default function Page(){
 
-
   const router = useRouter();
 
 
-
-
   function selectRole(role){
-
 
     localStorage.setItem(
       "role",
       role
     );
-
-
-
 
 
     if(role==="farmer"){
@@ -29,32 +22,20 @@ export default function Page(){
     }
 
 
-
-
-
-    if(role==="driver"){
+    else if(role==="driver"){
 
       router.push("/driver/login");
 
     }
 
 
-
-
-
-    if(role==="admin"){
+    else if(role==="admin"){
 
       router.push("/admin/login");
 
     }
 
-
-
   }
-
-
-
-
 
 
 
@@ -62,27 +43,23 @@ export default function Page(){
 
     <>
 
-
       <Head>
 
         <title>
           KisanSetu
         </title>
 
-
         <meta
-
           name="viewport"
-
           content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"
-
         />
 
+        <meta
+          name="theme-color"
+          content="#16a34a"
+        />
 
       </Head>
-
-
-
 
 
 
@@ -105,11 +82,9 @@ export default function Page(){
       >
 
 
-
         <h1>
           🚜 KisanSetu
         </h1>
-
 
 
         <h3>
@@ -119,64 +94,42 @@ export default function Page(){
 
 
 
-
-
-
         <button
-
-          onClick={()=>selectRole("farmer")}
-
+          onClick={()=>
+            selectRole("farmer")
+          }
           style={btn}
-
         >
-
           👨‍🌾 Farmer Login
-
         </button>
 
 
 
 
-
-
-
         <button
-
-          onClick={()=>selectRole("driver")}
-
+          onClick={()=>
+            selectRole("driver")
+          }
           style={btn}
-
         >
-
           🚜 Driver Login
-
         </button>
-
-
-
 
 
 
 
         <button
-
-          onClick={()=>selectRole("admin")}
-
+          onClick={()=>
+            selectRole("admin")
+          }
           style={btn}
-
         >
-
           👨‍💼 Admin Login
-
         </button>
-
-
-
 
 
 
       </div>
-
 
 
     </>
@@ -187,30 +140,20 @@ export default function Page(){
 
 
 
-
-
 const btn={
-
 
   width:"100%",
 
-
   padding:15,
-
 
   margin:"10px 0",
 
-
   borderRadius:12,
-
 
   border:"none",
 
-
   fontSize:18,
 
-
   cursor:"pointer"
-
 
 };
