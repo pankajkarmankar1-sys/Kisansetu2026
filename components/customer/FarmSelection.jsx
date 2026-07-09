@@ -6,32 +6,37 @@ export default function FarmSelection({
   selKhet,
   setSelKhet,
   next,
+  back,
 }) {
 
-  const [farms, setFarms] = useState([]);
+  const [farm, setFarm] = useState(null);
   const [loading, setLoading] = useState(true);
 
 
   useEffect(() => {
 
-    loadFarms();
+    loadFarm();
 
   }, []);
 
 
 
-  async function loadFarms(){
+  async function loadFarm() {
 
-    try{
+    try {
 
       const {
-        data:{user:authUser}
+        data:{
+          user:authUser
+        }
       } = await supabase.auth.getUser();
+
 
 
       if(!authUser){
         return;
       }
+
 
 
       const {
@@ -40,16 +45,17 @@ export default function FarmSelection({
       } = await supabase
         .from("profiles")
         .select("*")
-        .eq("auth_user_id", authUser.id);
+        .eq("auth_user_id", authUser.id)
+        .single();
 
 
 
-      if(error)
+      if(error){
         throw error;
+      }
 
 
-
-      setFarms(data || []);
+      setFarm(data);
 
 
     }
@@ -68,6 +74,18 @@ export default function FarmSelection({
 
 
 
+  if(loading){
+
+    return (
+      <h3>
+        Loading Farm...
+      </h3>
+    );
+
+  }
+
+
+
   return (
 
     <div
@@ -77,51 +95,93 @@ export default function FarmSelection({
     >
 
       <h2>
-        🌾 Select Farm
+        🌾 Select Your Farm
       </h2>
 
 
+
       {
-        loading
-        ?
-        <p>Loading farms...</p>
-        :
-        farms.map((farm)=>(
+        farm ? (
 
-          <button
-
-            key={farm.id}
-
-            onClick={()=>{
-              setSelKhet(farm);
-              next();
-            }}
-
+          <div
             style={{
-              display:"block",
-              width:"100%",
+              background:"#fff",
               padding:15,
-              marginBottom:10,
               borderRadius:10,
+              border:"1px solid #ddd"
             }}
-
           >
 
-            🌾 {farm.name || "My Farm"}
+            <h3>
+              {farm.name || "My Farm"}
+            </h3>
 
-            <br/>
 
-            {farm.village}
+            <p>
+              📍 Village: {farm.village || "-"}
+            </p>
 
-            <br/>
 
-            {farm.acres} Acre
+            <p>
+              🌾 Acres: {farm.acres || 0}
+            </p>
 
-          </button>
 
-        ))
+            <p>
+              🏡 Address: {farm.farm_address || "-"}
+            </p>
+
+
+
+            <button
+
+              onClick={()=>{
+
+                setSelKhet(farm);
+
+                next();
+
+              }}
+
+              style={{
+                width:"100%",
+                padding:14,
+                background:"#16a34a",
+                color:"#fff",
+                border:"none",
+                borderRadius:10
+              }}
+
+            >
+
+              ✅ Select This Farm
+
+            </button>
+
+
+          </div>
+
+        ) : (
+
+          <p>
+            No farm profile found
+          </p>
+
+        )
 
       }
+
+
+
+      <button
+        onClick={back}
+        style={{
+          marginTop:15,
+          padding:10
+        }}
+      >
+        ← Back
+      </button>
 
 
     </div>
