@@ -15,7 +15,8 @@ export default function AdminDashboard() {
   const router = useRouter();
 
 
-  async function logout() {
+
+  async function logout(){
 
     await supabase.auth.signOut();
 
@@ -24,6 +25,7 @@ export default function AdminDashboard() {
     router.replace("/");
 
   }
+
 
 
 
@@ -38,28 +40,50 @@ export default function AdminDashboard() {
     >
 
 
+
       <AdminSidebar
+
         onLogout={logout}
+
       />
 
 
 
+
+
       <div
+
         style={{
+
           flex:1,
+
           padding:20,
+
           overflowY:"auto",
+
         }}
+
       >
 
 
+
+
         <h1
+
           style={{
+
             marginBottom:20,
+
           }}
+
         >
+
           👨‍💼 Admin Dashboard
+
         </h1>
+
+
+
 
 
 
@@ -67,22 +91,18 @@ export default function AdminDashboard() {
 
 
 
-        <div
-          style={{
-            marginTop:30,
-          }}
-        >
 
-          <FarmerDocuments />
-
-        </div>
 
 
 
         <div
+
           style={{
+
             marginTop:30,
+
           }}
+
         >
 
           <BookingList />
@@ -92,10 +112,17 @@ export default function AdminDashboard() {
 
 
 
+
+
+
         <div
+
           style={{
+
             marginTop:30,
+
           }}
+
         >
 
           <DriverList />
@@ -104,7 +131,32 @@ export default function AdminDashboard() {
 
 
 
+
+
+
+
+
+        <div
+
+          style={{
+
+            marginTop:30,
+
+          }}
+
+        >
+
+          <FarmerDocuments />
+
+        </div>
+
+
+
+
+
+
       </div>
+
 
 
     </div>
