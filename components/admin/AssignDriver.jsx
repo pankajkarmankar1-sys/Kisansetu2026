@@ -1,23 +1,33 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 
+
 export default function AssignDriver({ booking }) {
 
-  const [drivers, setDrivers] = useState([]);
-  const [selectedDriver, setSelectedDriver] = useState("");
-  const [loading, setLoading] = useState(false);
+
+  const [drivers,setDrivers] = useState([]);
+
+  const [selectedDriver,setSelectedDriver] = useState("");
+
+  const [loading,setLoading] = useState(false);
 
 
 
-  useEffect(() => {
+
+
+
+  useEffect(()=>{
 
     loadDrivers();
 
-  }, []);
+  },[]);
 
 
 
-  useEffect(() => {
+
+
+
+  useEffect(()=>{
 
     if(booking){
 
@@ -27,7 +37,11 @@ export default function AssignDriver({ booking }) {
 
     }
 
-  }, [booking]);
+  },[booking]);
+
+
+
+
 
 
 
@@ -35,21 +49,39 @@ export default function AssignDriver({ booking }) {
 
   async function loadDrivers(){
 
+
     try{
 
 
       const {
+
         data,
+
         error
+
       } = await supabase
 
       .from("profiles")
 
-      .select("*")
+      .select(`
 
-      .eq("role","driver")
+        id,
+        auth_user_id,
+        name,
+        phone
 
-      .order("name");
+      `)
+
+      .eq(
+        "role",
+        "driver"
+      )
+
+      .order(
+        "name"
+      );
+
+
 
 
 
@@ -69,7 +101,11 @@ export default function AssignDriver({ booking }) {
 
     }
 
+
   }
+
+
+
 
 
 
@@ -79,45 +115,65 @@ export default function AssignDriver({ booking }) {
   async function assignDriver(){
 
 
-    if(!booking?.id){
-
-      alert("Booking not found");
-
-      return;
-
-    }
-
-
-
-    if(!selectedDriver){
-
-      alert("Please select driver");
-
-      return;
-
-    }
-
-
-
-    const driver =
-      drivers.find(
-        d=>d.id===selectedDriver
-      );
-
-
-
-    if(!driver){
-
-      alert("Driver not found");
-
-      return;
-
-    }
-
-
-
-
     try{
+
+
+      if(!booking?.id){
+
+        alert(
+          "Booking not found"
+        );
+
+        return;
+
+      }
+
+
+
+
+
+      if(!selectedDriver){
+
+        alert(
+          "Select Driver"
+        );
+
+        return;
+
+      }
+
+
+
+
+
+
+
+      const driver =
+        drivers.find(
+          d=>d.id===selectedDriver
+        );
+
+
+
+
+
+
+
+      if(!driver){
+
+        alert(
+          "Driver not found"
+        );
+
+        return;
+
+      }
+
+
+
+
+
+
 
 
       setLoading(true);
@@ -125,27 +181,47 @@ export default function AssignDriver({ booking }) {
 
 
 
+
+
+
       const {
+
         error
+
       } = await supabase
 
       .from("bookings")
 
       .update({
 
-        driver_id:driver.id,
+        driver_id:
+          driver.id,
+
 
         driver_name:
-        driver.name || "",
+          driver.name || "",
+
 
         driver_phone:
-        driver.phone || "",
+          driver.phone || "",
 
-        status:"Assigned",
+
+        status:
+          "Assigned"
+
 
       })
 
-      .eq("id",booking.id);
+      .eq(
+
+        "id",
+
+        booking.id
+
+      );
+
+
+
 
 
 
@@ -157,20 +233,29 @@ export default function AssignDriver({ booking }) {
 
 
 
+
+
       await supabase
 
       .from("notifications")
 
       .insert([{
 
-        user_id:driver.id,
+        user_id:
+          driver.auth_user_id,
 
-        title:"🚜 New Booking Assigned",
+
+        title:
+          "🚜 New Booking Assigned",
+
 
         message:
-        `New ${booking.service_name} booking assigned to you.`
+          `${booking.service_name} booking assigned to you.`
 
       }]);
+
+
+
 
 
 
@@ -186,12 +271,17 @@ export default function AssignDriver({ booking }) {
 
         .insert([{
 
-          user_id:booking.customer_id,
+          user_id:
+            booking.customer_id,
 
-          title:"🚜 Driver Assigned",
+
+          title:
+            "🚜 Driver Assigned",
+
 
           message:
-          `${driver.name} assigned for your booking.`
+            `${driver.name} assigned for your booking.`
+
 
         }]);
 
@@ -202,21 +292,32 @@ export default function AssignDriver({ booking }) {
 
 
 
-      alert("✅ Driver Assigned Successfully");
+
+      alert(
+        "✅ Driver Assigned Successfully"
+      );
+
+
 
 
 
     }
     catch(err){
 
-      console.error(err);
 
-      alert(err.message);
+      console.log(err);
+
+      alert(
+        err.message
+      );
+
 
     }
     finally{
 
+
       setLoading(false);
+
 
     }
 
@@ -228,15 +329,24 @@ export default function AssignDriver({ booking }) {
 
 
 
+
+
   return (
 
     <div
+
       style={{
+
         display:"flex",
+
         gap:10,
+
         alignItems:"center"
+
       }}
+
     >
+
 
 
       <select
@@ -244,15 +354,21 @@ export default function AssignDriver({ booking }) {
         value={selectedDriver}
 
         onChange={(e)=>
-          setSelectedDriver(e.target.value)
+          setSelectedDriver(
+            e.target.value
+          )
         }
 
         style={{
+
           padding:10,
+
           flex:1
+
         }}
 
       >
+
 
 
         <option value="">
@@ -261,27 +377,33 @@ export default function AssignDriver({ booking }) {
 
 
 
+
+
         {
-        drivers.map(driver=>(
+          drivers.map(driver=>(
 
-          <option
 
-            key={driver.id}
+            <option
 
-            value={driver.id}
+              key={driver.id}
 
-          >
+              value={driver.id}
 
-            {driver.name || driver.phone}
+            >
 
-          </option>
+              {driver.name || driver.phone}
 
-        ))
+            </option>
+
+
+          ))
         }
 
 
 
       </select>
+
+
 
 
 
@@ -309,15 +431,15 @@ export default function AssignDriver({ booking }) {
       >
 
         {
-        loading
-        ?
-        "Assigning..."
-        :
-        "Assign"
+          loading
+          ?
+          "Assigning..."
+          :
+          "Assign"
         }
 
-
       </button>
+
 
 
 
