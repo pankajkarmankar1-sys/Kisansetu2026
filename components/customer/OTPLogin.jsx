@@ -14,42 +14,86 @@ export default function OTPLogin({ onSuccess }) {
       return;
     }
 
-    setLoading(true);
-    setMsg("");
+    try {
+      setLoading(true);
+      setMsg("");
 
-    const { error } = await supabase.auth.signInWithOtp({
-      phone: "+91" + phone,
-    });
+      const { error } = await supabase.auth.signInWithOtp({
+        phone: "+91" + phone,
+      });
 
-    setLoading(false);
+      if (error) {
+        throw error;
+      }
 
-    if (error) {
-      setMsg(error.message);
-    } else {
       setStep(2);
       setMsg("OTP Sent Successfully");
+
+    } catch (err) {
+      setMsg(err.message);
+    } finally {
+      setLoading(false);
     }
   }
 
   async function verifyOTP() {
-    setLoading(true);
+    try {
+      setLoading(true);
+      setMsg("");
 
-    const { error } = await supabase.auth.verifyOtp({
-      phone: "+91" + phone,
-      token: otp,
-      type: "sms",
-    });
+      const { error } = await supabase.auth.verifyOtp({
+        phone: "+91" + phone,
+        token: otp,
+        type: "sms",
+      });
 
-    setLoading(false);
+      if (error) {
+        throw error;
+      }
 
-    if (error) {
-      setMsg(error.message);
-    } else {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("auth_user_id", user.id)
+        .maybeSingle();
+
+      if (!profile) {
+        const { error: insertError } = await supabase
+          .from("profiles")
+          .insert([
+            {
+              auth_user_id: user.id,
+              phone: user.phone,
+              role: "kisan",
+              name: "Kisan",
+            },
+          ]);
+
+        if (insertError) {
+          throw insertError;
+        }
+      }
+
       setMsg("Login Success");
-      if (onSuccess) onSuccess();
+
+      if (onSuccess) {
+        onSuccess();
+      }
+
+    } catch (err) {
+      setMsg(err.message);
+    } finally {
+      setLoading(false);
     }
   }
-
   return (
     <div style={{ padding: 20 }}>
       <h2>KisanSetu Login</h2>
@@ -68,7 +112,10 @@ export default function OTPLogin({ onSuccess }) {
           <br />
           <br />
 
-          <button onClick={sendOTP} disabled={loading}>
+          <button
+            onClick={sendOTP}
+            disabled={loading}
+          >
             {loading ? "Sending..." : "Send OTP"}
           </button>
         </>
@@ -88,11 +135,16 @@ export default function OTPLogin({ onSuccess }) {
           <br />
           <br />
 
-          <button onClick={verifyOTP} disabled={loading}>
+          <button
+            onClick={verifyOTP}
+            disabled={loading}
+          >
             {loading ? "Verifying..." : "Verify OTP"}
           </button>
         </>
       )}
+
+      <br />
 
       <p>{msg}</p>
     </div>
