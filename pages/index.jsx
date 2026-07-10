@@ -1,53 +1,22 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
 
-
-export default function Page(){
+export default function Page() {
 
   const router = useRouter();
 
+  function selectRole(role) {
 
-  function selectRole(role){
+    localStorage.setItem("role", role);
 
-    localStorage.setItem(
-      "role",
-      role
-    );
-
-
-    if(role==="farmer"){
-
-      router.push("/login");
-
-    }
-
-
-    else if(role==="driver"){
-
-      router.push("/driver/login");
-
-    }
-
-
-    else if(role==="admin"){
-
-      router.push("/admin/login");
-
-    }
+    router.push("/login");
 
   }
 
-
-
   return (
-
     <>
-
       <Head>
-
-        <title>
-          KisanSetu
-        </title>
+        <title>KisanSetu</title>
 
         <meta
           name="viewport"
@@ -58,102 +27,54 @@ export default function Page(){
           name="theme-color"
           content="#16a34a"
         />
-
       </Head>
 
-
-
       <div
-
         style={{
-
-          minHeight:"100vh",
-
-          padding:20,
-
-          background:"#16a34a",
-
-          color:"#fff",
-
-          textAlign:"center"
-
+          minHeight: "100vh",
+          padding: 20,
+          background: "#16a34a",
+          color: "#fff",
+          textAlign: "center",
         }}
-
       >
 
+        <h1>🚜 KisanSetu</h1>
 
-        <h1>
-          🚜 KisanSetu
-        </h1>
-
-
-        <h3>
-          Select Login Type
-        </h3>
-
-
-
+        <h3>Select Login Type</h3>
 
         <button
-          onClick={()=>
-            selectRole("farmer")
-          }
+          onClick={() => selectRole("farmer")}
           style={btn}
         >
           👨‍🌾 Farmer Login
         </button>
 
-
-
-
         <button
-          onClick={()=>
-            selectRole("driver")
-          }
+          onClick={() => selectRole("driver")}
           style={btn}
         >
           🚜 Driver Login
         </button>
 
-
-
-
         <button
-          onClick={()=>
-            selectRole("admin")
-          }
+          onClick={() => selectRole("admin")}
           style={btn}
         >
           👨‍💼 Admin Login
         </button>
 
-
-
       </div>
-
-
     </>
-
   );
-
 }
 
-
-
-const btn={
-
-  width:"100%",
-
-  padding:15,
-
-  margin:"10px 0",
-
-  borderRadius:12,
-
-  border:"none",
-
-  fontSize:18,
-
-  cursor:"pointer"
-
+const btn = {
+  width: "100%",
+  padding: 15,
+  margin: "10px 0",
+  borderRadius: 12,
+  border: "none",
+  fontSize: 18,
+  cursor: "pointer",
 };
