@@ -1,6 +1,4 @@
 import { useRouter } from "next/router";
-import DocumentsUpload from "../components/customer/DocumentsUpload";
-
 
 export default function DocumentsPage(){
 
