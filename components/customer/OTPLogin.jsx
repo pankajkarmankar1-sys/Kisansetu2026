@@ -15,6 +15,10 @@ export default function OTPLogin({
 
   function getFullPhone() {
 
+    if (phone.startsWith("+")) {
+      return phone;
+    }
+
     if (phone.startsWith("91")) {
       return "+" + phone;
     }
@@ -27,7 +31,7 @@ export default function OTPLogin({
 
   async function sendOTP() {
 
-    if (phone.length !== 10 && phone.length !== 12) {
+    if (phone.length < 10) {
 
       setMsg("Enter valid mobile number");
 
@@ -42,7 +46,7 @@ export default function OTPLogin({
       setMsg("");
 
 
-      const { data, error } =
+      const { error } =
         await supabase.auth.signInWithOtp({
 
           phone: getFullPhone(),
@@ -52,11 +56,6 @@ export default function OTPLogin({
           }
 
         });
-
-
-
-      console.log("OTP DATA:", data);
-      console.log("OTP ERROR:", error);
 
 
 
@@ -70,19 +69,14 @@ export default function OTPLogin({
 
       setStep(2);
 
-      setMsg(
-        "OTP Sent Successfully"
-      );
+      setMsg("OTP Sent Successfully");
 
 
-    } catch (err) {
-
+    } catch(err) {
 
       console.log(err);
 
-      setMsg(
-        err.message
-      );
+      setMsg(err.message);
 
 
     } finally {
@@ -101,11 +95,8 @@ export default function OTPLogin({
 
     try {
 
-
       setLoading(true);
-
       setMsg("");
-
 
 
       const { error } =
@@ -115,13 +106,13 @@ export default function OTPLogin({
 
           token: otp,
 
-          type: "sms"
+          type:"sms"
 
         });
 
 
 
-      if (error) {
+      if(error){
 
         throw error;
 
@@ -133,75 +124,70 @@ export default function OTPLogin({
         data:{
           user
         }
-
       } =
       await supabase.auth.getUser();
 
 
 
+      if(!user){
 
-      if (!user) {
-
-        throw new Error(
-          "User not found"
-        );
+        throw new Error("User not found");
 
       }
 
 
 
-
       let {
-        data: profile
+        data:profile
+      } =
+      await supabase
 
-      } = await supabase
+      .from("profiles")
 
-        .from("profiles")
+      .select("*")
 
-        .select("*")
+      .eq(
+        "auth_user_id",
+        user.id
+      )
 
-        .eq(
-          "auth_user_id",
-          user.id
-        )
-
-        .maybeSingle();
-
-
+      .maybeSingle();
 
 
 
-      if (!profile) {
+
+
+      if(!profile){
 
 
         const {
           data:newProfile,
           error:createError
-
         } =
         await supabase
 
-          .from("profiles")
+        .from("profiles")
 
-          .insert([{
+        .insert([{
 
-            auth_user_id:user.id,
+          auth_user_id:user.id,
 
-            phone:getFullPhone(),
+          phone:getFullPhone(),
 
-            role:"farmer",
+          role:"farmer",
 
-            document_status:"pending"
+          document_status:"pending"
 
-          }])
+        }])
 
-          .select()
+        .select()
 
-          .single();
+        .single();
 
 
 
-        if (createError) {
+
+        if(createError){
 
           throw createError;
 
@@ -217,9 +203,7 @@ export default function OTPLogin({
 
 
 
-      setMsg(
-        "Login Success"
-      );
+      setMsg("Login Success");
 
 
 
@@ -231,14 +215,12 @@ export default function OTPLogin({
 
 
 
-    } catch(err) {
+    } catch(err){
 
 
       console.log(err);
 
-      setMsg(
-        err.message
-      );
+      setMsg(err.message);
 
 
     } finally {
@@ -246,7 +228,6 @@ export default function OTPLogin({
       setLoading(false);
 
     }
-
 
   }
 
@@ -270,8 +251,7 @@ export default function OTPLogin({
 
         borderRadius:12,
 
-        boxShadow:
-        "0 2px 10px rgba(0,0,0,.1)"
+        boxShadow:"0 2px 10px rgba(0,0,0,.1)"
 
       }}
 
@@ -287,81 +267,74 @@ export default function OTPLogin({
 
 
 
-      {
-        step === 1 &&
+      {step === 1 &&
 
-        <>
+      <>
 
+      <input
 
-          <input
+        placeholder="+917020567623"
 
-            placeholder="+91XXXXXXXXXX"
+        value={phone}
 
-            value={phone}
+        maxLength={13}
 
-            maxLength={12}
+        onChange={(e)=>{
 
-            onChange={(e)=>
+          let value = e.target.value;
 
-              setPhone(
-                e.target.value.replace(/\D/g,"")
-              )
+          value = value.replace(/[^0-9+]/g,"");
 
-            }
+          setPhone(value);
 
-            style={{
+        }}
 
-              width:"100%",
+        style={{
 
-              padding:12,
+          width:"100%",
 
-              marginTop:20
+          padding:12,
 
-            }}
+          marginTop:20
 
-          />
+        }}
 
-
-
-          <button
-
-            onClick={sendOTP}
-
-            disabled={loading}
-
-            style={{
-
-              width:"100%",
-
-              padding:12,
-
-              marginTop:20,
-
-              background:"#16a34a",
-
-              color:"#fff",
-
-              border:"none",
-
-              borderRadius:8
-
-            }}
-
-          >
-
-          {
-            loading
-            ?
-            "Sending..."
-            :
-            "Send OTP"
-          }
+      />
 
 
-          </button>
+
+      <button
+
+        onClick={sendOTP}
+
+        disabled={loading}
+
+        style={{
+
+          width:"100%",
+
+          padding:12,
+
+          marginTop:20,
+
+          background:"#16a34a",
+
+          color:"#fff",
+
+          border:"none",
+
+          borderRadius:8
+
+        }}
+
+      >
+
+      {loading ? "Sending..." : "Send OTP"}
+
+      </button>
 
 
-        </>
+      </>
 
       }
 
@@ -369,81 +342,72 @@ export default function OTPLogin({
 
 
 
-      {
-        step === 2 &&
+      {step === 2 &&
 
-        <>
+      <>
 
+      <input
 
-          <input
+        placeholder="Enter OTP"
 
-            placeholder="Enter OTP"
+        value={otp}
 
-            value={otp}
+        maxLength={6}
 
-            maxLength={6}
+        onChange={(e)=>
 
-            onChange={(e)=>
+          setOtp(
+            e.target.value.replace(/\D/g,"")
+          )
 
-              setOtp(
-                e.target.value.replace(/\D/g,"")
-              )
+        }
 
-            }
+        style={{
 
-            style={{
+          width:"100%",
 
-              width:"100%",
+          padding:12,
 
-              padding:12,
+          marginTop:20
 
-              marginTop:20
+        }}
 
-            }}
-
-          />
+      />
 
 
 
-          <button
+      <button
 
-            onClick={verifyOTP}
+        onClick={verifyOTP}
 
-            disabled={loading}
+        disabled={loading}
 
-            style={{
+        style={{
 
-              width:"100%",
+          width:"100%",
 
-              padding:12,
+          padding:12,
 
-              marginTop:20,
+          marginTop:20,
 
-              background:"#16a34a",
+          background:"#16a34a",
 
-              color:"#fff",
+          color:"#fff",
 
-              border:"none",
+          border:"none",
 
-              borderRadius:8
+          borderRadius:8
 
-            }}
+        }}
 
-          >
+      >
 
-          {
-            loading
-            ?
-            "Verifying..."
-            :
-            "Verify OTP"
-          }
+      {loading ? "Verifying..." : "Verify OTP"}
+
+      </button>
 
 
-          </button>
-
-
-        </>
+      </>
 
       }
 
@@ -462,12 +426,10 @@ export default function OTPLogin({
 
         }}>
 
-          {msg}
+        {msg}
 
         </p>
-
       }
-
 
 
     </div>
