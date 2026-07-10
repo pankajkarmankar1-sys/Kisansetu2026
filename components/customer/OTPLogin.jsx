@@ -13,11 +13,26 @@ export default function OTPLogin({
 
 
 
+  function getFullPhone() {
+
+    if (phone.startsWith("91")) {
+      return "+" + phone;
+    }
+
+    return "+91" + phone;
+
+  }
+
+
+
   async function sendOTP() {
 
-    if (phone.length !== 10) {
+    if (phone.length !== 10 && phone.length !== 12) {
+
       setMsg("Enter valid mobile number");
+
       return;
+
     }
 
 
@@ -30,7 +45,7 @@ export default function OTPLogin({
       const { data, error } =
         await supabase.auth.signInWithOtp({
 
-          phone: "+91" + phone,
+          phone: getFullPhone(),
 
           options: {
             channel: "sms"
@@ -39,13 +54,18 @@ export default function OTPLogin({
         });
 
 
+
       console.log("OTP DATA:", data);
       console.log("OTP ERROR:", error);
 
 
+
       if (error) {
+
         throw error;
+
       }
+
 
 
       setStep(2);
@@ -56,6 +76,7 @@ export default function OTPLogin({
 
 
     } catch (err) {
+
 
       console.log(err);
 
@@ -80,14 +101,17 @@ export default function OTPLogin({
 
     try {
 
+
       setLoading(true);
+
       setMsg("");
+
 
 
       const { error } =
         await supabase.auth.verifyOtp({
 
-          phone: "+91" + phone,
+          phone: getFullPhone(),
 
           token: otp,
 
@@ -98,18 +122,21 @@ export default function OTPLogin({
 
 
       if (error) {
+
         throw error;
+
       }
 
 
 
       const {
-        data: {
+        data:{
           user
         }
 
       } =
-        await supabase.auth.getUser();
+      await supabase.auth.getUser();
+
 
 
 
@@ -148,26 +175,23 @@ export default function OTPLogin({
 
 
         const {
-          data: newProfile,
-          error: createError
+          data:newProfile,
+          error:createError
 
-        } = await supabase
+        } =
+        await supabase
 
           .from("profiles")
 
           .insert([{
 
-            auth_user_id:
-              user.id,
+            auth_user_id:user.id,
 
-            phone:
-              phone,
+            phone:getFullPhone(),
 
-            role:
-              "farmer",
+            role:"farmer",
 
-            document_status:
-              "pending"
+            document_status:"pending"
 
           }])
 
@@ -199,7 +223,7 @@ export default function OTPLogin({
 
 
 
-      if (onSuccess) {
+      if(onSuccess){
 
         onSuccess(profile);
 
@@ -207,7 +231,8 @@ export default function OTPLogin({
 
 
 
-    } catch (err) {
+    } catch(err) {
+
 
       console.log(err);
 
@@ -253,14 +278,10 @@ export default function OTPLogin({
     >
 
 
-      <h2
-        style={{
-          textAlign:"center"
-        }}
-      >
-
+      <h2 style={{
+        textAlign:"center"
+      }}>
         🚜 KisanSetu Login
-
       </h2>
 
 
@@ -271,13 +292,14 @@ export default function OTPLogin({
 
         <>
 
+
           <input
 
-            placeholder="Mobile Number"
+            placeholder="+91XXXXXXXXXX"
 
             value={phone}
 
-            maxLength={10}
+            maxLength={12}
 
             onChange={(e)=>
 
@@ -286,7 +308,6 @@ export default function OTPLogin({
               )
 
             }
-
 
             style={{
 
@@ -308,7 +329,6 @@ export default function OTPLogin({
 
             disabled={loading}
 
-
             style={{
 
               width:"100%",
@@ -329,13 +349,13 @@ export default function OTPLogin({
 
           >
 
-            {
-              loading
-              ?
-              "Sending..."
-              :
-              "Send OTP"
-            }
+          {
+            loading
+            ?
+            "Sending..."
+            :
+            "Send OTP"
+          }
 
 
           </button>
@@ -371,7 +391,6 @@ export default function OTPLogin({
 
             }
 
-
             style={{
 
               width:"100%",
@@ -391,7 +410,6 @@ export default function OTPLogin({
             onClick={verifyOTP}
 
             disabled={loading}
-
 
             style={{
 
@@ -413,13 +431,13 @@ export default function OTPLogin({
 
           >
 
-            {
-              loading
-              ?
-              "Verifying..."
-              :
-              "Verify OTP"
-            }
+          {
+            loading
+            ?
+            "Verifying..."
+            :
+            "Verify OTP"
+          }
 
 
           </button>
@@ -436,17 +454,13 @@ export default function OTPLogin({
       {
         msg &&
 
-        <p
+        <p style={{
 
-          style={{
+          marginTop:20,
 
-            marginTop:20,
+          textAlign:"center"
 
-            textAlign:"center"
-
-          }}
-
-        >
+        }}>
 
           {msg}
 
