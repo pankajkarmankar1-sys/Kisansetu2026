@@ -1,23 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
 import { useRouter } from "next/router";
-import DocumentsUpload from "../components/customer/DocumentsUpload";
+import DocumentsUpload from "../components/customer/DocumentUpload";
 
-export default function DocumentsPage(){
-
+export default function DocumentsPage() {
   const router = useRouter();
 
   return (
-
     <DocumentsUpload
-
-      onDone={()=>{
-
+      onDone={() => {
         router.replace("/dashboard");
-
       }}
-
     />
-
   );
-
 }
