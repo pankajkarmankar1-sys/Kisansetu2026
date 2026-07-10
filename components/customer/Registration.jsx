@@ -382,22 +382,7 @@ export default function Registration({
 
 
 
-        <CustomerLocation
-
-          onLocationSelect={(loc)=>
-
-            setLocation((prev)=>({
-
-              ...prev,
-
-              ...loc
-
-            }))
-
-          }
-
-        />
-
+        
 
 
 
