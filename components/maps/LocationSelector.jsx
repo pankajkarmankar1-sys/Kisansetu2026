@@ -14,9 +14,7 @@ export default function LocationSelector({ onSelect }) {
 
 
   useEffect(() => {
-
     loadTalukas();
-
   }, []);
 
 
@@ -26,22 +24,17 @@ export default function LocationSelector({ onSelect }) {
 
     const { data, error } =
       await supabase
-
       .from("villages")
-
       .select("taluka");
 
 
     if(error){
-
       console.log(error);
-
       return;
-
     }
 
 
-    const uniqueTalukas =
+    const unique =
       [
         ...new Set(
           data.map(item => item.taluka)
@@ -50,7 +43,7 @@ export default function LocationSelector({ onSelect }) {
 
 
     setTalukas(
-      uniqueTalukas.sort()
+      unique.sort()
     );
 
   }
@@ -61,29 +54,20 @@ export default function LocationSelector({ onSelect }) {
 
   async function loadVillages(selectedTaluka) {
 
-
     const { data, error } =
       await supabase
-
       .from("villages")
-
       .select("village")
-
       .eq(
         "taluka",
         selectedTaluka
       )
-
       .order("village");
 
 
-
     if(error){
-
       console.log(error);
-
       return;
-
     }
 
 
@@ -97,7 +81,6 @@ export default function LocationSelector({ onSelect }) {
 
   function saveLocation(data){
 
-
     localStorage.setItem(
       "location",
       JSON.stringify(data)
@@ -105,9 +88,7 @@ export default function LocationSelector({ onSelect }) {
 
 
     if(onSelect){
-
       onSelect(data);
-
     }
 
   }
@@ -118,7 +99,6 @@ export default function LocationSelector({ onSelect }) {
 
   function handleSave(){
 
-
     if(!taluka || !village){
 
       alert(
@@ -128,7 +108,6 @@ export default function LocationSelector({ onSelect }) {
       return;
 
     }
-
 
 
     saveLocation({
@@ -143,7 +122,6 @@ export default function LocationSelector({ onSelect }) {
 
     });
 
-
   }
 
 
@@ -152,17 +130,15 @@ export default function LocationSelector({ onSelect }) {
 
   function useCurrentLocation(){
 
-
     if(!navigator.geolocation){
 
       alert(
-        "GPS is not available"
+        "GPS not available"
       );
 
       return;
 
     }
-
 
 
     setLoading(true);
@@ -189,7 +165,6 @@ export default function LocationSelector({ onSelect }) {
         });
 
 
-
         setLoading(false);
 
 
@@ -198,28 +173,15 @@ export default function LocationSelector({ onSelect }) {
 
       ()=>{
 
-
         alert(
           "Location permission denied"
         );
 
-
         setLoading(false);
-
-
-      },
-
-
-      {
-
-        enableHighAccuracy:true,
-
-        timeout:10000
 
       }
 
     );
-
 
   }
 
@@ -227,8 +189,8 @@ export default function LocationSelector({ onSelect }) {
 
 
 
-  useEffect(()=>{
 
+  useEffect(()=>{
 
     if(taluka){
 
@@ -237,15 +199,14 @@ export default function LocationSelector({ onSelect }) {
       setVillage("");
 
     }
-
     else{
 
       setVillages([]);
 
     }
 
-
   },[taluka]);
+
 
 
 
@@ -281,17 +242,15 @@ export default function LocationSelector({ onSelect }) {
 
 
 
-      <div>
-        <strong>State:</strong> Maharashtra
-      </div>
+      <p>
+        <b>State:</b> Maharashtra
+      </p>
 
 
+      <p>
+        <b>District:</b> Chandrapur
+      </p>
 
-      <div style={{marginBottom:15}}>
-
-        <strong>District:</strong> Chandrapur
-
-      </div>
 
 
 
@@ -314,22 +273,17 @@ export default function LocationSelector({ onSelect }) {
 
       >
 
-
         <option value="">
           Select Taluka
         </option>
 
 
         {
-
           talukas.map(item=>(
 
             <option
-
               key={item}
-
               value={item}
-
             >
 
               {item}
@@ -337,7 +291,6 @@ export default function LocationSelector({ onSelect }) {
             </option>
 
           ))
-
         }
 
 
@@ -348,19 +301,20 @@ export default function LocationSelector({ onSelect }) {
 
 
 
+
       <input
 
-        list="villageList"
+        type="text"
 
         value={village}
+
+        disabled={!taluka}
+
+        placeholder="Type Village Name"
 
         onChange={(e)=>
           setVillage(e.target.value)
         }
-
-        disabled={!taluka}
-
-        placeholder="Type or select Village"
 
         style={{
 
@@ -368,7 +322,7 @@ export default function LocationSelector({ onSelect }) {
 
           padding:10,
 
-          marginBottom:15
+          marginBottom:10
 
         }}
 
@@ -376,27 +330,75 @@ export default function LocationSelector({ onSelect }) {
 
 
 
-      <datalist id="villageList">
 
+
+      {
+        taluka && village &&
+
+        <div
+
+          style={{
+
+            border:"1px solid #ccc",
+
+            background:"#fff",
+
+            maxHeight:150,
+
+            overflowY:"auto"
+
+          }}
+
+        >
 
         {
+          villages
 
-          villages.map(item=>(
+          .filter(item=>
 
-            <option
+            item.village
+
+            .toLowerCase()
+
+            .includes(
+
+              village.toLowerCase()
+
+            )
+
+          )
+
+          .map(item=>(
+
+            <div
 
               key={item.village}
 
-              value={item.village}
+              onClick={()=>setVillage(item.village)}
 
-            />
+              style={{
+
+                padding:10,
+
+                borderBottom:
+                "1px solid #eee"
+
+              }}
+
+            >
+
+              {item.village}
+
+            </div>
 
           ))
 
         }
 
+        </div>
 
-      </datalist>
+      }
+
 
 
 
@@ -413,15 +415,15 @@ export default function LocationSelector({ onSelect }) {
 
           padding:12,
 
+          marginTop:15,
+
           background:"#16a34a",
 
           color:"#fff",
 
           border:"none",
 
-          borderRadius:8,
-
-          marginBottom:10
+          borderRadius:8
 
         }}
 
@@ -447,6 +449,8 @@ export default function LocationSelector({ onSelect }) {
 
           padding:12,
 
+          marginTop:10,
+
           background:"#2563eb",
 
           color:"#fff",
@@ -466,7 +470,6 @@ export default function LocationSelector({ onSelect }) {
           :
           "📍 Use GPS"
         }
-
 
       </button>
 
