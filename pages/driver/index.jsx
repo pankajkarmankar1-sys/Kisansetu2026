@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "../../lib/supabase";
-
-import DriverDashboard from "../../components/driver/Driver Dashboard";
+import DriverDashboard from "../../components/driver/DriverDashboard";
 
 
 
