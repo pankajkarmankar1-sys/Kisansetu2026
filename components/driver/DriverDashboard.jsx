@@ -2,11 +2,11 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 
-import DriverBookings from "./Driver Bookings";
-import DriverProfile from "./Driver Profile";
-import DriverEarnings from "./Driver Earnings";
-import DriverHistory from "./Driver History";
-import DriverNotifications from "./Driver Notifications";
+import DriverBookings from "./DriverBookings";
+import DriverProfile from "./DriverProfile";
+import DriverEarnings from "./DriverEarnings";
+import DriverHistory from "./DriverHistory";
+import DriverNotifications from "./DriverNotifications";
 
 
 export default function DriverDashboard({user}) {
