@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { supabase } from "../../lib/supabase";
 
 import AdminSidebar from "./AdminSidebar";
-import StatsCards from "./StatsCards";
+import StatsCard from "./StatsCard";
 import BookingList from "./BookingList";
 import DriverList from "./DriverList";
 import FarmerDocuments from "./FarmerDocuments";
@@ -87,7 +87,7 @@ export default function AdminDashboard() {
 
 
 
-        <StatsCards />
+        <StatsCard />
 
 
 
