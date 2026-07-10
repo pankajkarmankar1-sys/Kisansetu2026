@@ -8,6 +8,7 @@ export default function LocationSelector({ onSelect }) {
 
   const [taluka, setTaluka] = useState("");
   const [village, setVillage] = useState("");
+  const [searchVillage, setSearchVillage] = useState("");
 
   const [loading, setLoading] = useState(false);
 
@@ -19,11 +20,9 @@ export default function LocationSelector({ onSelect }) {
 
 
 
+  async function loadTalukas(){
 
-  async function loadTalukas() {
-
-    const { data, error } =
-      await supabase
+    const {data,error}=await supabase
       .from("villages")
       .select("taluka");
 
@@ -34,16 +33,10 @@ export default function LocationSelector({ onSelect }) {
     }
 
 
-    const unique =
-      [
-        ...new Set(
-          data.map(item => item.taluka)
-        )
-      ];
-
-
     setTalukas(
-      unique.sort()
+      [...new Set(
+        data.map(x=>x.taluka)
+      )].sort()
     );
 
   }
@@ -51,17 +44,12 @@ export default function LocationSelector({ onSelect }) {
 
 
 
+  async function loadVillages(t){
 
-  async function loadVillages(selectedTaluka) {
-
-    const { data, error } =
-      await supabase
+    const {data,error}=await supabase
       .from("villages")
       .select("village")
-      .eq(
-        "taluka",
-        selectedTaluka
-      )
+      .eq("taluka",t)
       .order("village");
 
 
@@ -78,8 +66,29 @@ export default function LocationSelector({ onSelect }) {
 
 
 
+  function saveLocation(){
 
-  function saveLocation(data){
+    if(!taluka || !village){
+
+      alert("Please select Taluka and Village");
+
+      return;
+
+    }
+
+
+    const data={
+
+      state:"Maharashtra",
+
+      district:"Chandrapur",
+
+      taluka,
+
+      village
+
+    };
+
 
     localStorage.setItem(
       "location",
@@ -97,85 +106,41 @@ export default function LocationSelector({ onSelect }) {
 
 
 
-  function handleSave(){
-
-    if(!taluka || !village){
-
-      alert(
-        "Please select Taluka and Village"
-      );
-
-      return;
-
-    }
-
-
-    saveLocation({
-
-      state:"Maharashtra",
-
-      district:"Chandrapur",
-
-      taluka,
-
-      village
-
-    });
-
-  }
-
-
-
-
-
   function useCurrentLocation(){
-
-    if(!navigator.geolocation){
-
-      alert(
-        "GPS not available"
-      );
-
-      return;
-
-    }
-
 
     setLoading(true);
 
 
-
     navigator.geolocation.getCurrentPosition(
 
-      (position)=>{
+      (p)=>{
 
-
-        saveLocation({
+        const data={
 
           state:"Maharashtra",
 
           district:"Chandrapur",
 
-          latitude:
-          position.coords.latitude,
+          latitude:p.coords.latitude,
 
-          longitude:
-          position.coords.longitude
+          longitude:p.coords.longitude
 
-        });
+        };
+
+
+        if(onSelect){
+          onSelect(data);
+        }
 
 
         setLoading(false);
-
 
       },
 
 
       ()=>{
 
-        alert(
-          "Location permission denied"
-        );
+        alert("Location permission denied");
 
         setLoading(false);
 
@@ -188,8 +153,6 @@ export default function LocationSelector({ onSelect }) {
 
 
 
-
-
   useEffect(()=>{
 
     if(taluka){
@@ -198,15 +161,11 @@ export default function LocationSelector({ onSelect }) {
 
       setVillage("");
 
-    }
-    else{
-
-      setVillages([]);
+      setSearchVillage("");
 
     }
 
   },[taluka]);
-
 
 
 
@@ -224,11 +183,9 @@ export default function LocationSelector({ onSelect }) {
 
         padding:20,
 
-        border:"1px solid #ddd",
+        background:"#fff",
 
-        borderRadius:10,
-
-        background:"#fff"
+        borderRadius:10
 
       }}
 
@@ -240,8 +197,6 @@ export default function LocationSelector({ onSelect }) {
       </h2>
 
 
-
-
       <p>
         <b>State:</b> Maharashtra
       </p>
@@ -250,7 +205,6 @@ export default function LocationSelector({ onSelect }) {
       <p>
         <b>District:</b> Chandrapur
       </p>
-
 
 
 
@@ -279,14 +233,11 @@ export default function LocationSelector({ onSelect }) {
 
 
         {
-          talukas.map(item=>(
+          talukas.map(t=>(
 
-            <option
-              key={item}
-              value={item}
-            >
+            <option key={t} value={t}>
 
-              {item}
+              {t}
 
             </option>
 
@@ -300,29 +251,27 @@ export default function LocationSelector({ onSelect }) {
 
 
 
-
-
       <input
 
-        type="text"
-
-        value={village}
+        value={searchVillage}
 
         disabled={!taluka}
 
         placeholder="Type Village Name"
 
-        onChange={(e)=>
-          setVillage(e.target.value)
-        }
+        onChange={(e)=>{
+
+          setSearchVillage(e.target.value);
+
+          setVillage(e.target.value);
+
+        }}
 
         style={{
 
           width:"100%",
 
-          padding:10,
-
-          marginBottom:10
+          padding:10
 
         }}
 
@@ -333,7 +282,8 @@ export default function LocationSelector({ onSelect }) {
 
 
       {
-        taluka && village &&
+
+        searchVillage &&
 
         <div
 
@@ -341,53 +291,55 @@ export default function LocationSelector({ onSelect }) {
 
             border:"1px solid #ccc",
 
-            background:"#fff",
-
             maxHeight:150,
 
-            overflowY:"auto"
+            overflow:"auto"
 
           }}
 
         >
 
         {
+
           villages
 
-          .filter(item=>
+          .filter(v=>
 
-            item.village
+            v.village
 
             .toLowerCase()
 
             .includes(
 
-              village.toLowerCase()
+              searchVillage.toLowerCase()
 
             )
 
           )
 
-          .map(item=>(
+          .map(v=>(
 
             <div
 
-              key={item.village}
+              key={v.village}
 
-              onClick={()=>setVillage(item.village)}
+              onClick={()=>{
+
+                setVillage(v.village);
+
+                setSearchVillage(v.village);
+
+              }}
 
               style={{
 
-                padding:10,
-
-                borderBottom:
-                "1px solid #eee"
+                padding:10
 
               }}
 
             >
 
-              {item.village}
+              {v.village}
 
             </div>
 
@@ -403,27 +355,21 @@ export default function LocationSelector({ onSelect }) {
 
 
 
-
-
       <button
 
-        onClick={handleSave}
+        onClick={saveLocation}
 
         style={{
 
           width:"100%",
 
-          padding:12,
-
           marginTop:15,
+
+          padding:12,
 
           background:"#16a34a",
 
-          color:"#fff",
-
-          border:"none",
-
-          borderRadius:8
+          color:"#fff"
 
         }}
 
@@ -447,29 +393,19 @@ export default function LocationSelector({ onSelect }) {
 
           width:"100%",
 
-          padding:12,
-
           marginTop:10,
+
+          padding:12,
 
           background:"#2563eb",
 
-          color:"#fff",
-
-          border:"none",
-
-          borderRadius:8
+          color:"#fff"
 
         }}
 
       >
 
-        {
-          loading
-          ?
-          "Getting GPS..."
-          :
-          "📍 Use GPS"
-        }
+        📍 Use GPS
 
       </button>
 
