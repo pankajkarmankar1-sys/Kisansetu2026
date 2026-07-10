@@ -4,12 +4,32 @@
 
 export function formatPhone(phone) {
   if (!phone) return "";
-  return phone.replace(/\D/g, "").slice(-10);
+
+  let cleaned = phone.replace(/\D/g, "");
+
+  // India 10 digit number
+  if (cleaned.length === 10) {
+    return "+91" + cleaned;
+  }
+
+  // Already has India country code
+  if (cleaned.startsWith("91") && cleaned.length === 12) {
+    return "+" + cleaned;
+  }
+
+  // Other international numbers
+  if (cleaned.length > 10) {
+    return "+" + cleaned;
+  }
+
+  return "";
 }
+
 
 export function formatCurrency(amount) {
   return `₹${Number(amount || 0).toLocaleString("en-IN")}`;
 }
+
 
 export function generateId(prefix = "KS") {
   return (
@@ -19,17 +39,21 @@ export function generateId(prefix = "KS") {
   );
 }
 
+
 export function getCurrentDate() {
   return new Date().toISOString();
 }
+
 
 export function getToday() {
   return new Date().toLocaleDateString("en-IN");
 }
 
+
 export function getCurrentTime() {
   return new Date().toLocaleTimeString("en-IN");
 }
+
 
 export function bookingStatusColor(status) {
   switch (status) {
@@ -53,6 +77,7 @@ export function bookingStatusColor(status) {
   }
 }
 
+
 export function driverStatusColor(status) {
   switch (status) {
     case "Available":
@@ -68,6 +93,7 @@ export function driverStatusColor(status) {
       return "#6b7280";
   }
 }
+
 
 export function calculateAmount(acres, rate) {
   return Number(acres || 0) * Number(rate || 0);
