@@ -9,42 +9,65 @@ export default function FarmSelection({
   back,
 }) {
 
-  const [farms, setFarms] = useState([]);
-  const [loading, setLoading] = useState(true);
+
+  const [farms,setFarms] = useState([]);
+
+  const [loading,setLoading] = useState(true);
 
 
-  useEffect(() => {
+
+
+  useEffect(()=>{
+
     loadFarms();
-  }, []);
+
+  },[]);
 
 
 
-  async function loadFarms() {
 
-    try {
+
+
+  async function loadFarms(){
+
+
+    try{
+
 
       const {
         data:{
           user:authUser
         }
+
       } = await supabase.auth.getUser();
 
 
-      if(!authUser){
+
+
+
+      if(!authUser)
         return;
-      }
+
+
+
+
 
 
       const {
         data,
         error
+
       } = await supabase
+
       .from("khets")
+
       .select("*")
+
       .eq(
         "user_id",
         authUser.id
       )
+
       .order(
         "created_at",
         {
@@ -53,12 +76,21 @@ export default function FarmSelection({
       );
 
 
-      if(error){
+
+
+
+
+      if(error)
         throw error;
-      }
+
+
+
+
 
 
       setFarms(data || []);
+
+
 
 
     }
@@ -77,37 +109,73 @@ export default function FarmSelection({
 
 
 
+
+
+
+
   if(loading){
 
-    return <h3>Loading Farms...</h3>;
+    return (
+      <h3>
+        Loading Farms...
+      </h3>
+    );
 
   }
 
 
 
+
+
+
   return (
 
-    <div style={{padding:20}}>
+    <div
+      style={{
+        padding:20,
+        background:"#f8fafc",
+        minHeight:"100vh"
+      }}
+    >
+
+
 
       <h2>
         🌾 Select Your Farm
       </h2>
 
 
-      {
-        farms.length === 0 && (
 
-          <p>
-            No farm added. Please add your farm first.
-          </p>
+
+
+      {
+        farms.length === 0 &&
+
+        (
+
+          <div>
+
+            <p>
+              No farm added yet.
+            </p>
+
+
+          </div>
 
         )
+
       }
+
+
+
+
+
 
 
 
       {
         farms.map((farm)=>(
+
 
           <div
 
@@ -123,43 +191,79 @@ export default function FarmSelection({
 
           >
 
+
+
             <h3>
-              {farm.name || "My Farm"}
+              🌾 {farm.name || "My Farm"}
             </h3>
 
 
-            <p>
-              📍 Village: {farm.village || "-"}
-            </p>
 
 
             <p>
-              🌾 Acres: {farm.acres || 0}
+              📍 Village:
+              {" "}
+              {farm.village || "-"}
             </p>
+
+
 
 
             <p>
-              🏡 Address: {farm.farm_address || "-"}
+              📏 Acres:
+              {" "}
+              {farm.acres || 0}
             </p>
+
+
+
+
+            <p>
+              🏡 Address:
+              {" "}
+              {farm.farm_address || "-"}
+            </p>
+
+
+
+
+            <p>
+              📍 District:
+              {" "}
+              {farm.district || "-"}
+            </p>
+
+
 
 
             <button
 
               onClick={()=>{
 
+
                 setSelKhet(farm);
+
 
                 next();
 
+
               }}
 
+
               style={{
+
                 width:"100%",
+
                 padding:14,
+
                 background:"#16a34a",
+
                 color:"#fff",
+
                 border:"none",
+
                 borderRadius:10
+
               }}
 
             >
@@ -169,7 +273,10 @@ export default function FarmSelection({
             </button>
 
 
+
+
           </div>
+
 
         ))
 
@@ -177,15 +284,30 @@ export default function FarmSelection({
 
 
 
+
+
+
+
       <button
+
         onClick={back}
+
         style={{
+
           marginTop:15,
-          padding:10
+
+          padding:12
+
         }}
+
       >
+
         ← Back
+
       </button>
+
+
+
 
 
     </div>
