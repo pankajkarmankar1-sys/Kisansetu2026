@@ -18,7 +18,9 @@ export default function ServiceSelection({
 
 
   const [services,setServices] = useState([]);
+
   const [loading,setLoading] = useState(true);
+
   const [isSubscriber,setIsSubscriber] = useState(false);
 
 
@@ -36,42 +38,28 @@ export default function ServiceSelection({
 
   async function loadServices(){
 
-    try{
+    const {
+      data,
+      error
+    } = await supabase
 
-      const {
-        data,
-        error
-      } = await supabase
+    .from("services")
 
-      .from("services")
+    .select("*")
 
-      .select("*")
+    .eq("active",true)
 
-      .eq("active",true)
-
-      .order("name");
+    .order("name");
 
 
-
-      if(error)
-        throw error;
-
-
+    if(!error){
 
       setServices(data || []);
 
-
     }
-    catch(err){
 
-      console.log(err);
 
-    }
-    finally{
-
-      setLoading(false);
-
-    }
+    setLoading(false);
 
   }
 
@@ -82,71 +70,35 @@ export default function ServiceSelection({
 
   async function checkSubscription(){
 
-    try{
+    if(!user?.id)
+      return;
 
 
-      if(!user?.id)
-        return;
+    const {
+      data
+    } = await supabase
 
+    .from("subscriptions")
 
+    .select("id")
 
-      const today =
-      new Date()
-      .toISOString();
+    .eq(
+      "user_id",
+      user.id
+    )
 
+    .eq(
+      "status",
+      "active"
+    )
 
-
-      const {
-        data,
-        error
-      } = await supabase
-
-      .from("subscriptions")
-
-      .select("id")
-
-      .eq(
-        "user_id",
-        user.id
-      )
-
-      .eq(
-        "status",
-        "active"
-      )
-
-      .gte(
-        "end_date",
-        today
-      )
-
-      .maybeSingle();
+    .maybeSingle();
 
 
 
-
-
-      if(error){
-
-        console.log(error);
-
-        return;
-
-      }
-
-
-
-      setIsSubscriber(
-        !!data
-      );
-
-
-    }
-    catch(err){
-
-      console.log(err);
-
-    }
+    setIsSubscriber(
+      !!data
+    );
 
   }
 
@@ -155,34 +107,32 @@ export default function ServiceSelection({
 
 
 
-  const normalPrice =
-  selectedService
-  ?
-  Number(selectedService.price || 0)
-  :
-  0;
+
+  const normalPrice = 1100;
 
 
+  const servicePrice =
 
-  const price =
-  isSubscriber
-  ?
-  normalPrice * 0.5
-  :
-  normalPrice;
+    isSubscriber
+
+    ?
+
+    550
+
+    :
+
+    1100;
+
 
 
 
 
   const total =
-  Number(acres || 0) * price;
 
+    Number(acres || 0) *
 
+    servicePrice;
 
-
-  const discount =
-  Number(acres || 0) *
-  normalPrice * 0.5;
 
 
 
@@ -217,13 +167,9 @@ export default function ServiceSelection({
 
         <div style={S.card}>
 
-          <h3>
-            🌾 Farm
-          </h3>
+          <h3>🌾 Farm</h3>
 
-          <p>
-            {selKhet.name}
-          </p>
+          <p>{selKhet.name}</p>
 
         </div>
 
@@ -233,9 +179,7 @@ export default function ServiceSelection({
 
 
 
-
       <div style={S.card}>
-
 
         <h3>
           🌱 Acres
@@ -271,11 +215,9 @@ export default function ServiceSelection({
 
       <div style={S.card}>
 
-
         <h3>
           Choose Service
         </h3>
-
 
 
         {
@@ -283,59 +225,70 @@ export default function ServiceSelection({
 
           ?
 
-          <p>
-            Loading...
-          </p>
+          <p>Loading...</p>
+
 
           :
+
 
           services.map(service=>(
 
 
             <button
 
-            key={service.service_id}
+              key={service.service_id}
 
-            onClick={()=>{
+              onClick={()=>{
 
-              setSelectedService(service);
+                setSelectedService({
 
-            }}
+                  ...service,
+
+                  price:
+                  servicePrice
+
+                });
+
+              }}
 
 
-            style={{
+              style={{
 
-              width:"100%",
+                width:"100%",
 
-              padding:15,
+                padding:15,
 
-              marginBottom:10,
+                marginBottom:10,
 
-              textAlign:"left",
+                textAlign:"left",
 
-              borderRadius:10,
+                borderRadius:10,
 
-              border:
+                border:
 
-              selectedService?.service_id === service.service_id
+                selectedService?.service_id === service.service_id
 
-              ?
+                ?
 
-              "2px solid green"
+                "2px solid green"
 
-              :
+                :
 
-              "1px solid #ddd"
+                "1px solid #ddd"
 
-            }}
+              }}
 
             >
 
 
               <b>
+
                 {service.icon}
+
                 {" "}
+
                 {service.name_hi || service.name}
+
               </b>
 
 
@@ -343,24 +296,25 @@ export default function ServiceSelection({
               <br/>
 
 
+              💰
 
-              ₹
-              {
-                isSubscriber
-                ?
-                Number(service.price)*0.5
-                :
-                service.price
-              }
+              ₹{servicePrice}
 
+              {" / Acre "}
 
 
               {
+
                 isSubscriber
+
                 ?
-                " / Acre (50% OFF)"
+
+                "👑 Subscriber"
+
                 :
-                " / Acre"
+
+                "Normal"
+
               }
 
 
@@ -379,7 +333,6 @@ export default function ServiceSelection({
 
 
 
-
       {
         selectedService &&
 
@@ -391,7 +344,6 @@ export default function ServiceSelection({
           </h3>
 
 
-
           <p>
             Service:
             {" "}
@@ -401,22 +353,18 @@ export default function ServiceSelection({
 
 
           <p>
-            Acres:
+            Rate:
             {" "}
-            {acres}
+            ₹{servicePrice}/Acre
           </p>
 
 
 
-          {
-            isSubscriber &&
-
-            <p>
-              🎉 Discount:
-              ₹{discount}
-            </p>
-
-          }
+          <p>
+            Acres:
+            {" "}
+            {acres}
+          </p>
 
 
 
@@ -434,7 +382,6 @@ export default function ServiceSelection({
 
 
 
-
       <button
 
         onClick={next}
@@ -444,7 +391,6 @@ export default function ServiceSelection({
           !selectedService ||
           !acres
         }
-
 
         style={S.btnG}
 
