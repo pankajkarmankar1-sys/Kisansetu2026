@@ -9,7 +9,6 @@ export default function DashboardPage() {
 
   const router = useRouter();
 
-
   const [user,setUser] = useState(null);
 
   const [loading,setLoading] = useState(true);
@@ -29,7 +28,6 @@ export default function DashboardPage() {
 
 
 
-
   async function loadUser(){
 
 
@@ -37,14 +35,10 @@ export default function DashboardPage() {
 
 
       const {
-
         data:{
           user
-
         }
-
       } = await supabase.auth.getUser();
-
 
 
 
@@ -56,7 +50,6 @@ export default function DashboardPage() {
         return;
 
       }
-
 
 
 
@@ -89,12 +82,6 @@ export default function DashboardPage() {
 
 
 
-      const today =
-      new Date()
-      .toISOString();
-
-
-
 
 
       const {
@@ -105,7 +92,9 @@ export default function DashboardPage() {
 
       .select(`
         status,
-        end_date
+        acres,
+        amount,
+        start_date
       `)
 
       .eq(
@@ -116,11 +105,6 @@ export default function DashboardPage() {
       .eq(
         "status",
         "active"
-      )
-
-      .gte(
-        "end_date",
-        today
       )
 
       .maybeSingle();
@@ -190,10 +174,10 @@ export default function DashboardPage() {
 
         subscription_end:
 
-        subscription?.end_date
+        subscription?.start_date
         ?
         new Date(
-          subscription.end_date
+          subscription.start_date
         ).toLocaleDateString()
         :
         null
@@ -204,15 +188,12 @@ export default function DashboardPage() {
 
 
 
-
     }
-
     catch(err){
 
       console.log(err);
 
     }
-
     finally{
 
       setLoading(false);
@@ -230,15 +211,11 @@ export default function DashboardPage() {
 
   async function logout(){
 
-
     await supabase.auth.signOut();
-
 
     router.replace("/");
 
-
   }
-
 
 
 
@@ -250,8 +227,6 @@ export default function DashboardPage() {
     return <h2>Loading...</h2>;
 
   }
-
-
 
 
 
@@ -278,18 +253,15 @@ export default function DashboardPage() {
             "Documents approval ke baad booking open hogi"
           );
 
-
           return;
 
         }
-
 
 
         router.push("/book");
 
 
       }}
-
 
 
 
@@ -304,15 +276,11 @@ export default function DashboardPage() {
 
 
 
-
-
       onBookings={()=>{
 
         router.push("/bookings");
 
       }}
-
-
 
 
 
@@ -326,15 +294,11 @@ export default function DashboardPage() {
 
 
 
-
-
       onNotifications={()=>{
 
         router.push("/notifications");
 
       }}
-
-
 
 
 
