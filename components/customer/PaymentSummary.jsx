@@ -15,7 +15,9 @@ export default function PaymentSummary({
 
 
   const [isSubscriber,setIsSubscriber] = useState(false);
+
   const [showPayment,setShowPayment] = useState(false);
+
 
 
 
@@ -29,20 +31,15 @@ export default function PaymentSummary({
 
 
 
+
   async function checkSubscription(){
+
 
     try{
 
 
       if(!user?.id)
         return;
-
-
-
-      const today =
-      new Date()
-      .toISOString();
-
 
 
 
@@ -65,31 +62,17 @@ export default function PaymentSummary({
         "active"
       )
 
-      .gte(
-        "end_date",
-        today
-      )
-
       .maybeSingle();
 
 
 
 
 
-      if(error){
+      if(!error && data){
 
-        console.log(error);
-
-        return;
+        setIsSubscriber(true);
 
       }
-
-
-
-
-      setIsSubscriber(
-        !!data
-      );
 
 
     }
@@ -99,6 +82,7 @@ export default function PaymentSummary({
 
     }
 
+
   }
 
 
@@ -106,52 +90,60 @@ export default function PaymentSummary({
 
 
 
-  const normalPrice =
-  Number(
-    selectedService?.price || 0
-  );
+
+  // BUSINESS RATE
+  // Normal customer = 1100/Acre
+  // Subscriber = 550/Acre
 
 
+  const normalPrice = 1100;
 
 
 
   const price =
-  isSubscriber
-  ?
-  normalPrice * 0.5
-  :
-  normalPrice;
 
+    isSubscriber
 
+    ?
 
+    550
 
+    :
 
-  const acresValue =
-  Number(acres || 0);
+    1100;
+
 
 
 
 
 
   const normalAmount =
-  normalPrice *
-  acresValue;
+
+    normalPrice *
+
+    Number(acres || 0);
+
 
 
 
 
 
   const amount =
-  price *
-  acresValue;
+
+    price *
+
+    Number(acres || 0);
+
 
 
 
 
 
   const discount =
-  normalAmount -
-  amount;
+
+    normalAmount - amount;
+
+
 
 
 
@@ -168,6 +160,7 @@ export default function PaymentSummary({
 
         amount={amount}
 
+
         onSuccess={()=>{
 
           setPaymentDone(true);
@@ -176,13 +169,13 @@ export default function PaymentSummary({
 
         }}
 
-        onBack={()=>
-          setShowPayment(false)
-        }
+
+        onBack={()=>setShowPayment(false)}
 
       />
 
     );
+
 
   }
 
@@ -195,12 +188,19 @@ export default function PaymentSummary({
   return (
 
     <div
+
       style={{
+
         padding:20,
+
         background:"#F8FAFC",
+
         minHeight:"100vh",
+
       }}
+
     >
+
 
 
       <button onClick={back}>
@@ -217,12 +217,19 @@ export default function PaymentSummary({
 
 
 
+
       <div
+
         style={{
+
           background:"#fff",
+
           padding:15,
-          borderRadius:12,
+
+          borderRadius:12
+
         }}
+
       >
 
 
@@ -240,10 +247,11 @@ export default function PaymentSummary({
 
 
 
+
         <p>
           🌾 Acres:
           {" "}
-          {acresValue}
+          {acres || 0}
         </p>
 
 
@@ -268,6 +276,7 @@ export default function PaymentSummary({
 
         <p>
           💰 Normal Rate:
+          {" "}
           ₹{normalPrice}/Acre
         </p>
 
@@ -279,7 +288,8 @@ export default function PaymentSummary({
           isSubscriber &&
 
           <p>
-            🎉 50% Discount:
+            🎉 50% Subscription Discount:
+            {" "}
             ₹{discount}
           </p>
 
@@ -290,7 +300,8 @@ export default function PaymentSummary({
 
 
         <p>
-          Pay Rate:
+          ✅ Pay Rate:
+          {" "}
           ₹{price}/Acre
         </p>
 
@@ -299,10 +310,10 @@ export default function PaymentSummary({
 
 
         <h2>
-          Total: ₹{amount}
+          Total:
+          {" "}
+          ₹{amount}
         </h2>
-
-
 
 
 
@@ -320,6 +331,7 @@ export default function PaymentSummary({
 
 
 
+
       </div>
 
 
@@ -329,53 +341,64 @@ export default function PaymentSummary({
 
 
       {
-      !paymentDone
+        !paymentDone
 
-      ?
+        ?
 
-      <button
+        <button
 
-        onClick={()=>
-          setShowPayment(true)
-        }
+          onClick={()=>setShowPayment(true)}
 
-        style={{
-          marginTop:20,
-          padding:12,
-          width:"100%",
-          background:"#16a34a",
-          color:"#fff",
-          border:"none",
-          borderRadius:10,
-        }}
+          style={{
 
-      >
+            marginTop:20,
 
-        💳 Pay Now
+            padding:12,
 
-      </button>
+            width:"100%",
+
+            background:"#16a34a",
+
+            color:"#fff",
+
+            border:"none",
+
+            borderRadius:10
+
+          }}
+
+        >
+
+          💳 Pay Now
+
+        </button>
 
 
-      :
+        :
 
+        <button
 
-      <button
+          onClick={next}
 
-        onClick={next}
+          style={{
 
-        style={{
-          marginTop:20,
-          padding:12,
-          width:"100%",
-        }}
+            marginTop:20,
 
-      >
+            padding:12,
 
-        Continue →
+            width:"100%"
 
-      </button>
+          }}
+
+        >
+
+          Continue →
+
+        </button>
 
       }
+
+
 
 
 
