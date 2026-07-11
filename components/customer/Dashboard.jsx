@@ -7,13 +7,13 @@ export default function Dashboard({
   onProfile,
   onNotifications,
   onSubscription,
+  onAddFarm,
   onLogout,
 }) {
 
 
   const documentsApproved =
     user?.document_status === "approved";
-
 
 
   const subscriptionActive =
@@ -43,7 +43,6 @@ export default function Dashboard({
 
 
 
-
       <div
         style={{
           background:"#fff",
@@ -64,17 +63,15 @@ export default function Dashboard({
           ?
 
           <>
+            <p>
+              ✅ Active
+            </p>
 
-          <p>
-            ✅ Active
-          </p>
-
-          <p>
-            📅 Valid Till:
-            {" "}
-            {user?.subscription_end || "-"}
-          </p>
-
+            <p>
+              📅 Valid Till:
+              {" "}
+              {user?.subscription_end || "-"}
+            </p>
           </>
 
           :
@@ -107,7 +104,7 @@ export default function Dashboard({
 
             ⚠️ Documents verification pending.
             <br/>
-            Aadhaar & 7/12 approve hone ke baad booking open hogi.
+            Aadhaar approve hone ke baad booking open hogi.
 
           </div>
 
@@ -125,6 +122,23 @@ export default function Dashboard({
           marginTop:25,
         }}
       >
+
+
+
+        <button
+          onClick={onAddFarm}
+          style={{
+            padding:15,
+            background:"#16a34a",
+            color:"#fff",
+            border:"none",
+            borderRadius:10,
+          }}
+        >
+          🌾 Add New Farm
+        </button>
+
+
 
 
 
@@ -172,6 +186,7 @@ export default function Dashboard({
 
 
 
+
         <button
           onClick={onProfile}
           style={{
@@ -184,6 +199,7 @@ export default function Dashboard({
 
 
 
+
         <button
           onClick={onNotifications}
           style={{
@@ -192,6 +208,7 @@ export default function Dashboard({
         >
           🔔 Notifications
         </button>
+
 
 
 
