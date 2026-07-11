@@ -8,10 +8,12 @@ export default function DriverRegistration() {
     phone:"",
     village:"",
     tractor_num:"",
-    tractor_details:""
+    tractor_details:"",
   });
 
+
   const [loading,setLoading] = useState(false);
+
 
 
   function handleChange(e){
@@ -25,7 +27,7 @@ export default function DriverRegistration() {
 
 
 
-  async function submitDriver(){
+  async function registerDriver(){
 
     try{
 
@@ -37,6 +39,7 @@ export default function DriverRegistration() {
           user
         }
       } = await supabase.auth.getUser();
+
 
 
       if(!user){
@@ -51,7 +54,9 @@ export default function DriverRegistration() {
       const {
         error
       } = await supabase
+
       .from("drivers")
+
       .insert([{
 
         auth_user_id:user.id,
@@ -111,56 +116,60 @@ export default function DriverRegistration() {
 
 
 
+
   return (
 
     <div style={{padding:20}}>
 
-      <h2>🚜 Driver Registration</h2>
+      <h2>
+        🚜 Driver Registration
+      </h2>
 
 
-      {
-        Object.keys(driver).map((key)=>(
+      <input
+      name="name"
+      placeholder="Driver Name"
+      value={driver.name}
+      onChange={handleChange}
+      />
 
-          <input
 
-            key={key}
+      <input
+      name="phone"
+      placeholder="Mobile Number"
+      value={driver.phone}
+      onChange={handleChange}
+      />
 
-            name={key}
 
-            placeholder={key}
+      <input
+      name="village"
+      placeholder="Village"
+      value={driver.village}
+      onChange={handleChange}
+      />
 
-            value={driver[key]}
 
-            onChange={handleChange}
+      <input
+      name="tractor_num"
+      placeholder="Tractor Number"
+      value={driver.tractor_num}
+      onChange={handleChange}
+      />
 
-            style={{
-              width:"100%",
-              padding:12,
-              marginBottom:10
-            }}
 
-          />
-
-        ))
-      }
+      <input
+      name="tractor_details"
+      placeholder="Tractor Details"
+      value={driver.tractor_details}
+      onChange={handleChange}
+      />
 
 
 
       <button
-
-        onClick={submitDriver}
-
-        disabled={loading}
-
-        style={{
-          padding:14,
-          width:"100%",
-          background:"#16a34a",
-          color:"#fff",
-          border:"none",
-          borderRadius:10
-        }}
-
+      onClick={registerDriver}
+      disabled={loading}
       >
 
       {
