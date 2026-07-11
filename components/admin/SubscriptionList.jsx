@@ -12,7 +12,6 @@ export default function SubscriptionList(){
 
 
 
-
   useEffect(()=>{
 
     loadSubscriptions();
@@ -38,13 +37,7 @@ export default function SubscriptionList(){
 
       .from("subscriptions")
 
-      .select(`
-        *,
-        profiles(
-          name,
-          phone
-        )
-      `)
+      .select("*")
 
       .order(
         "created_at",
@@ -57,20 +50,15 @@ export default function SubscriptionList(){
 
 
 
-      if(error){
-
-        console.log(error);
-
-        return;
-
-      }
-
+      if(error)
+        throw error;
 
 
 
       setSubscriptions(
         data || []
       );
+
 
 
     }
@@ -93,30 +81,26 @@ export default function SubscriptionList(){
 
 
 
-  if(loading){
-
-    return <p>Loading subscriptions...</p>;
-
-  }
-
-
-
-
-
 
   return (
 
     <div
+
       style={{
+
         background:"#fff",
+
         padding:15,
+
         borderRadius:12
+
       }}
+
     >
 
 
       <h2>
-        👑 Subscriptions
+        👑 Subscription List
       </h2>
 
 
@@ -124,19 +108,31 @@ export default function SubscriptionList(){
 
 
       {
-        subscriptions.length===0
+        loading
 
         ?
 
         <p>
-          No subscriptions found
+          Loading...
         </p>
 
 
         :
 
 
-        subscriptions.map(sub=>(
+        subscriptions.length === 0
+
+        ?
+
+        <p>
+          No Subscription Found
+        </p>
+
+
+        :
+
+
+        subscriptions.map((sub)=>(
 
 
           <div
@@ -144,23 +140,24 @@ export default function SubscriptionList(){
             key={sub.id}
 
             style={{
+
               border:"1px solid #ddd",
+
               padding:12,
-              marginBottom:10,
+
+              marginTop:10,
+
               borderRadius:10
+
             }}
 
           >
 
 
-            <h3>
-              {sub.profiles?.name || "Farmer"}
-            </h3>
-
-
-
             <p>
-              📱 {sub.profiles?.phone || "-"}
+              👤 User ID:
+              {" "}
+              {sub.user_id}
             </p>
 
 
@@ -168,7 +165,7 @@ export default function SubscriptionList(){
             <p>
               🌾 Acres:
               {" "}
-              {sub.acres || "-"}
+              {sub.acres || 0}
             </p>
 
 
@@ -182,21 +179,42 @@ export default function SubscriptionList(){
 
 
             <p>
-              📅 Expiry:
+              Status:
               {" "}
-              {
-              new Date(
-                sub.end_date
-              ).toLocaleDateString()
-              }
+              {sub.status}
             </p>
 
 
 
             <p>
-              Status:
+              Start:
               {" "}
-              {sub.status}
+              {
+              sub.start_date
+              ?
+              new Date(
+                sub.start_date
+              ).toLocaleDateString()
+              :
+              "-"
+              }
+            </p>
+
+
+
+
+            <p>
+              End:
+              {" "}
+              {
+              sub.end_date
+              ?
+              new Date(
+                sub.end_date
+              ).toLocaleDateString()
+              :
+              "-"
+              }
             </p>
 
 
@@ -207,6 +225,7 @@ export default function SubscriptionList(){
         ))
 
       }
+
 
 
 
