@@ -61,31 +61,70 @@ export default function DashboardPage() {
 
 
 
-      const {
-  data: profile,
-  error: profileError,
-} = await supabase
-  .from("profiles")
-  .select(`
-    name,
-    phone,
-    document_status,
-    aadhaar_front,
-    aadhaar_back,
-    satbara_7_12,
-    state,
-    district,
-    taluka,
-    village,
-    farm_address,
-    acres
-  `)
-  .eq("auth_user_id", user.id)
-  .maybeSingle();
 
-if (profileError) {
-  console.log(profileError);
-}
+      const {
+        data:profile
+      } = await supabase
+
+      .from("profiles")
+
+      .select(`
+        name,
+        phone,
+        document_status,
+        aadhaar_front,
+        aadhaar_back,
+        satbara_7_12
+      `)
+
+      .eq(
+        "auth_user_id",
+        user.id
+      )
+
+      .maybeSingle();
+
+
+
+
+
+
+      const today =
+      new Date()
+      .toISOString();
+
+
+
+
+
+      const {
+        data:subscription
+      } = await supabase
+
+      .from("subscriptions")
+
+      .select(`
+        status,
+        end_date
+      `)
+
+      .eq(
+        "user_id",
+        user.id
+      )
+
+      .eq(
+        "status",
+        "active"
+      )
+
+      .gte(
+        "end_date",
+        today
+      )
+
+      .maybeSingle();
+
 
 
 
@@ -101,56 +140,64 @@ if (profileError) {
 
 
         name:
-
-          profile?.name ||
-
-          "Kisan",
-
+        profile?.name ||
+        "Kisan",
 
 
 
         phone:
-
-          profile?.phone ||
-
-          user.phone,
-
-
+        profile?.phone ||
+        user.phone,
 
 
 
         document_status:
-
-          profile?.document_status ||
-
-          "pending",
+        profile?.document_status ||
+        "pending",
 
 
 
 
         aadhaar_front:
-
-          profile?.aadhaar_front ||
-
-          null,
-
+        profile?.aadhaar_front ||
+        null,
 
 
 
         aadhaar_back:
-
-          profile?.aadhaar_back ||
-
-          null,
-
+        profile?.aadhaar_back ||
+        null,
 
 
 
         satbara_7_12:
+        profile?.satbara_7_12 ||
+        null,
 
-          profile?.satbara_7_12 ||
 
-          null,
+
+
+        subscription_status:
+
+        subscription
+        ?
+        "active"
+        :
+        "inactive",
+
+
+
+
+        subscription_end:
+
+        subscription?.end_date
+        ?
+        new Date(
+          subscription.end_date
+        ).toLocaleDateString()
+        :
+        null
+
 
 
       });
@@ -162,17 +209,13 @@ if (profileError) {
 
     catch(err){
 
-
       console.log(err);
-
 
     }
 
     finally{
 
-
       setLoading(false);
-
 
     }
 
@@ -204,9 +247,7 @@ if (profileError) {
 
   if(loading){
 
-
     return <h2>Loading...</h2>;
-
 
   }
 
@@ -219,13 +260,10 @@ if (profileError) {
 
   return (
 
-
     <Dashboard
 
 
       user={user}
-
-
 
 
 
@@ -236,18 +274,14 @@ if (profileError) {
           user?.document_status !== "approved"
         ){
 
-
           alert(
-
             "Documents approval ke baad booking open hogi"
-
           );
 
 
           return;
 
         }
-
 
 
 
@@ -261,53 +295,44 @@ if (profileError) {
 
 
 
+      onSubscription={()=>{
 
-      onSubscription={()=>
+        router.push("/subscription");
 
-
-        router.push("/subscription")
-
-      }
+      }}
 
 
 
 
 
 
+      onBookings={()=>{
 
-      onBookings={()=>
+        router.push("/bookings");
 
-
-        router.push("/bookings")
-
-      }
+      }}
 
 
 
 
 
 
+      onProfile={()=>{
 
-      onProfile={()=>
+        router.push("/profile");
 
-
-        router.push("/profile")
-
-      }
+      }}
 
 
 
 
 
 
+      onNotifications={()=>{
 
-      onNotifications={()=>
+        router.push("/notifications");
 
-
-        router.push("/notifications")
-
-      }
-
+      }}
 
 
 
@@ -319,7 +344,6 @@ if (profileError) {
 
 
     />
-
 
   );
 
