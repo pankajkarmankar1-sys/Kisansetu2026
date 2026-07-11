@@ -5,6 +5,7 @@ export default function BookingSuccess({
   onDone,
 }) {
 
+
   return (
 
     <div
@@ -18,44 +19,41 @@ export default function BookingSuccess({
 
 
       <h1>
-        🎉 Booking Successful
+        🎉 Booking Confirmed
       </h1>
 
 
 
       <p>
-        Aapki booking successfully create ho gayi hai.
+        Aapki service booking successfully create ho gayi hai.
       </p>
 
 
-
-      <br />
 
 
 
       <div
         style={{
           background:"#fff",
-          borderRadius:10,
-          padding:15,
-          marginBottom:20,
+          padding:20,
+          borderRadius:12,
+          marginTop:20,
           textAlign:"left",
+          boxShadow:"0 2px 8px #ddd"
         }}
       >
 
 
 
         <p>
-
-          <b>🚜 Service:</b>
+          🚜 <b>Service:</b>
           {" "}
-
           {
+          bookingData?.service_name ||
           bookingData?.selectedService?.name_hi ||
           bookingData?.selectedService?.name ||
           "-"
           }
-
         </p>
 
 
@@ -63,14 +61,11 @@ export default function BookingSuccess({
 
 
         <p>
-
-          <b>🌾 Acres:</b>
+          🌾 <b>Acres:</b>
           {" "}
-
           {
           bookingData?.acres || 0
           }
-
         </p>
 
 
@@ -78,17 +73,14 @@ export default function BookingSuccess({
 
 
         <p>
-
-          <b>💰 Amount:</b>
+          💰 <b>Total Amount:</b>
           {" "}
-
           ₹
           {
-          bookingData?.amount || 
+          bookingData?.amount ||
           bookingData?.total_amount ||
           0
           }
-
         </p>
 
 
@@ -96,14 +88,13 @@ export default function BookingSuccess({
 
 
         <p>
-
-          <b>📅 Date:</b>
+          📅 <b>Booking Date:</b>
           {" "}
-
           {
-          bookingData?.date || "-"
+          bookingData?.booking_date ||
+          bookingData?.date ||
+          "-"
           }
-
         </p>
 
 
@@ -111,15 +102,52 @@ export default function BookingSuccess({
 
 
         <p>
-
-          <b>💳 Payment:</b>
+          👤 <b>Customer:</b>
           {" "}
+          {
+          bookingData?.customer_name ||
+          "Kisan"
+          }
+        </p>
 
+
+
+
+
+        <p>
+          📞 <b>Mobile:</b>
+          {" "}
+          {
+          bookingData?.customer_phone ||
+          "-"
+          }
+        </p>
+
+
+
+
+
+        <p>
+          📍 <b>Village:</b>
+          {" "}
+          {
+          bookingData?.village ||
+          bookingData?.state ||
+          "-"
+          }
+        </p>
+
+
+
+
+
+        <p>
+          💳 <b>Payment Status:</b>
+          {" "}
           {
           bookingData?.payment_status ||
           "Pending"
           }
-
         </p>
 
 
@@ -127,16 +155,12 @@ export default function BookingSuccess({
 
 
         <p>
-
-          <b>📍 Village:</b>
+          📌 <b>Status:</b>
           {" "}
-
           {
-          bookingData?.selKhet?.selected712?.village ||
-          bookingData?.selKhet?.village ||
-          "-"
+          bookingData?.status ||
+          "Pending"
           }
-
         </p>
 
 
@@ -152,18 +176,19 @@ export default function BookingSuccess({
         onClick={onDone}
 
         style={{
-          padding:12,
+          marginTop:20,
           width:"100%",
-          borderRadius:8,
-          border:"none",
+          padding:14,
           background:"#16a34a",
           color:"#fff",
-          fontSize:16,
+          border:"none",
+          borderRadius:10,
+          fontSize:18
         }}
 
       >
 
-        🏠 Home
+        🏠 Go Home
 
       </button>
 
