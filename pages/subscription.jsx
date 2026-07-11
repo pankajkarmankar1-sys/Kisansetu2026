@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
 import PhonePePayment from "../components/payment/PhonePePayment";
+import SubscriptionPlans from "../components/customer/SubscriptionPlans";
 import { supabase } from "../lib/supabase";
 
 
@@ -10,18 +11,9 @@ export default function SubscriptionPage(){
   const router = useRouter();
 
 
-  const [acres,setAcres] = useState("");
+  const [plan,setPlan] = useState(null);
 
   const [payment,setPayment] = useState(false);
-
-
-
-  const pricePerAcre = 550;
-
-
-  const amount =
-    Number(acres || 0) * pricePerAcre;
-
 
 
 
@@ -51,11 +43,14 @@ export default function SubscriptionPage(){
 
 
 
-      const startDate = new Date();
+      const startDate =
+      new Date();
 
 
 
-      const endDate = new Date();
+      const endDate =
+      new Date();
+
 
       endDate.setFullYear(
         endDate.getFullYear()+1
@@ -76,9 +71,11 @@ export default function SubscriptionPage(){
 
         user_id:user.id,
 
-        acres:Number(acres),
+        acres:
+        plan.acres,
 
-        amount:amount,
+        amount:
+        plan.price,
 
         status:"active",
 
@@ -127,14 +124,15 @@ export default function SubscriptionPage(){
 
 
 
-  if(payment){
+
+  if(payment && plan){
 
 
     return (
 
       <PhonePePayment
 
-        amount={amount}
+        amount={plan.price}
 
         onSuccess={paymentSuccess}
 
@@ -146,7 +144,6 @@ export default function SubscriptionPage(){
 
     );
 
-
   }
 
 
@@ -157,109 +154,26 @@ export default function SubscriptionPage(){
 
   return (
 
-    <div
-      style={{
-        padding:20,
-        background:"#f5f7fb",
-        minHeight:"100vh"
-      }}
-    >
+    <SubscriptionPlans
 
 
-      <button
-      onClick={()=>router.back()}
-      >
-        ← Back
-      </button>
+      onSelect={(selected)=>{
 
 
+        setPlan(selected);
 
-      <h2>
-        👑 KisanSetu Subscription
-      </h2>
-
-
-
-      <h3>
-        ₹550 / Acre / Year
-      </h3>
-
-
-
-
-      <input
-
-      type="number"
-
-      placeholder="Enter Farm Acres"
-
-      value={acres}
-
-      onChange={(e)=>
-        setAcres(e.target.value)
-      }
-
-      style={{
-        width:"100%",
-        padding:12
-      }}
-
-      />
-
-
-
-
-
-      <h2>
-        Pay ₹{amount}
-      </h2>
-
-
-
-
-      <button
-
-      onClick={()=>{
-
-        if(!acres){
-
-          alert("Enter acres");
-
-          return;
-
-        }
 
         setPayment(true);
 
-      }}
-
-      style={{
-
-        width:"100%",
-
-        padding:15,
-
-        background:"#f59e0b",
-
-        color:"#fff",
-
-        border:"none",
-
-        borderRadius:10,
-
-        fontSize:18
 
       }}
 
-      >
-
-        👑 Buy Subscription
-
-      </button>
 
 
+      back={()=>router.back()}
 
-    </div>
+
+    />
 
   );
 
