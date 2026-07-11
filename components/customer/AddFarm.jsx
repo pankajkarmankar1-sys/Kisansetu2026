@@ -232,7 +232,12 @@ const user = data.user;
       if(error)
         throw error;
 
+console.log("Khet Saved:", khet);
 
+alert(
+  "Khet ID: " + khet.id +
+  "\nName: " + khet.name
+);
 
 
 
