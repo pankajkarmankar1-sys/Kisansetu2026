@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
-import SubscriptionPlans from "../components/customer/SubscriptionPlans";
 import PhonePePayment from "../components/payment/PhonePePayment";
 import { supabase } from "../lib/supabase";
 
@@ -11,8 +10,19 @@ export default function SubscriptionPage(){
   const router = useRouter();
 
 
-  const [plan,setPlan] = useState(null);
+  const [acres,setAcres] = useState("");
+
   const [payment,setPayment] = useState(false);
+
+
+
+  const pricePerAcre = 550;
+
+
+  const amount =
+    Number(acres || 0) * pricePerAcre;
+
+
 
 
 
@@ -41,31 +51,16 @@ export default function SubscriptionPage(){
 
 
 
-      const startDate =
-        new Date();
+      const startDate = new Date();
 
 
 
+      const endDate = new Date();
 
-      const endDate =
-        new Date();
+      endDate.setFullYear(
+        endDate.getFullYear()+1
+      );
 
-
-
-      if(plan.id==="monthly"){
-
-        endDate.setDate(
-          endDate.getDate()+30
-        );
-
-      }
-      else{
-
-        endDate.setDate(
-          endDate.getDate()+365
-        );
-
-      }
 
 
 
@@ -73,29 +68,26 @@ export default function SubscriptionPage(){
 
       const {
         error
-      } =
-      await supabase
+      } = await supabase
+
       .from("subscriptions")
+
       .insert({
 
         user_id:user.id,
 
-        plan_name:
-          plan.name,
+        acres:Number(acres),
 
-        amount:
-          plan.price,
+        amount:amount,
 
-        status:
-          "active",
+        status:"active",
 
-        start_date:
-          startDate,
+        start_date:startDate,
 
-        end_date:
-          endDate,
+        end_date:endDate,
 
       });
+
 
 
 
@@ -105,9 +97,11 @@ export default function SubscriptionPage(){
 
 
 
+
       alert(
         "✅ Subscription Activated"
       );
+
 
 
       router.replace("/dashboard");
@@ -116,6 +110,8 @@ export default function SubscriptionPage(){
 
     }
     catch(err){
+
+      console.log(err);
 
       alert(
         err.message
@@ -131,15 +127,14 @@ export default function SubscriptionPage(){
 
 
 
-
-  if(payment && plan){
+  if(payment){
 
 
     return (
 
       <PhonePePayment
 
-        amount={plan.price}
+        amount={amount}
 
         onSuccess={paymentSuccess}
 
@@ -162,19 +157,109 @@ export default function SubscriptionPage(){
 
   return (
 
-    <SubscriptionPlans
+    <div
+      style={{
+        padding:20,
+        background:"#f5f7fb",
+        minHeight:"100vh"
+      }}
+    >
 
-      onSelect={(selected)=>{
 
-        setPlan(selected);
+      <button
+      onClick={()=>router.back()}
+      >
+        ← Back
+      </button>
+
+
+
+      <h2>
+        👑 KisanSetu Subscription
+      </h2>
+
+
+
+      <h3>
+        ₹550 / Acre / Year
+      </h3>
+
+
+
+
+      <input
+
+      type="number"
+
+      placeholder="Enter Farm Acres"
+
+      value={acres}
+
+      onChange={(e)=>
+        setAcres(e.target.value)
+      }
+
+      style={{
+        width:"100%",
+        padding:12
+      }}
+
+      />
+
+
+
+
+
+      <h2>
+        Pay ₹{amount}
+      </h2>
+
+
+
+
+      <button
+
+      onClick={()=>{
+
+        if(!acres){
+
+          alert("Enter acres");
+
+          return;
+
+        }
 
         setPayment(true);
 
       }}
 
-      back={()=>router.back()}
+      style={{
 
-    />
+        width:"100%",
+
+        padding:15,
+
+        background:"#f59e0b",
+
+        color:"#fff",
+
+        border:"none",
+
+        borderRadius:10,
+
+        fontSize:18
+
+      }}
+
+      >
+
+        👑 Buy Subscription
+
+      </button>
+
+
+
+    </div>
 
   );
 
