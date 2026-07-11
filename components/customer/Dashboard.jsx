@@ -16,6 +16,11 @@ export default function Dashboard({
 
 
 
+  const subscriptionActive =
+    user?.subscription_status === "active";
+
+
+
   return (
 
     <div
@@ -34,6 +39,56 @@ export default function Dashboard({
       <h2>
         Welcome {user?.name || "User"}
       </h2>
+
+
+
+
+
+      <div
+        style={{
+          background:"#fff",
+          padding:15,
+          borderRadius:12,
+          marginTop:15
+        }}
+      >
+
+        <h3>
+          👑 Subscription Status
+        </h3>
+
+
+        {
+          subscriptionActive
+
+          ?
+
+          <>
+
+          <p>
+            ✅ Active
+          </p>
+
+          <p>
+            📅 Valid Till:
+            {" "}
+            {user?.subscription_end || "-"}
+          </p>
+
+          </>
+
+          :
+
+          <p>
+            ❌ No Active Subscription
+          </p>
+
+        }
+
+
+      </div>
+
+
 
 
 
@@ -98,7 +153,7 @@ export default function Dashboard({
             borderRadius:10,
           }}
         >
-          👑 Subscription
+          👑 Buy Subscription
         </button>
 
 
