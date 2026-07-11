@@ -5,14 +5,6 @@ export default function Page() {
 
   const router = useRouter();
 
-  function selectRole(role) {
-
-    localStorage.setItem("role", role);
-
-    router.push("/login");
-
-  }
-
   return (
     <>
       <Head>
@@ -36,32 +28,24 @@ export default function Page() {
           background: "#16a34a",
           color: "#fff",
           textAlign: "center",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
         }}
       >
-
         <h1>🚜 KisanSetu</h1>
 
-        <h3>Select Login Type</h3>
+        <h3>Welcome</h3>
+
+        <p>
+          Login with your registered mobile number.
+        </p>
 
         <button
-          onClick={() => selectRole("farmer")}
+          onClick={() => router.push("/login")}
           style={btn}
         >
-          👨‍🌾 Farmer Login
-        </button>
-
-        <button
-          onClick={() => selectRole("driver")}
-          style={btn}
-        >
-          🚜 Driver Login
-        </button>
-
-        <button
-          onClick={() => selectRole("admin")}
-          style={btn}
-        >
-          👨‍💼 Admin Login
+          Login with OTP
         </button>
 
       </div>
@@ -72,7 +56,7 @@ export default function Page() {
 const btn = {
   width: "100%",
   padding: 15,
-  margin: "10px 0",
+  margin: "20px 0",
   borderRadius: 12,
   border: "none",
   fontSize: 18,
