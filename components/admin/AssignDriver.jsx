@@ -16,21 +16,26 @@ export default function AssignDriver({ booking }) {
 
   async function loadDrivers(){
 
-    const {data,error}=await supabase
+    const {
+      data,
+      error
+    } = await supabase
     .from("drivers")
     .select(`
       id,
+      auth_user_id,
       name,
-      phone,
-      auth_user_id
+      phone
     `)
-    .eq("approved",true)
+    .eq("approval_status","approved")
     .order("name");
 
 
     if(error){
+
       console.log(error.message);
       return;
+
     }
 
 
@@ -41,88 +46,97 @@ export default function AssignDriver({ booking }) {
 
 
 
+
   async function assignDriver(){
 
-    if(!selectedDriver){
+    try{
 
-      alert("Select Driver");
-      return;
+
+      if(!booking?.id){
+
+        alert("Booking not found");
+        return;
+
+      }
+
+
+      if(!selectedDriver){
+
+        alert("Select Driver");
+        return;
+
+      }
+
+
+      const driver =
+      drivers.find(
+        d=>d.id === selectedDriver
+      );
+
+
+
+      if(!driver){
+
+        alert("Driver not found");
+        return;
+
+      }
+
+
+
+      setLoading(true);
+
+
+
+      const {
+        error
+      } = await supabase
+
+      .from("bookings")
+
+      .update({
+
+        driver_id:driver.id,
+
+        driver_name:driver.name,
+
+        driver_phone:driver.phone,
+
+        status:"Assigned"
+
+      })
+
+      .eq(
+        "id",
+        booking.id
+      );
+
+
+
+
+      if(error)
+        throw error;
+
+
+
+      alert("✅ Driver Assigned");
+
+
 
     }
+    catch(err){
 
-
-    const driver =
-    drivers.find(
-      d=>d.id==selectedDriver
-    );
-
-
-    if(!driver){
-
-      alert("Driver not found");
-      return;
+      alert(err.message);
 
     }
+    finally{
 
-
-    setLoading(true);
-
-
-
-    const {error}=await supabase
-    .from("bookings")
-    .update({
-
-      driver_id:driver.id,
-
-      driver_name:driver.name,
-
-      driver_phone:driver.phone,
-
-      status:"Assigned"
-
-    })
-    .eq(
-      "id",
-      booking.id
-    );
-
-
-
-    if(error){
-
-      alert(error.message);
       setLoading(false);
-      return;
 
     }
-
-
-
-    if(driver.auth_user_id){
-
-      await supabase
-      .from("notifications")
-      .insert({
-
-        user_id:driver.auth_user_id,
-
-        title:"🚜 New Booking Assigned",
-
-        message:
-        `${booking.service_name} booking assigned`
-
-      });
-
-    }
-
-
-
-    alert("✅ Driver Assigned");
-
-    setLoading(false);
 
   }
+
 
 
 
@@ -130,19 +144,24 @@ export default function AssignDriver({ booking }) {
   return (
 
     <div
-    style={{
-      display:"flex",
-      gap:10
-    }}
+      style={{
+        display:"flex",
+        gap:10
+      }}
     >
 
       <select
 
-      value={selectedDriver}
+        value={selectedDriver}
 
-      onChange={(e)=>
-        setSelectedDriver(e.target.value)
-      }
+        onChange={(e)=>
+          setSelectedDriver(e.target.value)
+        }
+
+        style={{
+          flex:1,
+          padding:10
+        }}
 
       >
 
@@ -152,14 +171,14 @@ export default function AssignDriver({ booking }) {
 
 
         {
-          drivers.map(d=>(
+          drivers.map(driver=>(
 
             <option
-            key={d.id}
-            value={d.id}
+              key={driver.id}
+              value={driver.id}
             >
 
-              {d.name} - {d.phone}
+              {driver.name} - {driver.phone}
 
             </option>
 
@@ -172,17 +191,28 @@ export default function AssignDriver({ booking }) {
 
 
       <button
-      onClick={assignDriver}
-      disabled={loading}
+
+        onClick={assignDriver}
+
+        disabled={loading}
+
+        style={{
+          padding:"10px 15px",
+          background:"#16a34a",
+          color:"#fff",
+          border:"none",
+          borderRadius:8
+        }}
+
       >
 
-      {
-        loading
-        ?
-        "Assigning..."
-        :
-        "Assign"
-      }
+        {
+          loading
+          ?
+          "Assigning..."
+          :
+          "Assign"
+        }
 
       </button>
 
