@@ -24,25 +24,9 @@ export default function AdminPage() {
         return;
       }
 
-      const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("auth_user_id", user.id)
-        .maybeSingle();
-
-      if (error || !profile) {
-        alert("Profile not found");
-        router.replace("/");
-        return;
-      }
-
-      if (profile.role !== "admin") {
-        alert("Access Denied");
-        router.replace("/");
-        return;
-      }
-
+      // TEMPORARY: Allow every logged-in user
       setAllowed(true);
+
     } catch (err) {
       console.log(err);
       router.replace("/");
@@ -52,7 +36,11 @@ export default function AdminPage() {
   }
 
   if (loading) {
-    return <div style={{ padding: 20 }}>Checking Admin Access...</div>;
+    return (
+      <div style={{ padding: 20 }}>
+        Checking Admin Access...
+      </div>
+    );
   }
 
   if (!allowed) {
