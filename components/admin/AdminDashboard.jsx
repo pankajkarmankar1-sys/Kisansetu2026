@@ -7,6 +7,7 @@ import StatsCard from "./StatsCard";
 import BookingList from "./BookingList";
 import DriverList from "./DriverList";
 import FarmerDocuments from "./FarmerDocuments";
+import SubscriptionList from "./SubscriptionList";
 
 export default function AdminDashboard() {
   const router = useRouter();
