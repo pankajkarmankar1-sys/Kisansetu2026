@@ -14,7 +14,7 @@ export default function PaymentSummary({
 }) {
 
 
-  const [isSubscriber,setIsSubscriber] = useState(false);
+  const [subscription,setSubscription] = useState(null);
 
   const [showPayment,setShowPayment] = useState(false);
 
@@ -50,16 +50,19 @@ export default function PaymentSummary({
 
       .from("subscriptions")
 
-      .select("id")
+      .select("*")
 
       .eq(
         "user_id",
         user.id
       )
 
-      .eq(
+      .in(
         "status",
-        "active"
+        [
+          "active",
+          "Active"
+        ]
       )
 
       .maybeSingle();
@@ -70,7 +73,7 @@ export default function PaymentSummary({
 
       if(!error && data){
 
-        setIsSubscriber(true);
+        setSubscription(data);
 
       }
 
@@ -91,9 +94,11 @@ export default function PaymentSummary({
 
 
 
-  // BUSINESS RATE
-  // Normal customer = 1100/Acre
-  // Subscriber = 550/Acre
+  const isSubscriber =
+  !!subscription;
+
+
+
 
 
   const normalPrice = 1100;
@@ -106,11 +111,14 @@ export default function PaymentSummary({
 
     ?
 
-    550
+    (
+      subscription?.rate_per_acre || 550
+    )
 
     :
 
-    1100;
+    normalPrice;
+
 
 
 
@@ -128,11 +136,13 @@ export default function PaymentSummary({
 
 
 
+
   const amount =
 
     price *
 
     Number(acres || 0);
+
 
 
 
@@ -264,9 +274,9 @@ export default function PaymentSummary({
           {
           isSubscriber
           ?
-          "Subscriber"
+          "Active Subscription"
           :
-          "Normal"
+          "Normal Customer"
           }
         </p>
 
@@ -288,7 +298,7 @@ export default function PaymentSummary({
           isSubscriber &&
 
           <p>
-            🎉 50% Subscription Discount:
+            🎉 Subscription Discount:
             {" "}
             ₹{discount}
           </p>
