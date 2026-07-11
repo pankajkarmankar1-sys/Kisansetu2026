@@ -22,16 +22,20 @@ export default function PhonePePayment({
 
 
 
-      /*
-        Yaha PhonePe API connect hogi.
-        Abhi testing ke liye success flow.
-      */
+      // Temporary testing payment
+      // Real PhonePe gateway integration baad me add karenge
 
 
       setTimeout(()=>{
 
 
         setLoading(false);
+
+
+
+        alert(
+          "✅ Payment Successful"
+        );
 
 
 
@@ -42,21 +46,31 @@ export default function PhonePePayment({
         }
 
 
+
       },2000);
 
 
 
     }
-    catch(err){
+    catch(error){
 
-      console.log(err);
+
+      console.log(error);
+
 
       setLoading(false);
+
+
+      alert(
+        "❌ Payment Failed"
+      );
+
 
     }
 
 
   }
+
 
 
 
@@ -85,6 +99,7 @@ export default function PhonePePayment({
 
 
 
+
       <button
 
         onClick={startPayment}
@@ -92,12 +107,21 @@ export default function PhonePePayment({
         disabled={loading}
 
         style={{
+
           width:"100%",
-          padding:14,
+
+          padding:15,
+
           background:"#16a34a",
+
           color:"#fff",
+
           border:"none",
+
           borderRadius:10,
+
+          fontSize:18
+
         }}
 
       >
@@ -118,25 +142,30 @@ export default function PhonePePayment({
 
 
       {
-        onBack && (
+        onBack &&
 
-          <button
+        <button
 
-            onClick={onBack}
+          onClick={onBack}
 
-            style={{
-              width:"100%",
-              padding:12,
-              marginTop:10,
-            }}
+          disabled={loading}
 
-          >
+          style={{
 
-            ← Back
+            width:"100%",
 
-          </button>
+            padding:12,
 
-        )
+            marginTop:10
+
+          }}
+
+        >
+
+          ← Back
+
+        </button>
+
       }
 
 
