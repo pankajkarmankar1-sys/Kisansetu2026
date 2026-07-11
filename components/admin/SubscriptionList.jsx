@@ -23,6 +23,7 @@ export default function SubscriptionList(){
 
 
 
+
   async function loadSubscriptions(){
 
 
@@ -42,8 +43,7 @@ export default function SubscriptionList(){
         acres,
         amount,
         status,
-        start_date,
-        end_date
+        start_date
       `)
 
       .order(
@@ -55,8 +55,11 @@ export default function SubscriptionList(){
 
 
 
+
       if(error)
         throw error;
+
+
 
 
 
@@ -85,6 +88,7 @@ export default function SubscriptionList(){
 
 
 
+
           return {
 
             ...sub,
@@ -107,6 +111,8 @@ export default function SubscriptionList(){
 
 
 
+
+
       setSubscriptions(updated);
 
 
@@ -125,6 +131,7 @@ export default function SubscriptionList(){
 
 
   }
+
 
 
 
@@ -156,6 +163,7 @@ export default function SubscriptionList(){
 
 
 
+
       {
         loading
 
@@ -166,19 +174,25 @@ export default function SubscriptionList(){
         </p>
 
 
+
         :
+
 
 
         subscriptions.length === 0
 
+
         ?
+
 
         <p>
           No Subscription Found
         </p>
 
 
+
         :
+
 
 
         subscriptions.map((sub)=>(
@@ -215,6 +229,7 @@ export default function SubscriptionList(){
 
 
 
+
             <p>
               🌾 Land:
               {" "}
@@ -223,11 +238,13 @@ export default function SubscriptionList(){
 
 
 
+
             <p>
-              💰 Subscription:
+              💰 Paid:
               {" "}
               ₹{sub.amount}
             </p>
+
 
 
 
@@ -247,27 +264,13 @@ export default function SubscriptionList(){
 
 
 
-            <p>
-              📅 End:
-              {" "}
-              {
-              sub.end_date
-              ?
-              new Date(
-                sub.end_date
-              ).toLocaleDateString()
-              :
-              "-"
-              }
-            </p>
-
-
 
             <p>
               Status:
               {" "}
               {sub.status}
             </p>
+
 
 
 
@@ -283,6 +286,5 @@ export default function SubscriptionList(){
     </div>
 
   );
-
 
 }
