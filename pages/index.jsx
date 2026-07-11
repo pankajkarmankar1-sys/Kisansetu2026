@@ -6,11 +6,10 @@ export default function Page() {
   const router = useRouter();
 
 
-  function selectRole(role){
+  function selectRole(role) {
 
     localStorage.setItem(
-      "role",console.log("SELECTED ROLE:", selectedRole);
-  
+      "role",
       role
     );
 
@@ -43,14 +42,14 @@ export default function Page() {
 
       <div
         style={{
-          minHeight:"100vh",
-          padding:20,
-          background:"#16a34a",
-          color:"#fff",
-          textAlign:"center",
-          display:"flex",
-          flexDirection:"column",
-          justifyContent:"center"
+          minHeight: "100vh",
+          padding: 20,
+          background: "#16a34a",
+          color: "#fff",
+          textAlign: "center",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
         }}
       >
 
@@ -66,7 +65,7 @@ export default function Page() {
 
 
         <button
-          onClick={()=>selectRole("farmer")}
+          onClick={() => selectRole("farmer")}
           style={btn}
         >
           👨‍🌾 Farmer Login
@@ -75,7 +74,7 @@ export default function Page() {
 
 
         <button
-          onClick={()=>selectRole("driver")}
+          onClick={() => selectRole("driver")}
           style={btn}
         >
           🚜 Driver Login
@@ -84,12 +83,11 @@ export default function Page() {
 
 
         <button
-          onClick={()=>selectRole("admin")}
+          onClick={() => selectRole("admin")}
           style={btn}
         >
           👨‍💼 Admin Login
         </button>
-
 
 
       </div>
@@ -101,14 +99,14 @@ export default function Page() {
 
 
 
-const btn={
+const btn = {
 
-  width:"100%",
-  padding:15,
-  margin:"10px 0",
-  borderRadius:12,
-  border:"none",
-  fontSize:18,
-  cursor:"pointer"
+  width: "100%",
+  padding: 15,
+  margin: "10px 0",
+  borderRadius: 12,
+  border: "none",
+  fontSize: 18,
+  cursor: "pointer",
 
 };
