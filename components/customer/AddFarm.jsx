@@ -156,6 +156,7 @@ export default function AddFarm({
       const { data, error } = await supabase.auth.getUser();
 
 console.log("SUPABASE USER:", data.user);
+      alert(JSON.stringify(data.user));
 
 const user = data.user;
 
