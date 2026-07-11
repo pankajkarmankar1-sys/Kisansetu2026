@@ -4,66 +4,17 @@ import { supabase } from "../../lib/supabase";
 
 export default function DriverBookings({ driver }) {
 
-
   const [bookings,setBookings] = useState([]);
-
   const [loading,setLoading] = useState(true);
-
-
 
 
 
   useEffect(()=>{
 
-
     if(!driver?.id)
       return;
 
-
     loadBookings();
-
-
-
-    const channel = supabase
-
-    .channel(
-      `driver_bookings_${driver.id}`
-    )
-
-    .on(
-
-      "postgres_changes",
-
-      {
-
-        event:"*",
-
-        schema:"public",
-
-        table:"bookings"
-
-      },
-
-      ()=>{
-
-        loadBookings();
-
-      }
-
-    )
-
-    .subscribe();
-
-
-
-
-
-    return ()=>{
-
-      supabase.removeChannel(channel);
-
-    };
-
 
   },[driver]);
 
@@ -71,26 +22,16 @@ export default function DriverBookings({ driver }) {
 
 
 
-
-
-
-
   async function loadBookings(){
 
-
     try{
-
 
       setLoading(true);
 
 
-
       const {
-
         data,
-
         error
-
       } = await supabase
 
       .from("bookings")
@@ -98,24 +39,16 @@ export default function DriverBookings({ driver }) {
       .select("*")
 
       .eq(
-
         "driver_id",
-
         driver.id
-
       )
 
       .order(
-
         "created_at",
-
         {
           ascending:false
         }
-
       );
-
-
 
 
 
@@ -123,9 +56,7 @@ export default function DriverBookings({ driver }) {
         throw error;
 
 
-
       setBookings(data || []);
-
 
 
     }
@@ -140,98 +71,7 @@ export default function DriverBookings({ driver }) {
 
     }
 
-
   }
-
-
-
-
-
-
-
-
-
-  async function updateStatus(
-    booking,
-    status
-  ){
-
-
-    const {
-
-      error
-
-    } = await supabase
-
-    .from("bookings")
-
-    .update({
-
-      status
-
-    })
-
-    .eq(
-
-      "id",
-
-      booking.id
-
-    );
-
-
-
-
-
-    if(error){
-
-      alert(error.message);
-
-      return;
-
-    }
-
-
-
-
-
-
-
-    if(booking.customer_id){
-
-
-      await supabase
-
-      .from("notifications")
-
-      .insert([{
-
-        user_id:
-          booking.customer_id,
-
-
-        title:
-          `Booking ${status}`,
-
-
-        message:
-          `Your booking status is ${status}`
-
-      }]);
-
-
-    }
-
-
-
-
-
-
-    loadBookings();
-
-
-  }
-
 
 
 
@@ -248,30 +88,24 @@ export default function DriverBookings({ driver }) {
 
 
 
-
   return (
 
-    <div>
-
+    <div style={{padding:15}}>
 
       <h2>
-        🚜 My Bookings
+        🚜 My Assigned Bookings
       </h2>
 
 
 
-
-
       {
-        bookings.length===0 && (
+        bookings.length === 0 &&
 
-          <p>
-            No bookings assigned.
-          </p>
+        <p>
+          No assigned bookings.
+        </p>
 
-        )
       }
-
 
 
 
@@ -279,55 +113,57 @@ export default function DriverBookings({ driver }) {
       {
         bookings.map((booking)=>(
 
-
           <div
 
-            key={booking.id}
+          key={booking.id}
 
-            style={{
+          style={{
 
-              background:"#fff",
+            background:"#fff",
 
-              padding:15,
+            padding:15,
 
-              marginBottom:15,
+            marginBottom:15,
 
-              borderRadius:10
+            borderRadius:12,
 
-            }}
+            border:"1px solid #ddd"
+
+          }}
 
           >
 
-
-
             <h3>
-              {booking.service_name}
+              🚜 {booking.service_name}
             </h3>
 
 
-
             <p>
-              Customer:
+              👨‍🌾 Customer:
               {" "}
-              {booking.customer_name || "-"}
+              {booking.customer_name}
             </p>
 
 
-
             <p>
-              Phone:
+              📞 Phone:
               {" "}
-              {booking.customer_phone || "-"}
+              {booking.customer_phone}
             </p>
 
 
+            <p>
+              🌾 Acres:
+              {" "}
+              {booking.acres}
+            </p>
+
 
             <p>
-              Village:
+              📍 Village:
               {" "}
               {booking.village || "-"}
             </p>
-
 
 
             <p>
@@ -337,126 +173,11 @@ export default function DriverBookings({ driver }) {
             </p>
 
 
-
-
-
-
-
-            {
-              booking.status==="Pending" && (
-
-                <button
-                  onClick={()=>updateStatus(
-                    booking,
-                    "Accepted"
-                  )}
-                >
-                  ✅ Accept
-                </button>
-
-              )
-            }
-
-
-
-
-
-            {
-              booking.status==="Accepted" && (
-
-                <button
-                  onClick={()=>updateStatus(
-                    booking,
-                    "In Progress"
-                  )}
-                >
-                  🚜 Start Work
-                </button>
-
-              )
-            }
-
-
-
-
-
-            {
-              booking.status==="In Progress" && (
-
-                <button
-                  onClick={()=>updateStatus(
-                    booking,
-                    "Completed"
-                  )}
-                >
-                  ✅ Complete
-                </button>
-
-              )
-            }
-
-
-
-
-
-            <button
-
-              onClick={()=>updateStatus(
-                booking,
-                "Rejected"
-              )}
-
-              style={{
-
-                marginLeft:10
-
-              }}
-
-            >
-
-              ❌ Reject
-
-            </button>
-
-
-
-
-
-            {
-              booking.customer_phone && (
-
-                <a
-
-                  href={
-                    `tel:${booking.customer_phone}`
-                  }
-
-                  style={{
-
-                    marginLeft:10
-
-                  }}
-
-                >
-
-                  📞 Call
-
-                </a>
-
-              )
-            }
-
-
-
-
-
           </div>
-
 
         ))
 
       }
-
 
 
     </div>
