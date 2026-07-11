@@ -1,89 +1,65 @@
-import React, { useState } from "react";
-import { supabase } from "../../lib/supabase";
+async function saveFarm(){
 
-export default function AddFarm({
-  onSaved,
-  back,
-}) {
+  try{
+
+    setLoading(true);
 
 
-  const [farm,setFarm] = useState({
-
-    name:"",
-    village:"",
-    farm_address:"",
-    acres:"",
-    state:"",
-    district:"",
-    taluka:""
-
-  });
+    const { data:userData, error:userError } =
+      await supabase.auth.getUser();
 
 
+    if(userError)
+      throw userError;
 
-  const [documents,setDocuments] = useState([]);
 
-  const [loading,setLoading] = useState(false);
+    const user = userData.user;
 
+
+    if(!user){
+
+      alert("Login required");
+
+      return;
+
+    }
 
 
 
-  function handleChange(e){
+    const { data:khet, error } = await supabase
 
-    setFarm({
+    .from("khets")
 
-      ...farm,
+    .insert({
 
-      [e.target.name]:e.target.value
+      user_id:user.id,
 
-    });
+      name:farm.name,
 
-  }
+      village:farm.village,
 
+      farm_address:farm.farm_address,
 
+      acres:Number(farm.acres),
 
+      state:farm.state,
 
-  function handleDocuments(e){
+      district:farm.district,
 
-    setDocuments(
-      Array.from(e.target.files)
-    );
+      taluka:farm.taluka
 
-  }
+    })
 
-
-
-
-
-
-
-  async function uploadDocument(
-    file,
-    khetId,
-    userId
-  ){
-
-
-    const fileName =
-
-    `7-12/${userId}/${Date.now()}_${file.name}`;
+    .select("*");
 
 
 
 
 
-    const {
+    console.log(
+      "INSERT RESULT:",
+      khet,
       error
-    } = await supabase.storage
-
-    .from("customer-documents")
-
-    .upload(
-
-      fileName,
-
-      file
-
     );
 
 
@@ -97,487 +73,56 @@ export default function AddFarm({
 
 
 
-
-    const {
-      data
-    } = supabase.storage
-
-    .from("customer-documents")
-
-    .getPublicUrl(
-
-      fileName
-
+    alert(
+      "✅ Farm Added Successfully\nID: "
+      +
+      khet[0].id
     );
 
 
 
 
 
+    for(
+      const file of documents
+    ){
 
-    await supabase
+      await uploadDocument(
 
-    .from("khet_documents")
+        file,
 
-    .insert([{
+        khet[0].id,
 
-      khet_id:khetId,
+        user.id
 
-      user_id:userId,
+      );
 
-      document_type:"7/12",
+    }
 
-      file_url:data.publicUrl
 
-    }]);
+
+
+
+    if(onSaved){
+
+      onSaved();
+
+    }
 
 
 
   }
+  catch(err){
 
+    alert(err.message);
 
-
-
-
-
-
-
-  async function saveFarm(){
-
-
-    try{
-
-
-      setLoading(true);
-
-
-
-
-      const { data, error } = await supabase.auth.getUser();
-
-console.log("SUPABASE USER:", data.user);
-      alert(JSON.stringify(data.user));
-
-const user = data.user;
-
-
-
-
-
-      if(!user){
-
-        alert(
-          "Login required"
-        );
-
-        return;
-
-      }
-
-
-
-
-
-
-
-      const {
-        data:khet,
-
-        error
-
-      } = await supabase
-
-      .from("khets")
-
-      .insert([{
-
-
-        user_id:user.id,
-
-
-        name:farm.name,
-
-
-        village:farm.village,
-
-
-        farm_address:farm.farm_address,
-
-
-        acres:Number(farm.acres),
-
-
-        state:farm.state,
-
-
-        district:farm.district,
-
-
-        taluka:farm.taluka
-
-
-
-      }])
-
-      .select()
-
-      .single();
-
-
-
-
-
-
-
-      if(error)
-        throw error;
-
-console.log("Khet Saved:", khet);
-
-alert(
-  "Khet ID: " + khet.id +
-  "\nName: " + khet.name
-);
-
-
-
-
-
-      for(
-        const file of documents
-      ){
-
-
-        await uploadDocument(
-
-          file,
-
-          khet.id,
-
-          user.id
-
-        );
-
-
-      }
-
-
-
-
-
-
-
-      alert(
-        "✅ Farm Added Successfully"
-      );
-
-
-
-
-
-
-      if(onSaved){
-
-        onSaved();
-
-      }
-
-
-
-
-
-    }
-    catch(err){
-
-
-      alert(
-        err.message
-      );
-
-
-    }
-    finally{
-
-
-      setLoading(false);
-
-
-    }
-
+    console.log(err);
 
   }
+  finally{
 
+    setLoading(false);
 
-
-
-
-
-
-
-
-  return (
-
-    <div
-      style={{
-        padding:20,
-        background:"#f8fafc",
-        minHeight:"100vh"
-      }}
-    >
-
-
-      <h2>
-        🌾 Add New Farm
-      </h2>
-
-
-
-
-
-      <input
-
-        name="name"
-
-        placeholder="Khet Name"
-
-        value={farm.name}
-
-        onChange={handleChange}
-
-        style={input}
-
-      />
-
-
-
-
-      <input
-
-        name="village"
-
-        placeholder="Village"
-
-        value={farm.village}
-
-        onChange={handleChange}
-
-        style={input}
-
-      />
-
-
-
-
-      <input
-
-        name="farm_address"
-
-        placeholder="Farm Address"
-
-        value={farm.farm_address}
-
-        onChange={handleChange}
-
-        style={input}
-
-      />
-
-
-
-
-      <input
-
-        name="acres"
-
-        placeholder="Acres"
-
-        type="number"
-
-        value={farm.acres}
-
-        onChange={handleChange}
-
-        style={input}
-
-      />
-
-
-
-
-      <input
-
-        name="state"
-
-        placeholder="State"
-
-        value={farm.state}
-
-        onChange={handleChange}
-
-        style={input}
-
-      />
-
-
-
-
-      <input
-
-        name="district"
-
-        placeholder="District"
-
-        value={farm.district}
-
-        onChange={handleChange}
-
-        style={input}
-
-      />
-
-
-
-
-      <input
-
-        name="taluka"
-
-        placeholder="Taluka"
-
-        value={farm.taluka}
-
-        onChange={handleChange}
-
-        style={input}
-
-      />
-
-
-
-
-
-      <h3>
-        📄 7/12 Upload
-      </h3>
-
-
-      <p>
-        Camera / Gallery / PDF / Multiple Files
-      </p>
-
-
-
-      <input
-
-        type="file"
-
-        accept="image/*,.pdf"
-
-        multiple
-
-        onChange={handleDocuments}
-
-      />
-
-
-
-
-      <p>
-        Selected Files:
-        {" "}
-        {documents.length}
-      </p>
-
-
-
-
-
-
-      <button
-
-        onClick={saveFarm}
-
-        disabled={loading}
-
-        style={button}
-
-      >
-
-        {
-          loading
-          ?
-          "Saving..."
-          :
-          "✅ Save Farm"
-        }
-
-      </button>
-
-
-
-
-
-
-      <button
-
-        onClick={back}
-
-        style={{
-          ...button,
-          background:"#64748b",
-          marginTop:10
-        }}
-
-      >
-
-        ← Back
-
-      </button>
-
-
-
-    </div>
-
-  );
+  }
 
 }
-
-
-
-
-
-
-const input={
-
-  width:"100%",
-
-  padding:12,
-
-  marginBottom:12,
-
-  borderRadius:8,
-
-  border:"1px solid #ccc"
-
-};
-
-
-
-
-const button={
-
-  width:"100%",
-
-  padding:14,
-
-  background:"#16a34a",
-
-  color:"#fff",
-
-  border:"none",
-
-  borderRadius:10,
-
-  fontSize:16
-
-};
