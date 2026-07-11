@@ -2,163 +2,54 @@ import { useRouter } from "next/router";
 import OTPLogin from "../components/customer/OTPLogin";
 import { supabase } from "../lib/supabase";
 
-
 export default function LoginPage() {
-
 
   const router = useRouter();
 
+  async function handleSuccess() {
 
-
-
-  async function handleSuccess(profile){
-
-
-    try{
-
-
-      const role =
-        localStorage.getItem("role");
-
-
+    try {
 
       const {
-        data:{
-          user
-        }
-      } =
-      await supabase.auth.getUser();
+        data: { user },
+      } = await supabase.auth.getUser();
 
-
-
-
-
-      if(!user){
-
+      if (!user) {
         router.replace("/login");
-
         return;
-
       }
 
-
-
-
-
-
-      const {
-        data:userProfile
-      } = await supabase
-
+      const { data: profile } = await supabase
         .from("profiles")
-
-        .select("*")
-
-        .eq(
-          "auth_user_id",
-          user.id
-        )
-
+        .select("name, role")
+        .eq("auth_user_id", user.id)
         .maybeSingle();
 
-
-
-
-
-
+      // New User
+      if (!profile || !profile.name) {
+        router.replace(`/registration?phone=${user.phone || ""}`);
+        return;
+      }
 
       // Admin
-
-      if(role==="admin"){
-
+      if (profile.role === "admin") {
         router.replace("/admin");
-
         return;
-
       }
-
-
-
-
-
-
 
       // Driver
-
-      if(role==="driver"){
-
+      if (profile.role === "driver") {
         router.replace("/driver");
-
         return;
-
       }
 
+      // Farmer
+      router.replace("/dashboard");
 
-
-
-
-
-
-
-      // Farmer new user
-
-      if(
-        !userProfile ||
-        !userProfile.name
-      ){
-
-
-        router.replace(
-
-          `/registration?phone=${user.phone || ""}`
-
-        );
-
-
-        return;
-
-      }
-
-
-
-
-
-
-
-      // Farmer existing user
-
-      router.replace(
-        "/dashboard"
-      );
-
-
-
-
-
-    }
-    catch(err){
-
+    } catch (err) {
       console.log(err);
-
     }
-
-
   }
 
-
-
-
-
-
-
-  return (
-
-    <OTPLogin
-
-      onSuccess={handleSuccess}
-
-    />
-
-  );
-
+  return <OTPLogin onSuccess={handleSuccess} />;
 }
