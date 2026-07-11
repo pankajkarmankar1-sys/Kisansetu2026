@@ -12,6 +12,8 @@ export default function PhonePePayment({
 
 
 
+
+
   async function startPayment(){
 
 
@@ -22,8 +24,9 @@ export default function PhonePePayment({
 
 
 
-      // Temporary testing payment
-      // Real PhonePe gateway integration baad me add karenge
+      // Temporary testing payment flow
+      // Real PhonePe API integration baad me connect karenge
+
 
 
       setTimeout(()=>{
@@ -46,24 +49,18 @@ export default function PhonePePayment({
         }
 
 
-
       },2000);
 
 
 
     }
-    catch(error){
+    catch(err){
 
 
-      console.log(error);
+      console.log(err);
 
 
       setLoading(false);
-
-
-      alert(
-        "❌ Payment Failed"
-      );
 
 
     }
@@ -76,14 +73,21 @@ export default function PhonePePayment({
 
 
 
+
   return (
 
     <div
+
       style={{
+
         padding:20,
+
         background:"#fff",
-        borderRadius:12,
+
+        borderRadius:12
+
       }}
+
     >
 
 
@@ -110,7 +114,7 @@ export default function PhonePePayment({
 
           width:"100%",
 
-          padding:15,
+          padding:14,
 
           background:"#16a34a",
 
@@ -141,38 +145,31 @@ export default function PhonePePayment({
 
 
 
-      {
-        onBack &&
+      <button
 
-        <button
+        onClick={onBack}
 
-          onClick={onBack}
+        style={{
 
-          disabled={loading}
+          width:"100%",
 
-          style={{
+          padding:12,
 
-            width:"100%",
+          marginTop:10
 
-            padding:12,
+        }}
 
-            marginTop:10
+      >
 
-          }}
+        ← Back
 
-        >
-
-          ← Back
-
-        </button>
-
-      }
-
+      </button>
 
 
 
     </div>
 
   );
+
 
 }
