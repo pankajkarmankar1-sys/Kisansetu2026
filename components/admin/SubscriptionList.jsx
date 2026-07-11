@@ -23,7 +23,6 @@ export default function SubscriptionList(){
 
 
 
-
   async function loadSubscriptions(){
 
 
@@ -37,7 +36,15 @@ export default function SubscriptionList(){
 
       .from("subscriptions")
 
-      .select("*")
+      .select(`
+        id,
+        user_id,
+        acres,
+        amount,
+        status,
+        start_date,
+        end_date
+      `)
 
       .order(
         "created_at",
@@ -48,16 +55,59 @@ export default function SubscriptionList(){
 
 
 
-
-
       if(error)
         throw error;
 
 
 
-      setSubscriptions(
-        data || []
+      const updated = await Promise.all(
+
+        (data || []).map(async(sub)=>{
+
+
+          const {
+            data:profile
+          } = await supabase
+
+          .from("profiles")
+
+          .select(`
+            name,
+            phone
+          `)
+
+          .eq(
+            "auth_user_id",
+            sub.user_id
+          )
+
+          .maybeSingle();
+
+
+
+          return {
+
+            ...sub,
+
+            name:
+            profile?.name ||
+            "Kisan",
+
+
+            phone:
+            profile?.phone ||
+            "-"
+
+          };
+
+
+        })
+
       );
+
+
+
+      setSubscriptions(updated);
 
 
 
@@ -106,7 +156,6 @@ export default function SubscriptionList(){
 
 
 
-
       {
         loading
 
@@ -137,41 +186,45 @@ export default function SubscriptionList(){
 
           <div
 
-            key={sub.id}
+          key={sub.id}
 
-            style={{
+          style={{
 
-              border:"1px solid #ddd",
+            border:"1px solid #ddd",
 
-              padding:12,
+            padding:15,
 
-              marginTop:10,
+            marginTop:10,
 
-              borderRadius:10
+            borderRadius:10
 
-            }}
+          }}
 
           >
 
 
+            <h3>
+              👨‍🌾 {sub.name}
+            </h3>
+
+
+
             <p>
-              👤 User ID:
-              {" "}
-              {sub.user_id}
+              📱 {sub.phone}
             </p>
 
 
 
             <p>
-              🌾 Acres:
+              🌾 Land:
               {" "}
-              {sub.acres || 0}
+              {sub.acres} Acre
             </p>
 
 
 
             <p>
-              💰 Amount:
+              💰 Subscription:
               {" "}
               ₹{sub.amount}
             </p>
@@ -179,15 +232,7 @@ export default function SubscriptionList(){
 
 
             <p>
-              Status:
-              {" "}
-              {sub.status}
-            </p>
-
-
-
-            <p>
-              Start:
+              📅 Start:
               {" "}
               {
               sub.start_date
@@ -202,9 +247,8 @@ export default function SubscriptionList(){
 
 
 
-
             <p>
-              End:
+              📅 End:
               {" "}
               {
               sub.end_date
@@ -219,6 +263,14 @@ export default function SubscriptionList(){
 
 
 
+            <p>
+              Status:
+              {" "}
+              {sub.status}
+            </p>
+
+
+
           </div>
 
 
@@ -228,9 +280,9 @@ export default function SubscriptionList(){
 
 
 
-
     </div>
 
   );
+
 
 }
