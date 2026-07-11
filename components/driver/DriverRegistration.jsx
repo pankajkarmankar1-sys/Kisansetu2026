@@ -1,291 +1,80 @@
 import React, { useState } from "react";
 import { supabase } from "../../lib/supabase";
 
-
 export default function DriverRegistration() {
 
-
   const [driver,setDriver] = useState({
-
     name:"",
     phone:"",
-    aadhaar:"",
-    vehicle_type:"",
-    vehicle_number:""
-
+    village:"",
+    tractor_num:"",
+    tractor_details:""
   });
-
-
-
-  const [docs,setDocs] = useState({
-
-    aadhaarFront:null,
-    aadhaarBack:null,
-    license:null,
-    rc:null,
-    vehiclePhoto:null
-
-  });
-
-
 
   const [loading,setLoading] = useState(false);
 
 
-
-
-
-  function change(e){
+  function handleChange(e){
 
     setDriver({
-
       ...driver,
-
-      [e.target.name]:
-      e.target.value
-
+      [e.target.name]:e.target.value
     });
 
   }
 
 
 
-
-
-
-
-  function selectFile(e,name){
-
-    setDocs({
-
-      ...docs,
-
-      [name]:
-      e.target.files[0]
-
-    });
-
-  }
-
-
-
-
-
-
-
-
-  async function uploadFile(file,folder,userId){
-
-
-    if(!file)
-      return null;
-
-
-
-    const fileName =
-
-    `${folder}/${userId}_${Date.now()}_${file.name}`;
-
-
-
-
-
-    const {
-      error
-    } = await supabase.storage
-
-    .from("driver-documents")
-
-    .upload(
-      fileName,
-      file
-    );
-
-
-
-
-
-    if(error)
-      throw error;
-
-
-
-
-    const {
-      data
-    } =
-    supabase.storage
-
-    .from("driver-documents")
-
-    .getPublicUrl(
-      fileName
-    );
-
-
-
-    return data.publicUrl;
-
-
-  }
-
-
-
-
-
-
-
-
-  async function submit(){
-
+  async function submitDriver(){
 
     try{
 
-
       setLoading(true);
-
-
 
 
       const {
         data:{
           user
         }
-      } =
-      await supabase.auth.getUser();
-
-
+      } = await supabase.auth.getUser();
 
 
       if(!user){
 
         alert("Login required");
-
         return;
 
       }
 
 
 
-
-
-
-
-      const aadhaarFront =
-      await uploadFile(
-        docs.aadhaarFront,
-        "aadhaar-front",
-        user.id
-      );
-
-
-
-      const aadhaarBack =
-      await uploadFile(
-        docs.aadhaarBack,
-        "aadhaar-back",
-        user.id
-      );
-
-
-
-      const license =
-      await uploadFile(
-        docs.license,
-        "license",
-        user.id
-      );
-
-
-
-      const rc =
-      await uploadFile(
-        docs.rc,
-        "rc",
-        user.id
-      );
-
-
-
-      const vehiclePhoto =
-      await uploadFile(
-        docs.vehiclePhoto,
-        "vehicle",
-        user.id
-      );
-
-
-
-
-
-
-
-
       const {
         error
       } = await supabase
+      .from("drivers")
+      .insert([{
 
-      .from("profiles")
+        auth_user_id:user.id,
 
-      .update({
+        name:driver.name,
 
-        name:
-        driver.name,
+        phone:driver.phone,
 
+        village:driver.village,
 
-        phone:
-        driver.phone,
+        tractor_num:driver.tractor_num,
 
+        tractor_details:driver.tractor_details,
 
-        role:
-        "driver",
+        role:"driver",
 
+        approval_status:"pending",
 
-        aadhaar_front:
-        aadhaarFront,
+        is_online:false,
 
+        busy:false
 
-        aadhaar_back:
-        aadhaarBack,
-
-
-        driving_license:
-        license,
-
-
-        rc_book:
-        rc,
-
-
-        vehicle_photo:
-        vehiclePhoto,
-
-
-        tractor_details:
-        driver.vehicle_type,
-
-
-        tractor_num:
-        driver.vehicle_number,
-
-
-        document_status:
-        "pending"
-
-
-      })
-
-      .eq(
-
-        "auth_user_id",
-
-        user.id
-
-      );
-
-
-
-
+      }]);
 
 
 
@@ -294,12 +83,16 @@ export default function DriverRegistration() {
 
 
 
+      alert("✅ Driver Registration Successful");
 
 
-      alert(
-        "✅ Driver Registration Submitted"
-      );
-
+      setDriver({
+        name:"",
+        phone:"",
+        village:"",
+        tractor_num:"",
+        tractor_details:""
+      });
 
 
     }
@@ -318,21 +111,11 @@ export default function DriverRegistration() {
 
 
 
-
-
-
-
-
   return (
 
     <div style={{padding:20}}>
 
-
-      <h2>
-        🚜 Driver Registration
-      </h2>
-
-
+      <h2>🚜 Driver Registration</h2>
 
 
       {
@@ -348,7 +131,7 @@ export default function DriverRegistration() {
 
             value={driver[key]}
 
-            onChange={change}
+            onChange={handleChange}
 
             style={{
               width:"100%",
@@ -363,67 +146,19 @@ export default function DriverRegistration() {
 
 
 
-
-
-
-      {
-        Object.keys(docs).map((key)=>(
-
-
-          <div key={key}>
-
-
-            <p>
-              {key}
-            </p>
-
-
-            <input
-
-              type="file"
-
-              accept="image/*,.pdf"
-
-              capture="environment"
-
-              onChange={(e)=>
-                selectFile(e,key)
-              }
-
-            />
-
-
-          </div>
-
-
-        ))
-
-      }
-
-
-
-
-
-
-
       <button
 
-        onClick={submit}
+        onClick={submitDriver}
 
         disabled={loading}
 
         style={{
-
-          marginTop:20,
-
+          padding:14,
           width:"100%",
-
-          padding:15,
-
           background:"#16a34a",
-
-          color:"#fff"
-
+          color:"#fff",
+          border:"none",
+          borderRadius:10
         }}
 
       >
@@ -431,14 +166,12 @@ export default function DriverRegistration() {
       {
         loading
         ?
-        "Submitting..."
+        "Saving..."
         :
-        "✅ Register Driver"
+        "Register Driver"
       }
 
       </button>
-
-
 
 
     </div>
