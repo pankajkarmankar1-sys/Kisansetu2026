@@ -6,7 +6,9 @@ export default function AddFarm({
   back,
 }) {
 
+
   const [farm,setFarm] = useState({
+
     name:"",
     village:"",
     farm_address:"",
@@ -14,7 +16,9 @@ export default function AddFarm({
     state:"",
     district:"",
     taluka:""
+
   });
+
 
 
   const [documents,setDocuments] = useState([]);
@@ -22,14 +26,20 @@ export default function AddFarm({
   const [loading,setLoading] = useState(false);
 
 
+
+
   function handleChange(e){
 
     setFarm({
+
       ...farm,
+
       [e.target.name]:e.target.value
+
     });
 
   }
+
 
 
 
@@ -43,22 +53,41 @@ export default function AddFarm({
 
 
 
-  async function uploadDocument(file,khetId,userId){
+
+
+
+
+  async function uploadDocument(
+    file,
+    khetId,
+    userId
+  ){
 
 
     const fileName =
+
     `7-12/${userId}/${Date.now()}_${file.name}`;
+
+
+
 
 
     const {
       error
-    } =
-    await supabase.storage
+    } = await supabase.storage
+
     .from("customer-documents")
+
     .upload(
+
       fileName,
+
       file
+
     );
+
+
+
 
 
     if(error)
@@ -66,19 +95,30 @@ export default function AddFarm({
 
 
 
+
+
+
     const {
       data
-    } =
-    supabase.storage
+    } = supabase.storage
+
     .from("customer-documents")
+
     .getPublicUrl(
+
       fileName
+
     );
 
 
 
+
+
+
     await supabase
+
     .from("khet_documents")
+
     .insert([{
 
       khet_id:khetId,
@@ -92,7 +132,11 @@ export default function AddFarm({
     }]);
 
 
+
   }
+
+
+
 
 
 
@@ -100,56 +144,88 @@ export default function AddFarm({
 
   async function saveFarm(){
 
+
     try{
 
+
       setLoading(true);
+
+
 
 
       const {
         data:{
           user
         }
-      } =
-      await supabase.auth.getUser();
+
+      } = await supabase.auth.getUser();
+
+
 
 
 
       if(!user){
 
-        alert("Login required");
+        alert(
+          "Login required"
+        );
+
         return;
 
       }
 
 
 
+
+
+
+
       const {
         data:khet,
+
         error
-      } =
-      await supabase
+
+      } = await supabase
+
       .from("khets")
+
       .insert([{
+
 
         user_id:user.id,
 
+
         name:farm.name,
+
 
         village:farm.village,
 
+
         farm_address:farm.farm_address,
+
 
         acres:Number(farm.acres),
 
+
         state:farm.state,
+
 
         district:farm.district,
 
+
         taluka:farm.taluka
 
+
+
       }])
+
       .select()
+
       .single();
+
+
+
+
 
 
 
@@ -158,36 +234,71 @@ export default function AddFarm({
 
 
 
-      for(const file of documents){
+
+
+
+
+      for(
+        const file of documents
+      ){
+
 
         await uploadDocument(
+
           file,
+
           khet.id,
+
           user.id
+
         );
+
 
       }
 
 
 
-      alert("✅ Farm Added Successfully");
 
 
-      if(onSaved)
+
+
+      alert(
+        "✅ Farm Added Successfully"
+      );
+
+
+
+
+
+
+      if(onSaved){
+
         onSaved();
+
+      }
+
+
+
 
 
     }
     catch(err){
 
-      alert(err.message);
+
+      alert(
+        err.message
+      );
+
 
     }
     finally{
 
+
       setLoading(false);
 
+
     }
+
 
   }
 
@@ -195,42 +306,160 @@ export default function AddFarm({
 
 
 
+
+
+
+
   return (
 
-    <div style={{padding:20}}>
+    <div
+      style={{
+        padding:20,
+        background:"#f8fafc",
+        minHeight:"100vh"
+      }}
+    >
+
 
       <h2>
         🌾 Add New Farm
       </h2>
 
 
-      {
-        Object.keys(farm).map((key)=>(
 
-          <input
 
-            key={key}
 
-            name={key}
+      <input
 
-            placeholder={key.replace("_"," ").toUpperCase()}
+        name="name"
 
-            value={farm[key]}
+        placeholder="Khet Name"
 
-            onChange={handleChange}
+        value={farm.name}
 
-            style={input}
+        onChange={handleChange}
 
-          />
+        style={input}
 
-        ))
-      }
+      />
+
+
+
+
+      <input
+
+        name="village"
+
+        placeholder="Village"
+
+        value={farm.village}
+
+        onChange={handleChange}
+
+        style={input}
+
+      />
+
+
+
+
+      <input
+
+        name="farm_address"
+
+        placeholder="Farm Address"
+
+        value={farm.farm_address}
+
+        onChange={handleChange}
+
+        style={input}
+
+      />
+
+
+
+
+      <input
+
+        name="acres"
+
+        placeholder="Acres"
+
+        type="number"
+
+        value={farm.acres}
+
+        onChange={handleChange}
+
+        style={input}
+
+      />
+
+
+
+
+      <input
+
+        name="state"
+
+        placeholder="State"
+
+        value={farm.state}
+
+        onChange={handleChange}
+
+        style={input}
+
+      />
+
+
+
+
+      <input
+
+        name="district"
+
+        placeholder="District"
+
+        value={farm.district}
+
+        onChange={handleChange}
+
+        style={input}
+
+      />
+
+
+
+
+      <input
+
+        name="taluka"
+
+        placeholder="Taluka"
+
+        value={farm.taluka}
+
+        onChange={handleChange}
+
+        style={input}
+
+      />
+
+
 
 
 
       <h3>
-        📄 Upload 7/12 Documents
+        📄 7/12 Upload
       </h3>
+
+
+      <p>
+        Camera / Gallery / PDF / Multiple Files
+      </p>
+
 
 
       <input
@@ -241,17 +470,20 @@ export default function AddFarm({
 
         multiple
 
-        capture="environment"
-
         onChange={handleDocuments}
 
       />
 
 
 
+
       <p>
-        {documents.length} files selected
+        Selected Files:
+        {" "}
+        {documents.length}
       </p>
+
+
 
 
 
@@ -278,6 +510,9 @@ export default function AddFarm({
 
 
 
+
+
+
       <button
 
         onClick={back}
@@ -295,6 +530,7 @@ export default function AddFarm({
       </button>
 
 
+
     </div>
 
   );
@@ -303,25 +539,40 @@ export default function AddFarm({
 
 
 
+
+
+
 const input={
 
- width:"100%",
- padding:12,
- marginBottom:12,
- borderRadius:8,
- border:"1px solid #ccc"
+  width:"100%",
+
+  padding:12,
+
+  marginBottom:12,
+
+  borderRadius:8,
+
+  border:"1px solid #ccc"
 
 };
 
 
+
+
 const button={
 
- width:"100%",
- padding:14,
- background:"#16a34a",
- color:"#fff",
- border:"none",
- borderRadius:10,
- fontSize:16
+  width:"100%",
+
+  padding:14,
+
+  background:"#16a34a",
+
+  color:"#fff",
+
+  border:"none",
+
+  borderRadius:10,
+
+  fontSize:16
 
 };
