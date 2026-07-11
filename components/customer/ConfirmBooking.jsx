@@ -11,13 +11,11 @@ export default function ConfirmBooking({
 
 
   const [loading,setLoading] = useState(false);
-
   const [amount,setAmount] = useState(0);
-
   const [servicePrice,setServicePrice] = useState(0);
-
+  const [normalTotal,setNormalTotal] = useState(0);
+  const [discount,setDiscount] = useState(0);
   const [isSubscriber,setIsSubscriber] = useState(false);
-
 
 
 
@@ -53,53 +51,54 @@ export default function ConfirmBooking({
         data:subscription
       } = await supabase
 
-        .from("subscriptions")
+      .from("subscriptions")
 
-        .select("id")
+      .select("id")
 
-        .eq(
-          "user_id",
-          user.id
-        )
+      .eq(
+        "user_id",
+        user.id
+      )
 
-        .eq(
-          "status",
-          "active"
-        )
+      .eq(
+        "status",
+        "active"
+      )
 
-        .maybeSingle();
-
-
-
-
-      const subscriber =
-        !!subscription;
+      .maybeSingle();
 
 
 
-      setIsSubscriber(
-        subscriber
+
+
+      const subscriber = !!subscription;
+
+
+
+      setIsSubscriber(subscriber);
+
+
+
+
+
+      const normalPrice =
+
+      Number(
+        bookingData?.selectedService?.price || 0
       );
 
 
 
 
+      const price = subscriber
 
-      const price =
+      ?
 
-        subscriber
+      normalPrice * 0.5
 
-        ?
+      :
 
-        Number(
-          bookingData?.selectedService?.price_subscriber || 0
-        )
-
-        :
-
-        Number(
-          bookingData?.selectedService?.price || 0
-        );
+      normalPrice;
 
 
 
@@ -111,23 +110,44 @@ export default function ConfirmBooking({
 
 
 
-      const total =
+      const normalAmount =
 
-        price *
+      normalPrice *
 
-        Number(
-          bookingData?.acres || 0
-        );
-
-
+      Number(
+        bookingData?.acres || 0
+      );
 
 
 
-      setAmount(total);
+
+      const finalAmount =
+
+      price *
+
+      Number(
+        bookingData?.acres || 0
+      );
 
 
 
-      return total;
+
+
+      setNormalTotal(normalAmount);
+
+
+
+      setDiscount(
+        normalAmount - finalAmount
+      );
+
+
+
+      setAmount(finalAmount);
+
+
+
+      return finalAmount;
 
 
 
@@ -150,6 +170,7 @@ export default function ConfirmBooking({
 
 
 
+
   async function handleConfirm(){
 
 
@@ -157,7 +178,6 @@ export default function ConfirmBooking({
 
 
       setLoading(true);
-
 
 
 
@@ -183,48 +203,8 @@ export default function ConfirmBooking({
 
 
 
-      const {
-        data:profile
-      } = await supabase
-
-        .from("profiles")
-
-        .select("document_status")
-
-        .eq(
-          "auth_user_id",
-          user.id
-        )
-
-        .maybeSingle();
-
-
-
-
-
-
-      if(
-        !profile ||
-        profile.document_status !== "approved"
-      ){
-
-        alert(
-          "Documents approval pending"
-        );
-
-        return;
-
-      }
-
-
-
-
-
-
-
       const finalAmount =
-        await calculateAmount();
-
+      await calculateAmount();
 
 
 
@@ -235,119 +215,90 @@ export default function ConfirmBooking({
       const booking = {
 
 
-        customer_id:
-          user.id,
-
+        customer_id:user.id,
 
 
         customer_name:
-          user.user_metadata?.name ||
-          "Kisan",
+        user.user_metadata?.name ||
+        "Kisan",
 
 
 
         customer_phone:
-          user.phone || "",
-
+        user.phone || "",
 
 
 
         farm_name:
-          bookingData?.selKhet?.name || "",
+        bookingData?.selKhet?.name || "",
 
 
 
         state:
-          bookingData?.selKhet?.state || "",
+        bookingData?.selKhet?.state || "",
 
 
 
         district:
-          bookingData?.selKhet?.district || "",
+        bookingData?.selKhet?.district || "",
 
 
 
         taluka:
-          bookingData?.selKhet?.taluka || "",
+        bookingData?.selKhet?.taluka || "",
 
 
 
         village:
-          bookingData?.selKhet?.village || "",
+        bookingData?.selKhet?.village || "",
 
 
 
         survey_no:
-          bookingData?.selKhet?.surveyNo || "",
-
-
-
-
-        farm_acres:
-          Number(
-            bookingData?.selKhet?.acres || 0
-          ),
-
-
-
-
-        booking_date:
-          bookingData?.date || null,
-
+        bookingData?.selKhet?.surveyNo || "",
 
 
 
         service_id:
-          bookingData?.selectedService?.service_id || null,
+        bookingData?.selectedService?.service_id || null,
 
 
 
         service_name:
-          bookingData?.selectedService?.name_hi ||
-          bookingData?.selectedService?.name ||
-          "",
-
+        bookingData?.selectedService?.name_hi ||
+        bookingData?.selectedService?.name ||
+        "",
 
 
 
         acres:
-          Number(
-            bookingData?.acres || 0
-          ),
-
+        Number(
+          bookingData?.acres || 0
+        ),
 
 
 
         amount:
-          finalAmount,
+        finalAmount,
 
 
 
         total_amount:
-          finalAmount,
+        finalAmount,
 
 
 
         payment_status:
-          bookingData?.payment_status ||
-          "Pending",
-
+        "Pending",
 
 
 
         status:
-          "Pending",
+        "Pending",
 
-
-
-
-        note:
-          bookingData?.note || null,
 
 
       };
-
-
 
 
 
@@ -359,15 +310,15 @@ export default function ConfirmBooking({
         error
       } = await supabase
 
-        .from("bookings")
+      .from("bookings")
 
-        .insert([
-          booking
-        ])
+      .insert([
+        booking
+      ])
 
-        .select()
+      .select()
 
-        .single();
+      .single();
 
 
 
@@ -375,29 +326,6 @@ export default function ConfirmBooking({
 
       if(error)
         throw error;
-
-
-
-
-
-
-
-      await supabase
-
-        .from("notifications")
-
-        .insert([{
-
-          user_id:user.id,
-
-          title:"✅ Booking Created",
-
-          message:
-          `${booking.service_name} booking created successfully`
-
-        }]);
-
-
 
 
 
@@ -411,15 +339,11 @@ export default function ConfirmBooking({
 
 
 
-
       if(onConfirm){
 
         onConfirm(data);
 
       }
-
-
-
 
 
 
@@ -449,16 +373,16 @@ export default function ConfirmBooking({
 
 
 
+
   return (
 
     <div
-      style={{
-        padding:20,
-        background:"#F8FAFC",
-        minHeight:"100vh"
-      }}
+    style={{
+      padding:20,
+      background:"#F8FAFC",
+      minHeight:"100vh"
+    }}
     >
-
 
 
       <button onClick={back}>
@@ -474,13 +398,12 @@ export default function ConfirmBooking({
 
 
 
-
       <div
-        style={{
-          background:"#fff",
-          padding:15,
-          borderRadius:12
-        }}
+      style={{
+        background:"#fff",
+        padding:15,
+        borderRadius:12
+      }}
       >
 
 
@@ -488,9 +411,9 @@ export default function ConfirmBooking({
           🚜 Service:
           {" "}
           {
-            bookingData?.selectedService?.name_hi ||
-            bookingData?.selectedService?.name ||
-            "-"
+          bookingData?.selectedService?.name_hi ||
+          bookingData?.selectedService?.name ||
+          "-"
           }
         </p>
 
@@ -504,9 +427,30 @@ export default function ConfirmBooking({
 
 
 
+
         <p>
-          💵 Rate:
-          {" "}
+          💵 Normal Amount:
+          ₹{normalTotal}
+        </p>
+
+
+
+
+        {
+          isSubscriber &&
+
+          <p>
+            🎉 Subscription Discount 50%:
+            ₹{discount}
+          </p>
+
+        }
+
+
+
+
+        <p>
+          Rate:
           ₹{servicePrice}/Acre
         </p>
 
@@ -516,18 +460,19 @@ export default function ConfirmBooking({
           👑 Subscription:
           {" "}
           {
-            isSubscriber
-            ?
-            "✅ Active"
-            :
-            "❌ Not Active"
+          isSubscriber
+          ?
+          "✅ Active"
+          :
+          "❌ Not Active"
           }
         </p>
 
 
 
+
         <h2>
-          💰 Total ₹{amount}
+          💰 Pay ₹{amount}
         </h2>
 
 
@@ -538,32 +483,35 @@ export default function ConfirmBooking({
 
 
 
+
+
       <button
 
-        onClick={handleConfirm}
+      onClick={handleConfirm}
 
-        disabled={loading}
+      disabled={loading}
 
-        style={{
-          marginTop:20,
-          width:"100%",
-          padding:15,
-          background:"#16a34a",
-          color:"#fff",
-          border:"none",
-          borderRadius:12,
-          fontSize:18
-        }}
+      style={{
+        marginTop:20,
+        width:"100%",
+        padding:15,
+        background:"#16a34a",
+        color:"#fff",
+        border:"none",
+        borderRadius:12,
+        fontSize:18
+      }}
 
       >
 
-        {
-          loading
-          ?
-          "Booking..."
-          :
-          "✅ Confirm Booking"
-        }
+      {
+        loading
+        ?
+        "Booking..."
+        :
+        "✅ Confirm Booking"
+      }
+
 
       </button>
 
@@ -572,5 +520,6 @@ export default function ConfirmBooking({
     </div>
 
   );
+
 
 }
