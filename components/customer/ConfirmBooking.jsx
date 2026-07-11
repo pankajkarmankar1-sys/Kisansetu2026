@@ -3,7 +3,6 @@ import { supabase } from "../../lib/supabase";
 
 
 export default function ConfirmBooking({
-  user,
   bookingData,
   onConfirm,
   back,
@@ -21,7 +20,6 @@ export default function ConfirmBooking({
   const [discount,setDiscount] = useState(0);
 
   const [isSubscriber,setIsSubscriber] = useState(false);
-
 
 
 
@@ -59,22 +57,26 @@ export default function ConfirmBooking({
 
 
 
+
       const {
         data:subscription
       } = await supabase
 
       .from("subscriptions")
 
-      .select("id")
+      .select("*")
 
       .eq(
         "user_id",
         user.id
       )
 
-      .eq(
+      .in(
         "status",
-        "active"
+        [
+          "active",
+          "Active"
+        ]
       )
 
       .maybeSingle();
@@ -84,7 +86,11 @@ export default function ConfirmBooking({
 
 
 
-      const subscriber = !!subscription;
+
+      const subscriber =
+      !!subscription;
+
+
 
 
 
@@ -94,20 +100,24 @@ export default function ConfirmBooking({
 
 
 
-      // BUSINESS RATE
-      // Normal = 1100/Acre
-      // Subscriber = 550/Acre
-
 
       const normalPrice = 1100;
 
 
 
       const price = subscriber
+
       ?
-      550
+
+      (
+        subscription?.rate_per_acre || 550
+      )
+
       :
-      1100;
+
+      normalPrice;
+
+
 
 
 
@@ -122,8 +132,11 @@ export default function ConfirmBooking({
 
 
 
+
       const normalAmount =
       normalPrice * acres;
+
+
 
 
 
@@ -135,12 +148,13 @@ export default function ConfirmBooking({
 
 
 
+
       setServicePrice(price);
 
       setNormalTotal(normalAmount);
 
       setDiscount(
-        normalAmount - finalAmount
+        normalAmount-finalAmount
       );
 
       setAmount(finalAmount);
@@ -171,6 +185,8 @@ export default function ConfirmBooking({
 
 
 
+
+
   async function handleConfirm(){
 
 
@@ -178,6 +194,7 @@ export default function ConfirmBooking({
 
 
       setLoading(true);
+
 
 
 
@@ -191,20 +208,20 @@ export default function ConfirmBooking({
 
 
 
-      if(!user){
-
-        alert("Please login first");
-
-        return;
-
-      }
-
-
-
-
 
       const finalAmount =
       await calculateAmount();
+
+
+
+
+
+
+
+
+      const farm =
+      bookingData?.selKhet;
+
 
 
 
@@ -228,20 +245,48 @@ export default function ConfirmBooking({
 
 
 
+
+
+        farm_id:
+        farm?.id || null,
+
+
+
         farm_name:
-        bookingData?.selKhet?.name || "",
+        farm?.name || "",
 
 
 
-        service_id:
-        bookingData?.selectedService?.service_id || null,
+        village:
+        farm?.village || "",
+
+
+
+        farm_address:
+        farm?.farm_address || "",
+
+
+
+        district:
+        farm?.district || "",
+
+
+
+        taluka:
+        farm?.taluka || "",
+
+
+
 
 
 
         service_name:
+
         bookingData?.selectedService?.name_hi ||
         bookingData?.selectedService?.name ||
         "",
+
+
 
 
 
@@ -249,6 +294,9 @@ export default function ConfirmBooking({
         Number(
           bookingData?.acres || 0
         ),
+
+
+
 
 
 
@@ -271,7 +319,20 @@ export default function ConfirmBooking({
         "Pending",
 
 
+
+
+        note:
+        bookingData?.note || "",
+
+
+
+        booking_date:
+        bookingData?.date || null,
+
+
       };
+
+
 
 
 
@@ -281,6 +342,7 @@ export default function ConfirmBooking({
       const {
         data,
         error
+
       } = await supabase
 
       .from("bookings")
@@ -297,8 +359,11 @@ export default function ConfirmBooking({
 
 
 
+
       if(error)
         throw error;
+
+
 
 
 
@@ -307,6 +372,7 @@ export default function ConfirmBooking({
       alert(
         "✅ Booking Successful"
       );
+
 
 
 
@@ -343,6 +409,7 @@ export default function ConfirmBooking({
 
 
 
+
   return (
 
     <div
@@ -368,6 +435,7 @@ export default function ConfirmBooking({
 
 
 
+
       <div
       style={{
         background:"#fff",
@@ -381,12 +449,13 @@ export default function ConfirmBooking({
         <p>
           🚜 Service:
           {" "}
-          {
-          bookingData?.selectedService?.name_hi ||
+          {bookingData?.selectedService?.name_hi ||
           bookingData?.selectedService?.name ||
           "-"
           }
         </p>
+
+
 
 
 
@@ -399,30 +468,19 @@ export default function ConfirmBooking({
 
 
 
+
         <p>
-          💵 Normal Amount:
-          ₹{normalTotal}
+          📍 Farm:
+          {" "}
+          {bookingData?.selKhet?.name || "-"}
         </p>
 
 
 
 
-        {
-          isSubscriber &&
-
-          <p>
-            🎉 Subscription Discount 50%:
-            ₹{discount}
-          </p>
-
-        }
-
-
-
-
 
         <p>
-          Rate:
+          💰 Rate:
           ₹{servicePrice}/Acre
         </p>
 
@@ -447,7 +505,7 @@ export default function ConfirmBooking({
 
 
         <h2>
-          💰 Pay ₹{amount}
+          Pay ₹{amount}
         </h2>
 
 
@@ -459,33 +517,39 @@ export default function ConfirmBooking({
 
 
 
-
       <button
 
-      onClick={handleConfirm}
+        onClick={handleConfirm}
 
-      disabled={loading}
+        disabled={loading}
 
-      style={{
-        marginTop:20,
-        width:"100%",
-        padding:15,
-        background:"#16a34a",
-        color:"#fff",
-        border:"none",
-        borderRadius:12,
-        fontSize:18
-      }}
+        style={{
+
+          marginTop:20,
+
+          width:"100%",
+
+          padding:15,
+
+          background:"#16a34a",
+
+          color:"#fff",
+
+          border:"none",
+
+          borderRadius:12
+
+        }}
 
       >
 
-      {
+        {
         loading
         ?
         "Booking..."
         :
         "✅ Confirm Booking"
-      }
+        }
 
 
       </button>
