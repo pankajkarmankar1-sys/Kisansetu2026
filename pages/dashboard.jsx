@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+
 import Dashboard from "../components/customer/Dashboard";
+import AddFarm from "../components/customer/AddFarm";
+
 import { supabase } from "../lib/supabase";
 
 
@@ -12,6 +15,8 @@ export default function DashboardPage() {
   const [user,setUser] = useState(null);
 
   const [loading,setLoading] = useState(true);
+
+  const [showAddFarm,setShowAddFarm] = useState(false);
 
 
 
@@ -55,6 +60,7 @@ export default function DashboardPage() {
 
 
 
+
       const {
         data:profile
       } = await supabase
@@ -76,7 +82,6 @@ export default function DashboardPage() {
       )
 
       .maybeSingle();
-
 
 
 
@@ -115,18 +120,13 @@ export default function DashboardPage() {
 
 
 
-
       setUser({
 
-
         id:user.id,
-
-
 
         name:
         profile?.name ||
         "Kisan",
-
 
 
         phone:
@@ -134,12 +134,9 @@ export default function DashboardPage() {
         user.phone,
 
 
-
         document_status:
         profile?.document_status ||
         "pending",
-
-
 
 
         aadhaar_front:
@@ -147,17 +144,14 @@ export default function DashboardPage() {
         null,
 
 
-
         aadhaar_back:
         profile?.aadhaar_back ||
         null,
 
 
-
         satbara_7_12:
         profile?.satbara_7_12 ||
         null,
-
 
 
 
@@ -171,7 +165,6 @@ export default function DashboardPage() {
 
 
 
-
         subscription_end:
 
         subscription?.start_date
@@ -181,8 +174,6 @@ export default function DashboardPage() {
         ).toLocaleDateString()
         :
         null
-
-
 
       });
 
@@ -200,8 +191,8 @@ export default function DashboardPage() {
 
     }
 
-
   }
+
 
 
 
@@ -222,11 +213,44 @@ export default function DashboardPage() {
 
 
 
+
+
   if(loading){
 
     return <h2>Loading...</h2>;
 
   }
+
+
+
+
+
+
+
+  if(showAddFarm){
+
+    return (
+
+      <AddFarm
+
+        onSaved={()=>{
+
+          setShowAddFarm(false);
+
+        }}
+
+        back={()=>{
+
+          setShowAddFarm(false);
+
+        }}
+
+      />
+
+    );
+
+  }
+
 
 
 
@@ -239,6 +263,17 @@ export default function DashboardPage() {
 
 
       user={user}
+
+
+
+      onAddFarm={()=>{
+
+        setShowAddFarm(true);
+
+      }}
+
+
+
 
 
 
@@ -267,11 +302,14 @@ export default function DashboardPage() {
 
 
 
+
       onSubscription={()=>{
 
         router.push("/subscription");
 
       }}
+
+
 
 
 
@@ -285,6 +323,8 @@ export default function DashboardPage() {
 
 
 
+
+
       onProfile={()=>{
 
         router.push("/profile");
@@ -294,11 +334,15 @@ export default function DashboardPage() {
 
 
 
+
+
       onNotifications={()=>{
 
         router.push("/notifications");
 
       }}
+
+
 
 
 
