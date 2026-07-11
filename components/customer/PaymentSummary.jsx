@@ -31,7 +31,6 @@ export default function PaymentSummary({
 
   async function checkSubscription(){
 
-
     try{
 
 
@@ -44,17 +43,22 @@ export default function PaymentSummary({
         data,
         error
       } = await supabase
-        .from("subscriptions")
-        .select("*")
-        .eq(
-          "user_id",
-          user.id
-        )
-        .eq(
-          "status",
-          "active"
-        )
-        .maybeSingle();
+
+      .from("subscriptions")
+
+      .select("id")
+
+      .eq(
+        "user_id",
+        user.id
+      )
+
+      .eq(
+        "status",
+        "active"
+      )
+
+      .maybeSingle();
 
 
 
@@ -66,7 +70,6 @@ export default function PaymentSummary({
       }
 
 
-
     }
     catch(err){
 
@@ -74,30 +77,44 @@ export default function PaymentSummary({
 
     }
 
-
   }
 
 
 
 
 
+  const normalPrice =
+
+  Number(
+    selectedService?.price || 0
+  );
+
+
+
 
   const price =
 
-    isSubscriber
+  isSubscriber
 
-    ?
+  ?
 
-    Number(
-      selectedService?.price_subscriber || 0
-    )
+  normalPrice * 0.5
 
-    :
+  :
 
-    Number(
-      selectedService?.price || 0
-    );
+  normalPrice;
 
+
+
+
+
+  const normalAmount =
+
+  normalPrice *
+
+  Number(
+    acres || 0
+  );
 
 
 
@@ -105,11 +122,19 @@ export default function PaymentSummary({
 
   const amount =
 
-    price *
+  price *
 
-    Number(
-      acres || 0
-    );
+  Number(
+    acres || 0
+  );
+
+
+
+
+
+  const discount =
+
+  normalAmount - amount;
 
 
 
@@ -166,6 +191,13 @@ export default function PaymentSummary({
       }}
 
     >
+
+
+
+      <button onClick={back}>
+        ← Back
+      </button>
+
 
 
 
@@ -230,11 +262,37 @@ export default function PaymentSummary({
 
 
 
+
         <p>
-          💰 Rate:
+          💰 Normal Rate:
           {" "}
-          ₹{price} / Acre
+          ₹{normalPrice}/Acre
         </p>
+
+
+
+
+
+        {
+          isSubscriber &&
+
+          <p>
+            🎉 50% Subscription Discount:
+            ₹{discount}
+          </p>
+
+        }
+
+
+
+
+
+        <p>
+          Pay Rate:
+          {" "}
+          ₹{price}/Acre
+        </p>
+
 
 
 
@@ -269,6 +327,7 @@ export default function PaymentSummary({
 
 
 
+
       {
       !paymentDone
 
@@ -278,9 +337,7 @@ export default function PaymentSummary({
 
         <button
 
-          onClick={()=>
-            setShowPayment(true)
-          }
+          onClick={()=>setShowPayment(true)}
 
           style={{
 
@@ -336,31 +393,6 @@ export default function PaymentSummary({
       )
 
       }
-
-
-
-
-
-
-      <button
-
-        onClick={back}
-
-        style={{
-
-          marginTop:15,
-
-          padding:12,
-
-          width:"100%",
-
-        }}
-
-      >
-
-        ← Back
-
-      </button>
 
 
 
