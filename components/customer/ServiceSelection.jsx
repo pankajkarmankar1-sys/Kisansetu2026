@@ -33,20 +33,29 @@ export default function ServiceSelection({
 
 
 
+
   async function loadServices(){
 
     try{
 
-      const {data,error} =
-      await supabase
+      const {
+        data,
+        error
+      } = await supabase
+
       .from("services")
+
       .select("*")
+
       .eq("active",true)
+
       .order("name");
+
 
 
       if(error)
         throw error;
+
 
 
       setServices(data || []);
@@ -69,28 +78,67 @@ export default function ServiceSelection({
 
 
 
+
+
   async function checkSubscription(){
 
     try{
+
 
       if(!user?.id)
         return;
 
 
-      const {data,error} =
-      await supabase
+
+      const today =
+      new Date()
+      .toISOString();
+
+
+
+      const {
+        data,
+        error
+      } = await supabase
+
       .from("subscriptions")
+
       .select("id")
-      .eq("user_id",user.id)
-      .eq("status","active")
+
+      .eq(
+        "user_id",
+        user.id
+      )
+
+      .eq(
+        "status",
+        "active"
+      )
+
+      .gte(
+        "end_date",
+        today
+      )
+
       .maybeSingle();
 
 
-      if(error)
+
+
+
+      if(error){
+
         console.log(error);
 
+        return;
 
-      setIsSubscriber(!!data);
+      }
+
+
+
+      setIsSubscriber(
+        !!data
+      );
 
 
     }
@@ -105,7 +153,10 @@ export default function ServiceSelection({
 
 
 
-  const normalPrice = selectedService
+
+
+  const normalPrice =
+  selectedService
   ?
   Number(selectedService.price || 0)
   :
@@ -113,11 +164,13 @@ export default function ServiceSelection({
 
 
 
-  const price = isSubscriber
+  const price =
+  isSubscriber
   ?
   normalPrice * 0.5
   :
   normalPrice;
+
 
 
 
@@ -126,24 +179,22 @@ export default function ServiceSelection({
 
 
 
-  const normalTotal =
-  Number(acres || 0) * normalPrice;
-
-
 
   const discount =
-  normalTotal - total;
+  Number(acres || 0) *
+  normalPrice * 0.5;
+
 
 
 
   return (
 
     <div
-    style={{
-      padding:20,
-      background:"#F8FAFC",
-      minHeight:"100vh"
-    }}
+      style={{
+        padding:20,
+        background:"#F8FAFC",
+        minHeight:"100vh"
+      }}
     >
 
 
@@ -156,6 +207,7 @@ export default function ServiceSelection({
       <h2>
         🚜 Select Service
       </h2>
+
 
 
 
@@ -192,26 +244,25 @@ export default function ServiceSelection({
 
         <input
 
-        type="number"
+          type="number"
 
-        value={acres}
+          value={acres}
 
-        min="0.1"
+          min="0.1"
 
-        onChange={(e)=>
-          setAcres(e.target.value)
-        }
+          onChange={(e)=>
+            setAcres(e.target.value)
+          }
 
-
-        style={{
-          width:"100%",
-          padding:12
-        }}
+          style={{
+            width:"100%",
+            padding:12
+          }}
 
         />
 
-
       </div>
+
 
 
 
@@ -236,9 +287,7 @@ export default function ServiceSelection({
             Loading...
           </p>
 
-
           :
-
 
           services.map(service=>(
 
@@ -246,7 +295,6 @@ export default function ServiceSelection({
             <button
 
             key={service.service_id}
-
 
             onClick={()=>{
 
@@ -285,15 +333,15 @@ export default function ServiceSelection({
 
 
               <b>
-
-              {service.icon}
-              {" "}
-              {service.name_hi || service.name}
-
+                {service.icon}
+                {" "}
+                {service.name_hi || service.name}
               </b>
 
 
+
               <br/>
+
 
 
               ₹
@@ -304,6 +352,7 @@ export default function ServiceSelection({
                 :
                 service.price
               }
+
 
 
               {
@@ -331,10 +380,8 @@ export default function ServiceSelection({
 
 
 
-
       {
         selectedService &&
-
 
         <div style={S.card}>
 
@@ -361,18 +408,11 @@ export default function ServiceSelection({
 
 
 
-          <p>
-            Normal Price:
-            ₹{normalTotal}
-          </p>
-
-
-
           {
             isSubscriber &&
 
             <p>
-              🎉 Subscription Discount:
+              🎉 Discount:
               ₹{discount}
             </p>
 
@@ -381,7 +421,7 @@ export default function ServiceSelection({
 
 
           <h2>
-            Pay ₹{total}
+            Total ₹{total}
           </h2>
 
 
@@ -395,32 +435,29 @@ export default function ServiceSelection({
 
 
 
-
       <button
 
-      onClick={next}
+        onClick={next}
 
-      disabled={
-        !selKhet ||
-        !selectedService ||
-        !acres
-      }
+        disabled={
+          !selKhet ||
+          !selectedService ||
+          !acres
+        }
 
 
-      style={S.btnG}
+        style={S.btnG}
 
       >
 
-      Continue →
+        Continue →
 
       </button>
-
 
 
 
     </div>
 
   );
-
 
 }
