@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 
@@ -21,13 +20,10 @@ export default function DriverDashboard({user}) {
 
   useEffect(()=>{
 
-    if(!user){
-
-      loadDriver();
-
-    }
+    loadDriver();
 
   },[]);
+
 
 
 
@@ -36,68 +32,100 @@ export default function DriverDashboard({user}) {
   async function loadDriver(){
 
 
-    const {
-
-      data:{
-        user:authUser
-
-      }
-
-    } = await supabase.auth.getUser();
+    try{
 
 
-
-
-    if(!authUser)
-      return;
+      const {
+        data:{
+          user:authUser
+        }
+      } = await supabase.auth.getUser();
 
 
 
 
-
-    const {
-
-      data,
-
-      error
-
-    } = await supabase
-
-    .from("profiles")
-
-    .select("*")
-
-    .eq(
-
-      "auth_user_id",
-
-      authUser.id
-
-    )
-
-    .maybeSingle();
+      if(!authUser)
+        return;
 
 
 
 
 
-    if(error){
+
+
+      const {
+        data,
+        error
+      } = await supabase
+
+      .from("profiles")
+
+      .select("*")
+
+      .eq(
+        "auth_user_id",
+        authUser.id
+      )
+
+      .maybeSingle();
+
+
+
+
+
+
+      if(error)
+        throw error;
+
+
+
+
+
+
+
+
+      setDriver({
+
+        ...data,
+
+        id:
+        data.id,
+
+        auth_user_id:
+        authUser.id
+
+      });
+
+
+
+
+
+    }
+    catch(err){
 
       console.log(
         "Driver Load Error:",
-        error.message
+        err.message
       );
-
-      return;
 
     }
 
 
+  }
 
 
 
-    setDriver(data);
 
+
+
+
+  if(!driver){
+
+    return (
+      <h3>
+        Loading Driver...
+      </h3>
+    );
 
   }
 
@@ -131,6 +159,7 @@ export default function DriverDashboard({user}) {
 
 
 
+
       <h3>
         Welcome {driver?.name || "Driver"}
       </h3>
@@ -139,59 +168,51 @@ export default function DriverDashboard({user}) {
 
 
 
+
       <div
 
-        style={{
+      style={{
 
-          display:"flex",
+        display:"flex",
 
-          flexWrap:"wrap",
+        flexWrap:"wrap",
 
-          gap:10,
+        gap:10,
 
-          marginBottom:20
+        marginBottom:20
 
-        }}
+      }}
 
       >
 
 
+
         <button onClick={()=>setTab("bookings")}>
-
           📋 Bookings
-
         </button>
 
 
 
         <button onClick={()=>setTab("notifications")}>
-
           🔔 Notifications
-
         </button>
 
 
 
         <button onClick={()=>setTab("earnings")}>
-
           💰 Earnings
-
         </button>
 
 
 
         <button onClick={()=>setTab("history")}>
-
           📜 History
-
         </button>
 
 
 
         <button onClick={()=>setTab("profile")}>
-
           👤 Profile
-
         </button>
 
 
@@ -207,10 +228,11 @@ export default function DriverDashboard({user}) {
       {
         tab==="bookings" &&
 
-        <DriverBookings driver={driver}/>
+        <DriverBookings
+          driver={driver}
+        />
 
       }
-
 
 
 
@@ -218,10 +240,11 @@ export default function DriverDashboard({user}) {
       {
         tab==="notifications" &&
 
-        <DriverNotifications driver={driver}/>
+        <DriverNotifications
+          driver={driver}
+        />
 
       }
-
 
 
 
@@ -229,10 +252,11 @@ export default function DriverDashboard({user}) {
       {
         tab==="earnings" &&
 
-        <DriverEarnings driver={driver}/>
+        <DriverEarnings
+          driver={driver}
+        />
 
       }
-
 
 
 
@@ -240,10 +264,11 @@ export default function DriverDashboard({user}) {
       {
         tab==="history" &&
 
-        <DriverHistory driver={driver}/>
+        <DriverHistory
+          driver={driver}
+        />
 
       }
-
 
 
 
@@ -251,7 +276,9 @@ export default function DriverDashboard({user}) {
       {
         tab==="profile" &&
 
-        <DriverProfile driver={driver}/>
+        <DriverProfile
+          driver={driver}
+        />
 
       }
 
