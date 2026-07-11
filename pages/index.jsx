@@ -9,7 +9,8 @@ export default function Page() {
   function selectRole(role){
 
     localStorage.setItem(
-      "role",
+      "role",console.log("SELECTED ROLE:", selectedRole);
+  
       role
     );
 
