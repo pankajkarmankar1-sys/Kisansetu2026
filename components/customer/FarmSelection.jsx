@@ -9,19 +9,17 @@ export default function FarmSelection({
   back,
 }) {
 
-  const [farm, setFarm] = useState(null);
+  const [farms, setFarms] = useState([]);
   const [loading, setLoading] = useState(true);
 
 
   useEffect(() => {
-
-    loadFarm();
-
+    loadFarms();
   }, []);
 
 
 
-  async function loadFarm() {
+  async function loadFarms() {
 
     try {
 
@@ -32,22 +30,27 @@ export default function FarmSelection({
       } = await supabase.auth.getUser();
 
 
-
       if(!authUser){
         return;
       }
-
 
 
       const {
         data,
         error
       } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("auth_user_id", authUser.id)
-        .single();
-
+      .from("khets")
+      .select("*")
+      .eq(
+        "user_id",
+        authUser.id
+      )
+      .order(
+        "created_at",
+        {
+          ascending:false
+        }
+      );
 
 
       if(error){
@@ -55,13 +58,13 @@ export default function FarmSelection({
       }
 
 
-      setFarm(data);
+      setFarms(data || []);
 
 
     }
     catch(err){
 
-      console.log(err);
+      console.log(err.message);
 
     }
     finally{
@@ -76,11 +79,7 @@ export default function FarmSelection({
 
   if(loading){
 
-    return (
-      <h3>
-        Loading Farm...
-      </h3>
-    );
+    return <h3>Loading Farms...</h3>;
 
   }
 
@@ -88,28 +87,40 @@ export default function FarmSelection({
 
   return (
 
-    <div
-      style={{
-        padding:20
-      }}
-    >
+    <div style={{padding:20}}>
 
       <h2>
         🌾 Select Your Farm
       </h2>
 
 
+      {
+        farms.length === 0 && (
+
+          <p>
+            No farm added. Please add your farm first.
+          </p>
+
+        )
+      }
+
+
 
       {
-        farm ? (
+        farms.map((farm)=>(
 
           <div
+
+            key={farm.id}
+
             style={{
               background:"#fff",
               padding:15,
-              borderRadius:10,
+              marginBottom:15,
+              borderRadius:12,
               border:"1px solid #ddd"
             }}
+
           >
 
             <h3>
@@ -130,7 +141,6 @@ export default function FarmSelection({
             <p>
               🏡 Address: {farm.farm_address || "-"}
             </p>
-
 
 
             <button
@@ -161,13 +171,7 @@ export default function FarmSelection({
 
           </div>
 
-        ) : (
-
-          <p>
-            No farm profile found
-          </p>
-
-        )
+        ))
 
       }
 
