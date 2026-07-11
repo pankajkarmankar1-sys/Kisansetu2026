@@ -17,7 +17,7 @@ export default function AdminDashboard() {
 
 
 
-  async function logout() {
+  async function logout(){
 
     await supabase.auth.signOut();
 
@@ -40,6 +40,7 @@ export default function AdminDashboard() {
 
 
   return (
+
 
     <div
 
@@ -67,11 +68,14 @@ export default function AdminDashboard() {
 
 
 
+
       <AdminSidebar
 
         onLogout={logout}
 
       />
+
+
 
 
 
@@ -89,34 +93,13 @@ export default function AdminDashboard() {
 
           overflowX:"auto",
 
-          overflowY:"auto",
-
-          boxSizing:"border-box",
-
         }}
 
       >
 
 
 
-
-
-        <h1
-
-          style={{
-
-            marginBottom:20,
-
-            fontSize:
-            isMobile
-            ?
-            24
-            :
-            32,
-
-          }}
-
-        >
+        <h1>
 
           👨‍💼 Admin Dashboard
 
@@ -128,18 +111,7 @@ export default function AdminDashboard() {
 
 
 
-
-        <div
-
-          style={{
-
-            width:"100%",
-
-            overflowX:"auto",
-
-          }}
-
-        >
+        <div style={{marginTop:20}}>
 
           <StatsCard />
 
@@ -151,19 +123,8 @@ export default function AdminDashboard() {
 
 
 
-        <div
 
-          style={{
-
-            marginTop:25,
-
-            width:"100%",
-
-            overflowX:"auto",
-
-          }}
-
-        >
+        <div style={{marginTop:25}}>
 
           <BookingList />
 
@@ -175,19 +136,7 @@ export default function AdminDashboard() {
 
 
 
-        <div
-
-          style={{
-
-            marginTop:25,
-
-            width:"100%",
-
-            overflowX:"auto",
-
-          }}
-
-        >
+        <div style={{marginTop:25}}>
 
           <DriverList />
 
@@ -199,19 +148,8 @@ export default function AdminDashboard() {
 
 
 
-        <div
 
-          style={{
-
-            marginTop:25,
-
-            width:"100%",
-
-            overflowX:"auto",
-
-          }}
-
-        >
+        <div style={{marginTop:25}}>
 
           <FarmerDocuments />
 
@@ -224,19 +162,7 @@ export default function AdminDashboard() {
 
 
 
-        <div
-
-          style={{
-
-            marginTop:25,
-
-            width:"100%",
-
-            overflowX:"auto",
-
-          }}
-
-        >
+        <div style={{marginTop:25}}>
 
           <SubscriptionList />
 
