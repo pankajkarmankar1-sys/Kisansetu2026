@@ -11,11 +11,17 @@ export default function ConfirmBooking({
 
 
   const [loading,setLoading] = useState(false);
+
   const [amount,setAmount] = useState(0);
+
   const [servicePrice,setServicePrice] = useState(0);
+
   const [normalTotal,setNormalTotal] = useState(0);
+
   const [discount,setDiscount] = useState(0);
+
   const [isSubscriber,setIsSubscriber] = useState(false);
+
 
 
 
@@ -24,6 +30,8 @@ export default function ConfirmBooking({
     calculateAmount();
 
   },[bookingData]);
+
+
 
 
 
@@ -43,7 +51,11 @@ export default function ConfirmBooking({
 
 
 
-      if(!user) return 0;
+
+      if(!user)
+        return 0;
+
+
 
 
 
@@ -71,6 +83,7 @@ export default function ConfirmBooking({
 
 
 
+
       const subscriber = !!subscription;
 
 
@@ -81,24 +94,42 @@ export default function ConfirmBooking({
 
 
 
-      const normalPrice =
+      // BUSINESS RATE
+      // Normal = 1100/Acre
+      // Subscriber = 550/Acre
 
+
+      const normalPrice = 1100;
+
+
+
+      const price = subscriber
+      ?
+      550
+      :
+      1100;
+
+
+
+
+
+      const acres =
       Number(
-        bookingData?.selectedService?.price || 0
+        bookingData?.acres || 0
       );
 
 
 
 
-      const price = subscriber
 
-      ?
+      const normalAmount =
+      normalPrice * acres;
 
-      normalPrice * 0.5
 
-      :
 
-      normalPrice;
+
+      const finalAmount =
+      price * acres;
 
 
 
@@ -106,44 +137,15 @@ export default function ConfirmBooking({
 
       setServicePrice(price);
 
-
-
-
-
-      const normalAmount =
-
-      normalPrice *
-
-      Number(
-        bookingData?.acres || 0
-      );
-
-
-
-
-      const finalAmount =
-
-      price *
-
-      Number(
-        bookingData?.acres || 0
-      );
-
-
-
-
-
       setNormalTotal(normalAmount);
-
-
 
       setDiscount(
         normalAmount - finalAmount
       );
 
-
-
       setAmount(finalAmount);
+
+
 
 
 
@@ -169,8 +171,6 @@ export default function ConfirmBooking({
 
 
 
-
-
   async function handleConfirm(){
 
 
@@ -178,6 +178,7 @@ export default function ConfirmBooking({
 
 
       setLoading(true);
+
 
 
 
@@ -202,10 +203,8 @@ export default function ConfirmBooking({
 
 
 
-
       const finalAmount =
       await calculateAmount();
-
 
 
 
@@ -231,31 +230,6 @@ export default function ConfirmBooking({
 
         farm_name:
         bookingData?.selKhet?.name || "",
-
-
-
-        state:
-        bookingData?.selKhet?.state || "",
-
-
-
-        district:
-        bookingData?.selKhet?.district || "",
-
-
-
-        taluka:
-        bookingData?.selKhet?.taluka || "",
-
-
-
-        village:
-        bookingData?.selKhet?.village || "",
-
-
-
-        survey_no:
-        bookingData?.selKhet?.surveyNo || "",
 
 
 
@@ -295,7 +269,6 @@ export default function ConfirmBooking({
 
         status:
         "Pending",
-
 
 
       };
@@ -338,7 +311,6 @@ export default function ConfirmBooking({
 
 
 
-
       if(onConfirm){
 
         onConfirm(data);
@@ -347,14 +319,13 @@ export default function ConfirmBooking({
 
 
 
+
     }
     catch(err){
 
       console.log(err);
 
-      alert(
-        err.message
-      );
+      alert(err.message);
 
     }
     finally{
@@ -372,16 +343,14 @@ export default function ConfirmBooking({
 
 
 
-
-
   return (
 
     <div
-    style={{
-      padding:20,
-      background:"#F8FAFC",
-      minHeight:"100vh"
-    }}
+      style={{
+        padding:20,
+        background:"#F8FAFC",
+        minHeight:"100vh"
+      }}
     >
 
 
@@ -398,6 +367,7 @@ export default function ConfirmBooking({
 
 
 
+
       <div
       style={{
         background:"#fff",
@@ -405,6 +375,7 @@ export default function ConfirmBooking({
         borderRadius:12
       }}
       >
+
 
 
         <p>
@@ -449,10 +420,13 @@ export default function ConfirmBooking({
 
 
 
+
         <p>
           Rate:
           ₹{servicePrice}/Acre
         </p>
+
+
 
 
 
@@ -467,6 +441,7 @@ export default function ConfirmBooking({
           "❌ Not Active"
           }
         </p>
+
 
 
 
@@ -520,6 +495,5 @@ export default function ConfirmBooking({
     </div>
 
   );
-
 
 }
