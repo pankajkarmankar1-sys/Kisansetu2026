@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { supabase } from "../../lib/supabase";
 
 export default function AddFarm({
-  user,
   onSaved,
   back,
 }) {
@@ -18,18 +17,84 @@ export default function AddFarm({
   });
 
 
-  const [loading,setLoading] = useState(false);
+  const [documents,setDocuments] = useState([]);
 
+  const [loading,setLoading] = useState(false);
 
 
   function handleChange(e){
 
     setFarm({
       ...farm,
-      [e.target.name]: e.target.value
+      [e.target.name]:e.target.value
     });
 
   }
+
+
+
+  function handleDocuments(e){
+
+    setDocuments(
+      Array.from(e.target.files)
+    );
+
+  }
+
+
+
+  async function uploadDocument(file,khetId,userId){
+
+
+    const fileName =
+    `7-12/${userId}/${Date.now()}_${file.name}`;
+
+
+    const {
+      error
+    } =
+    await supabase.storage
+    .from("customer-documents")
+    .upload(
+      fileName,
+      file
+    );
+
+
+    if(error)
+      throw error;
+
+
+
+    const {
+      data
+    } =
+    supabase.storage
+    .from("customer-documents")
+    .getPublicUrl(
+      fileName
+    );
+
+
+
+    await supabase
+    .from("khet_documents")
+    .insert([{
+
+      khet_id:khetId,
+
+      user_id:userId,
+
+      document_type:"7/12",
+
+      file_url:data.publicUrl
+
+    }]);
+
+
+  }
+
+
 
 
 
@@ -42,12 +107,14 @@ export default function AddFarm({
 
       const {
         data:{
-          user:authUser
+          user
         }
-      } = await supabase.auth.getUser();
+      } =
+      await supabase.auth.getUser();
 
 
-      if(!authUser){
+
+      if(!user){
 
         alert("Login required");
         return;
@@ -57,12 +124,14 @@ export default function AddFarm({
 
 
       const {
+        data:khet,
         error
-      } = await supabase
+      } =
+      await supabase
       .from("khets")
       .insert([{
 
-        user_id:authUser.id,
+        user_id:user.id,
 
         name:farm.name,
 
@@ -78,7 +147,9 @@ export default function AddFarm({
 
         taluka:farm.taluka
 
-      }]);
+      }])
+      .select()
+      .single();
 
 
 
@@ -87,12 +158,23 @@ export default function AddFarm({
 
 
 
+      for(const file of documents){
+
+        await uploadDocument(
+          file,
+          khet.id,
+          user.id
+        );
+
+      }
+
+
+
       alert("✅ Farm Added Successfully");
 
 
-      if(onSaved){
+      if(onSaved)
         onSaved();
-      }
 
 
     }
@@ -111,73 +193,66 @@ export default function AddFarm({
 
 
 
+
+
   return (
+
     <div style={{padding:20}}>
 
       <h2>
         🌾 Add New Farm
-      </h2><input
-        name="name"
-        placeholder="Khet Name"
-        value={farm.name}
-        onChange={handleChange}
-        style={input}
-      />
+      </h2>
+
+
+      {
+        Object.keys(farm).map((key)=>(
+
+          <input
+
+            key={key}
+
+            name={key}
+
+            placeholder={key.replace("_"," ").toUpperCase()}
+
+            value={farm[key]}
+
+            onChange={handleChange}
+
+            style={input}
+
+          />
+
+        ))
+      }
+
+
+
+      <h3>
+        📄 Upload 7/12 Documents
+      </h3>
 
 
       <input
-        name="village"
-        placeholder="Village Name"
-        value={farm.village}
-        onChange={handleChange}
-        style={input}
+
+        type="file"
+
+        accept="image/*,.pdf"
+
+        multiple
+
+        capture="environment"
+
+        onChange={handleDocuments}
+
       />
 
 
-      <input
-        name="farm_address"
-        placeholder="Farm Address"
-        value={farm.farm_address}
-        onChange={handleChange}
-        style={input}
-      />
 
+      <p>
+        {documents.length} files selected
+      </p>
 
-      <input
-        name="acres"
-        type="number"
-        placeholder="Total Acres"
-        value={farm.acres}
-        onChange={handleChange}
-        style={input}
-      />
-
-
-      <input
-        name="state"
-        placeholder="State"
-        value={farm.state}
-        onChange={handleChange}
-        style={input}
-      />
-
-
-      <input
-        name="district"
-        placeholder="District"
-        value={farm.district}
-        onChange={handleChange}
-        style={input}
-      />
-
-
-      <input
-        name="taluka"
-        placeholder="Taluka"
-        value={farm.taluka}
-        onChange={handleChange}
-        style={input}
-      />
 
 
 
@@ -187,16 +262,7 @@ export default function AddFarm({
 
         disabled={loading}
 
-        style={{
-          width:"100%",
-          padding:15,
-          background:"#16a34a",
-          color:"#fff",
-          border:"none",
-          borderRadius:10,
-          fontSize:18,
-          marginTop:15
-        }}
+        style={button}
 
       >
 
@@ -217,8 +283,8 @@ export default function AddFarm({
         onClick={back}
 
         style={{
-          width:"100%",
-          padding:12,
+          ...button,
+          background:"#64748b",
           marginTop:10
         }}
 
@@ -230,19 +296,32 @@ export default function AddFarm({
 
 
     </div>
+
   );
 
 }
 
 
 
-const input = {
+const input={
 
-  width:"100%",
-  padding:12,
-  marginBottom:12,
-  borderRadius:8,
-  border:"1px solid #ccc",
-  fontSize:16
+ width:"100%",
+ padding:12,
+ marginBottom:12,
+ borderRadius:8,
+ border:"1px solid #ccc"
+
+};
+
+
+const button={
+
+ width:"100%",
+ padding:14,
+ background:"#16a34a",
+ color:"#fff",
+ border:"none",
+ borderRadius:10,
+ fontSize:16
 
 };
