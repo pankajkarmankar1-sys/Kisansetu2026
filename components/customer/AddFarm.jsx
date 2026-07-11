@@ -13,7 +13,9 @@ async function saveFarm(){
       throw userError;
 
 
-    const user = userData.user;
+    const user = userData.user; alert(
+  "USER ID: " + user?.id
+);
 
 
     if(!user){
