@@ -48,6 +48,7 @@ export default function DashboardPage() {
 
 
 
+
       const {
         data:profile
       } = await supabase
@@ -66,27 +67,6 @@ export default function DashboardPage() {
         user.id
       )
       .maybeSingle();
-
-
-
-      // ROLE REDIRECT START
-
-      if(profile?.role === "admin"){
-
-        router.replace("/admin");
-        return;
-
-      }
-
-
-      if(profile?.role === "driver"){
-
-        router.replace("/driver");
-        return;
-
-      }
-
-      // ROLE REDIRECT END
 
 
 
@@ -111,7 +91,6 @@ export default function DashboardPage() {
         "active"
       )
       .maybeSingle();
-
 
 
 
@@ -146,7 +125,6 @@ export default function DashboardPage() {
       setUser({
 
         id:user.id,
-
 
         role:
         profile?.role ||
@@ -282,9 +260,28 @@ export default function DashboardPage() {
 
     <Dashboard
 
+
       user={user}
 
+
       farms={farms}
+
+
+
+      onAdmin={()=>{
+
+        router.push("/admin");
+
+      }}
+
+
+
+      onDriver={()=>{
+
+        router.push("/driver");
+
+      }}
+
 
 
 
@@ -293,6 +290,7 @@ export default function DashboardPage() {
         setShowAddFarm(true);
 
       }}
+
 
 
 
@@ -357,6 +355,7 @@ export default function DashboardPage() {
 
 
       onLogout={logout}
+
 
 
     />
