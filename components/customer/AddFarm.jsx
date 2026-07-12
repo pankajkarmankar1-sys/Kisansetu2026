@@ -12,17 +12,17 @@ export default function AddFarm({
 
   const [farm,setFarm] = useState({
 
-    name:"",
-    village:"",
-    state:"Maharashtra",
-    district:"", Chandrapur 
-    taluka:"",
-    farm_address:"",
-    acres:"",
-    latitude:"",
-    longitude:""
+  name:"",
+  village:"",
+  state:"Maharashtra",
+  district:"Chandrapur",
+  taluka:"",
+  farm_address:"",
+  acres:"",
+  latitude:"",
+  longitude:""
 
-  });
+});
 
 
   const [documents,setDocuments] = useState([]);
