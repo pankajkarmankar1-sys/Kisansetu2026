@@ -4,18 +4,25 @@ import { supabase } from "../../lib/supabase";
 
 export default function DriverBookings({ driver }) {
 
+
   const [bookings,setBookings] = useState([]);
+
   const [loading,setLoading] = useState(true);
+
 
 
 
   useEffect(()=>{
 
     if(driver?.id){
+
       loadBookings();
+
     }
 
   },[driver]);
+
+
 
 
 
@@ -24,19 +31,24 @@ export default function DriverBookings({ driver }) {
 
     try{
 
+
       setLoading(true);
+
 
 
       const {
         data,
         error
       } = await supabase
+
       .from("bookings")
+
       .select("*")
-      .eq(
-        "driver_id",
-        driver.id
+
+      .or(
+        `driver_id.eq.${driver.id},driver_id.is.null`
       )
+
       .order(
         "created_at",
         {
@@ -45,17 +57,27 @@ export default function DriverBookings({ driver }) {
       );
 
 
+
+
+
       if(error)
         throw error;
 
 
-      setBookings(data || []);
+
+
+      setBookings(
+        data || []
+      );
+
 
 
     }
     catch(err){
 
-      console.log(err.message);
+      console.log(
+        err.message
+      );
 
     }
     finally{
@@ -64,7 +86,10 @@ export default function DriverBookings({ driver }) {
 
     }
 
+
   }
+
+
 
 
 
@@ -73,39 +98,63 @@ export default function DriverBookings({ driver }) {
   async function updateStatus(id,status){
 
 
-    const {
-      error
-    } = await supabase
-    .from("bookings")
-    .update({
-
-      status:status
-
-    })
-    .eq(
-      "id",
-      id
-    );
+    try{
 
 
+      const {
+        error
+      } = await supabase
 
-    if(error){
+      .from("bookings")
 
-      alert(error.message);
-      return;
+      .update({
+
+        status:status,
+
+        driver_id:
+        driver.id
+
+      })
+
+      .eq(
+        "id",
+        id
+      );
+
+
+
+
+
+      if(error)
+        throw error;
+
+
+
+
+
+      alert(
+        "✅ Booking Updated"
+      );
+
+
+
+      loadBookings();
+
+
+
+    }
+    catch(err){
+
+      alert(
+        err.message
+      );
 
     }
 
 
-    alert(
-      "Status Updated"
-    );
-
-
-    loadBookings();
-
-
   }
+
+
 
 
 
@@ -117,7 +166,9 @@ export default function DriverBookings({ driver }) {
     return (
 
       <div style={{padding:20}}>
+
         Loading Bookings...
+
       </div>
 
     );
@@ -128,20 +179,31 @@ export default function DriverBookings({ driver }) {
 
 
 
+
+
   return (
 
     <div
+
       style={{
+
         padding:15,
+
         background:"#f5f7fb",
+
         minHeight:"100vh"
+
       }}
+
     >
 
 
+
       <h2>
-        🚜 My Assigned Bookings
+        🚜 Available Bookings
       </h2>
+
+
 
 
 
@@ -149,7 +211,7 @@ export default function DriverBookings({ driver }) {
         bookings.length===0 &&
 
         <p>
-          No booking assigned
+          No booking available
         </p>
 
       }
@@ -157,8 +219,12 @@ export default function DriverBookings({ driver }) {
 
 
 
+
+
+
       {
         bookings.map((booking)=>(
+
 
 
           <div
@@ -168,143 +234,203 @@ export default function DriverBookings({ driver }) {
           style={{
 
             background:"#fff",
+
             padding:18,
+
             borderRadius:15,
-            marginBottom:15
+
+            marginBottom:15,
+
+            boxShadow:"0 2px 8px #ddd"
 
           }}
 
           >
 
 
-            <h3>
-              🚜 {booking.service_name}
-            </h3>
 
+          <h3>
 
+          🚜 {booking.service_name}
 
-            <p>
-              👨‍🌾 Customer:
-              {" "}
-              {booking.customer_name}
-            </p>
-
-
-
-            <p>
-              📞 Mobile:
-              {" "}
-              {booking.customer_phone}
-            </p>
-
-
-
-            <p>
-              📍 Village:
-              {" "}
-              {booking.village || "-"}
-            </p>
-
-
-
-            <p>
-              🌾 Acres:
-              {" "}
-              {booking.acres}
-            </p>
-
-
-
-            <p>
-              📅 Date:
-              {" "}
-              {booking.booking_date}
-            </p>
-
-
-
-            <p>
-              💰 Amount:
-              {" "}
-              ₹{booking.amount}
-            </p>
-
-
-
-            <p>
-              Status:
-              {" "}
-              <b>
-              {booking.status}
-              </b>
-            </p>
+          </h3>
 
 
 
 
-            {
-              booking.status==="Pending" &&
-
-              <button
-
-              onClick={()=>updateStatus(
-                booking.id,
-                "Accepted"
-              )}
-
-              style={{
-
-                width:"100%",
-                padding:12,
-                background:"#16a34a",
-                color:"#fff",
-                border:"none",
-                borderRadius:10,
-                fontWeight:"bold"
-
-              }}
-
-              >
-
-              ✅ Accept Booking
-
-              </button>
-
-            }
+          <p>
+          👨‍🌾 Customer:
+          {" "}
+          {booking.customer_name}
+          </p>
 
 
 
 
-            {
-              booking.status==="Accepted" &&
+          <p>
+          📞 Mobile:
+          {" "}
+          {booking.customer_phone}
+          </p>
 
-              <button
 
-              onClick={()=>updateStatus(
-                booking.id,
-                "Completed"
-              )}
 
-              style={{
 
-                width:"100%",
-                padding:12,
-                marginTop:10,
-                background:"#2563eb",
-                color:"#fff",
-                border:"none",
-                borderRadius:10,
-                fontWeight:"bold"
+          <p>
+          📍 Village:
+          {" "}
+          {booking.village || "-"}
+          </p>
 
-              }}
 
-              >
 
-              🚜 Mark Completed
 
-              </button>
+          <p>
+          🏠 Address:
+          {" "}
+          {booking.farm_address || "-"}
+          </p>
 
-            }
+
+
+
+          <p>
+          🌾 Acres:
+          {" "}
+          {booking.acres}
+          </p>
+
+
+
+
+          <p>
+          📅 Date:
+          {" "}
+          {booking.booking_date}
+          </p>
+
+
+
+
+          <p>
+          📝 Note:
+          {" "}
+          {booking.note || "-"}
+          </p>
+
+
+
+
+          <p>
+          💰 Amount:
+          {" "}
+          ₹{booking.amount}
+          </p>
+
+
+
+
+          <p>
+          Status:
+          {" "}
+          <b>
+          {booking.status}
+          </b>
+          </p>
+
+
+
+
+
+
+
+          {
+            booking.status==="Pending" &&
+
+
+            <button
+
+            onClick={()=>updateStatus(
+              booking.id,
+              "Accepted"
+            )}
+
+            style={{
+
+              width:"100%",
+
+              padding:12,
+
+              background:"#16a34a",
+
+              color:"#fff",
+
+              border:"none",
+
+              borderRadius:10,
+
+              fontWeight:"bold"
+
+            }}
+
+            >
+
+            ✅ Accept Booking
+
+            </button>
+
+
+          }
+
+
+
+
+
+
+
+          {
+            booking.status==="Accepted" &&
+
+
+            <button
+
+            onClick={()=>updateStatus(
+              booking.id,
+              "Completed"
+            )}
+
+            style={{
+
+              width:"100%",
+
+              padding:12,
+
+              background:"#2563eb",
+
+              color:"#fff",
+
+              border:"none",
+
+              borderRadius:10,
+
+              marginTop:10,
+
+              fontWeight:"bold"
+
+            }}
+
+            >
+
+            🚜 Mark Completed
+
+            </button>
+
+
+          }
+
+
+
+
 
 
 
@@ -314,6 +440,8 @@ export default function DriverBookings({ driver }) {
         ))
 
       }
+
+
 
 
 
