@@ -2,13 +2,19 @@ import React from "react";
 
 
 export default function Dashboard({
+
   user,
+
   onBook,
   onBookings,
   onProfile,
   onNotifications,
   onSubscription,
   onLogout,
+
+  onAdmin,
+  onDriver,
+
 }) {
 
 
@@ -27,6 +33,10 @@ return (
 
 <p className="mt-2 text-lg">
 Namaste {user?.name || "Kisan"} 🌾
+</p>
+
+<p className="mt-1">
+Role: {user?.role || "farmer"}
 </p>
 
 </div>
@@ -76,6 +86,7 @@ Buy Subscription
 
 
 
+
 <h2 className="text-2xl font-bold mt-6">
 🚜 Services
 </h2>
@@ -111,6 +122,7 @@ Book tractor, rotavator, cultivator services
 
 
 
+
 <button
 
 onClick={onBookings}
@@ -133,6 +145,96 @@ Check your service history
 
 
 </div>
+
+
+
+
+
+
+
+{/* ADMIN CONTROL */}
+
+{
+
+user?.role === "admin" && (
+
+<div className="mt-6 bg-purple-100 rounded-3xl p-6 shadow">
+
+<h2 className="text-2xl font-bold text-purple-700">
+👑 Admin Control
+</h2>
+
+
+<p className="mt-2">
+Manage users, drivers, bookings and reports
+</p>
+
+
+<button
+
+onClick={onAdmin}
+
+className="mt-4 w-full bg-purple-600 text-white p-4 rounded-xl font-bold"
+
+>
+
+Open Admin Dashboard
+
+</button>
+
+
+</div>
+
+)
+
+}
+
+
+
+
+
+
+
+
+{/* DRIVER CONTROL */}
+
+{
+
+user?.role === "driver" && (
+
+<div className="mt-6 bg-blue-100 rounded-3xl p-6 shadow">
+
+<h2 className="text-2xl font-bold text-blue-700">
+🚜 Driver Panel
+</h2>
+
+
+<p className="mt-2">
+Manage tractor services and bookings
+</p>
+
+
+<button
+
+onClick={onDriver}
+
+className="mt-4 w-full bg-blue-600 text-white p-4 rounded-xl font-bold"
+
+>
+
+Open Driver Dashboard
+
+</button>
+
+
+</div>
+
+)
+
+}
+
+
+
 
 
 
