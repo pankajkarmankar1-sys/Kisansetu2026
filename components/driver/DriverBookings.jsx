@@ -11,13 +11,11 @@ export default function DriverBookings({ driver }) {
 
   useEffect(()=>{
 
-    if(!driver?.id)
-      return;
-
-    loadBookings();
+    if(driver?.id){
+      loadBookings();
+    }
 
   },[driver]);
-
 
 
 
@@ -33,23 +31,18 @@ export default function DriverBookings({ driver }) {
         data,
         error
       } = await supabase
-
       .from("bookings")
-
       .select("*")
-
       .eq(
         "driver_id",
         driver.id
       )
-
       .order(
         "created_at",
         {
           ascending:false
         }
       );
-
 
 
       if(error)
@@ -77,10 +70,57 @@ export default function DriverBookings({ driver }) {
 
 
 
+  async function updateStatus(id,status){
+
+
+    const {
+      error
+    } = await supabase
+    .from("bookings")
+    .update({
+
+      status:status
+
+    })
+    .eq(
+      "id",
+      id
+    );
+
+
+
+    if(error){
+
+      alert(error.message);
+      return;
+
+    }
+
+
+    alert(
+      "Status Updated"
+    );
+
+
+    loadBookings();
+
+
+  }
+
+
+
+
+
 
   if(loading){
 
-    return <h3>Loading Bookings...</h3>;
+    return (
+
+      <div style={{padding:20}}>
+        Loading Bookings...
+      </div>
+
+    );
 
   }
 
@@ -90,7 +130,14 @@ export default function DriverBookings({ driver }) {
 
   return (
 
-    <div style={{padding:15}}>
+    <div
+      style={{
+        padding:15,
+        background:"#f5f7fb",
+        minHeight:"100vh"
+      }}
+    >
+
 
       <h2>
         🚜 My Assigned Bookings
@@ -99,10 +146,10 @@ export default function DriverBookings({ driver }) {
 
 
       {
-        bookings.length === 0 &&
+        bookings.length===0 &&
 
         <p>
-          No assigned bookings.
+          No booking assigned
         </p>
 
       }
@@ -113,6 +160,7 @@ export default function DriverBookings({ driver }) {
       {
         bookings.map((booking)=>(
 
+
           <div
 
           key={booking.id}
@@ -120,22 +168,19 @@ export default function DriverBookings({ driver }) {
           style={{
 
             background:"#fff",
-
-            padding:15,
-
-            marginBottom:15,
-
-            borderRadius:12,
-
-            border:"1px solid #ddd"
+            padding:18,
+            borderRadius:15,
+            marginBottom:15
 
           }}
 
           >
 
+
             <h3>
               🚜 {booking.service_name}
             </h3>
+
 
 
             <p>
@@ -145,18 +190,13 @@ export default function DriverBookings({ driver }) {
             </p>
 
 
+
             <p>
-              📞 Phone:
+              📞 Mobile:
               {" "}
               {booking.customer_phone}
             </p>
 
-
-            <p>
-              🌾 Acres:
-              {" "}
-              {booking.acres}
-            </p>
 
 
             <p>
@@ -166,18 +206,115 @@ export default function DriverBookings({ driver }) {
             </p>
 
 
+
+            <p>
+              🌾 Acres:
+              {" "}
+              {booking.acres}
+            </p>
+
+
+
+            <p>
+              📅 Date:
+              {" "}
+              {booking.booking_date}
+            </p>
+
+
+
+            <p>
+              💰 Amount:
+              {" "}
+              ₹{booking.amount}
+            </p>
+
+
+
             <p>
               Status:
               {" "}
+              <b>
               {booking.status}
+              </b>
             </p>
+
+
+
+
+            {
+              booking.status==="Pending" &&
+
+              <button
+
+              onClick={()=>updateStatus(
+                booking.id,
+                "Accepted"
+              )}
+
+              style={{
+
+                width:"100%",
+                padding:12,
+                background:"#16a34a",
+                color:"#fff",
+                border:"none",
+                borderRadius:10,
+                fontWeight:"bold"
+
+              }}
+
+              >
+
+              ✅ Accept Booking
+
+              </button>
+
+            }
+
+
+
+
+            {
+              booking.status==="Accepted" &&
+
+              <button
+
+              onClick={()=>updateStatus(
+                booking.id,
+                "Completed"
+              )}
+
+              style={{
+
+                width:"100%",
+                padding:12,
+                marginTop:10,
+                background:"#2563eb",
+                color:"#fff",
+                border:"none",
+                borderRadius:10,
+                fontWeight:"bold"
+
+              }}
+
+              >
+
+              🚜 Mark Completed
+
+              </button>
+
+            }
+
 
 
           </div>
 
+
         ))
 
       }
+
 
 
     </div>
