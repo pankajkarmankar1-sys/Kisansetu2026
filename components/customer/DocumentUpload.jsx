@@ -12,6 +12,7 @@ export default function DocumentUpload({
   const [loading, setLoading] = useState(false);
 
 
+
   async function uploadFile(file, userId, type) {
 
     if (!file) return null;
@@ -28,22 +29,24 @@ export default function DocumentUpload({
       .upload(path, file);
 
 
-    if (error) {
+    if(error){
       throw error;
     }
 
 
     return path;
+
   }
 
 
 
-  async function handleSubmit(e) {
+
+  async function handleSubmit(e){
 
     e.preventDefault();
 
 
-    try {
+    try{
 
       setLoading(true);
 
@@ -67,28 +70,43 @@ export default function DocumentUpload({
 
 
 
-      const aadhaarFrontPath =
-        await uploadFile(
-          aadhaarFront,
-          user.id,
-          "aadhaar-front"
+
+      if(!aadhaarFront || !aadhaarBack || !satbara){
+
+        throw new Error(
+          "Please upload all documents"
         );
+
+      }
+
+
+
+
+      const aadhaarFrontPath =
+      await uploadFile(
+        aadhaarFront,
+        user.id,
+        "aadhaar-front"
+      );
+
 
 
       const aadhaarBackPath =
-        await uploadFile(
-          aadhaarBack,
-          user.id,
-          "aadhaar-back"
-        );
+      await uploadFile(
+        aadhaarBack,
+        user.id,
+        "aadhaar-back"
+      );
+
 
 
       const satbaraPath =
-        await uploadFile(
-          satbara,
-          user.id,
-          "7-12"
-        );
+      await uploadFile(
+        satbara,
+        user.id,
+        "7-12"
+      );
+
 
 
 
@@ -101,22 +119,26 @@ export default function DocumentUpload({
       .update({
 
         aadhaar_front:
-          aadhaarFrontPath,
+        aadhaarFrontPath,
+
 
         aadhaar_back:
-          aadhaarBackPath,
+        aadhaarBackPath,
+
 
         satbara_7_12:
-          satbaraPath,
+        satbaraPath,
+
 
         document_status:
-          "pending"
+        "pending"
 
       })
       .eq(
         "auth_user_id",
         user.id
       );
+
 
 
 
@@ -129,6 +151,7 @@ export default function DocumentUpload({
       alert(
         "✅ Documents uploaded successfully"
       );
+
 
 
       if(onDone){
@@ -153,7 +176,10 @@ export default function DocumentUpload({
 
     }
 
+
   }
+
+
 
 
 
@@ -163,67 +189,149 @@ export default function DocumentUpload({
 
     <div className="min-h-screen bg-green-50 p-5">
 
-      <div className="bg-white rounded-3xl shadow p-6 max-w-xl mx-auto">
+
+      <div className="max-w-xl mx-auto bg-white rounded-3xl shadow-xl p-6">
 
 
-        <h2 className="text-2xl font-bold text-green-700">
-          📄 Farmer Documents
-        </h2>
+        <div className="text-center">
+
+          <div className="text-5xl">
+            📄
+          </div>
 
 
-
-        <label className="block mt-5">
-          Aadhaar Front
-        </label>
-
-        <input
-          type="file"
-          accept="image/*,.pdf"
-          onChange={(e)=>
-            setAadhaarFront(
-              e.target.files[0]
-            )
-          }
-        />
+          <h2 className="text-2xl font-bold text-green-700 mt-3">
+            Farmer Documents
+          </h2>
 
 
+          <p className="text-gray-500 mt-2">
+            Upload Aadhaar & 7/12 documents
+          </p>
 
-        <label className="block mt-5">
-          Aadhaar Back
-        </label>
 
-        <input
-          type="file"
-          accept="image/*,.pdf"
-          onChange={(e)=>
-            setAadhaarBack(
-              e.target.files[0]
-            )
-          }
-        />
+        </div>
 
 
 
-        <label className="block mt-5">
-          7/12 (Satbara)
-        </label>
 
-        <input
-          type="file"
-          accept="image/*,.pdf"
-          onChange={(e)=>
-            setSatbara(
-              e.target.files[0]
-            )
-          }
-        />
+
+        <div className="mt-6 space-y-5">
+
+
+
+          <div className="bg-green-50 rounded-2xl p-4">
+
+            <h3 className="font-bold">
+              🪪 Aadhaar Front
+            </h3>
+
+
+            <input
+              type="file"
+              accept="image/*,.pdf"
+              onChange={(e)=>
+                setAadhaarFront(
+                  e.target.files[0]
+                )
+              }
+              className="mt-3 w-full"
+            />
+
+
+            {
+              aadhaarFront &&
+              <p className="text-green-600 text-sm mt-2">
+                ✅ {aadhaarFront.name}
+              </p>
+            }
+
+
+          </div>
+
+
+
+
+
+          <div className="bg-green-50 rounded-2xl p-4">
+
+            <h3 className="font-bold">
+              🪪 Aadhaar Back
+            </h3>
+
+
+            <input
+              type="file"
+              accept="image/*,.pdf"
+              onChange={(e)=>
+                setAadhaarBack(
+                  e.target.files[0]
+                )
+              }
+              className="mt-3 w-full"
+            />
+
+
+            {
+              aadhaarBack &&
+              <p className="text-green-600 text-sm mt-2">
+                ✅ {aadhaarBack.name}
+              </p>
+            }
+
+
+          </div>
+
+
+
+
+
+
+          <div className="bg-green-50 rounded-2xl p-4">
+
+            <h3 className="font-bold">
+              📜 7/12 Satbara
+            </h3>
+
+
+            <input
+              type="file"
+              accept="image/*,.pdf"
+              onChange={(e)=>
+                setSatbara(
+                  e.target.files[0]
+                )
+              }
+              className="mt-3 w-full"
+            />
+
+
+            {
+              satbara &&
+              <p className="text-green-600 text-sm mt-2">
+                ✅ {satbara.name}
+              </p>
+            }
+
+
+          </div>
+
+
+
+        </div>
+
+
 
 
 
         <button
+
           onClick={handleSubmit}
+
           disabled={loading}
-          className="w-full mt-6 bg-green-600 text-white p-4 rounded-xl font-bold"
+
+          className="w-full mt-7 bg-green-600 text-white p-4 rounded-2xl font-bold text-lg"
+
         >
 
           {
@@ -231,13 +339,16 @@ export default function DocumentUpload({
             ?
             "Uploading..."
             :
-            "Submit Documents"
+            "✅ Submit Documents"
           }
+
 
         </button>
 
 
+
       </div>
+
 
     </div>
 
