@@ -6,26 +6,20 @@ export default function DocumentUpload({ onDone }) {
   const [aadhaarFront,setAadhaarFront] = useState(null);
   const [aadhaarBack,setAadhaarBack] = useState(null);
   const [satbara,setSatbara] = useState(null);
-
   const [loading,setLoading] = useState(false);
 
 
-  async function uploadFile(file,userId,type){
-
-    if(!file) return null;
+  async function uploadFile(file,type,userId){
 
     const path =
       `${userId}/${Date.now()}-${type}-${file.name}`;
-
 
     const {error} =
       await supabase.storage
       .from("khet-documents")
       .upload(path,file);
 
-
     if(error) throw error;
-
 
     return path;
 
@@ -33,10 +27,9 @@ export default function DocumentUpload({ onDone }) {
 
 
 
-  async function submitDocuments(e){
+  async function submit(e){
 
     e.preventDefault();
-
 
     try{
 
@@ -45,40 +38,47 @@ export default function DocumentUpload({ onDone }) {
 
       const {
         data:{user}
-      } =
-      await supabase.auth.getUser();
+      } = await supabase.auth.getUser();
 
 
       if(!user)
         throw new Error("Login required");
 
 
+      if(!aadhaarFront || !aadhaarBack || !satbara){
+
+        alert("Please upload all documents");
+        return;
+
+      }
+
 
       const front =
       await uploadFile(
         aadhaarFront,
-        user.id,
-        "aadhaar-front"
+        "aadhaar-front",
+        user.id
       );
 
 
       const back =
       await uploadFile(
         aadhaarBack,
-        user.id,
-        "aadhaar-back"
+        "aadhaar-back",
+        user.id
       );
 
 
       const seven =
       await uploadFile(
         satbara,
-        user.id,
-        "7-12"
+        "7-12",
+        user.id
       );
 
 
 
+      const {error} =
       await supabase
       .from("profiles")
       .update({
@@ -95,8 +95,11 @@ export default function DocumentUpload({ onDone }) {
       );
 
 
+      if(error) throw error;
 
-      alert("✅ Documents Submitted");
+
+      alert("Documents uploaded");
+
 
       if(onDone)
         onDone();
@@ -118,69 +121,87 @@ export default function DocumentUpload({ onDone }) {
 
 
 
-
-
 return (
 
-<div style={page}>
+<div style={{
+ minHeight:"100vh",
+ background:"#e8f5e9",
+ padding:20
+}}>
 
 
-<div style={card}>
+<div style={{
+ maxWidth:450,
+ margin:"auto",
+ background:"#fff",
+ borderRadius:25,
+ padding:25,
+ boxShadow:"0 5px 20px #ccc"
+}}>
 
 
-<h1 style={title}>
-🌱 Farmer Verification
+<h1 style={{
+ textAlign:"center",
+ color:"#15803d"
+}}>
+📄 Farmer Documents
 </h1>
 
 
-<p style={sub}>
+<p style={{
+textAlign:"center",
+color:"#666"
+}}>
 Upload Aadhaar & 7/12 documents
 </p>
 
 
 
-
-<UploadBox
+<FileBox
 title="🪪 Aadhaar Front"
 file={aadhaarFront}
 setFile={setAadhaarFront}
 />
 
 
-
-<UploadBox
+<FileBox
 title="🪪 Aadhaar Back"
 file={aadhaarBack}
 setFile={setAadhaarBack}
 />
 
 
-
-<UploadBox
-title="📄 7/12 Satbara"
+<FileBox
+title="📜 7/12 Satbara"
 file={satbara}
 setFile={setSatbara}
 />
 
 
 
-
 <button
-onClick={submitDocuments}
+
+onClick={submit}
+
 disabled={loading}
-style={button}
+
+style={{
+width:"100%",
+marginTop:25,
+padding:15,
+borderRadius:15,
+border:"none",
+background:"#16a34a",
+color:"#fff",
+fontSize:18,
+fontWeight:"bold"
+}}
+
 >
 
-{
-loading
-?
-"Uploading..."
-:
-"✅ Submit Documents"
-}
+{loading?"Uploading...":"✅ Submit Documents"}
 
 </button>
-
 
 
 </div>
@@ -189,28 +210,23 @@ loading
 
 );
 
+
 }
 
 
 
-
-
-function UploadBox({
-title,
-file,
-setFile
-}){
+function FileBox({title,file,setFile}){
 
 return (
 
-<div style={box}>
+<div style={{
+background:"#f0fdf4",
+padding:15,
+borderRadius:15,
+marginTop:15
+}}>
 
 <h3>{title}</h3>
-
-
-<label style={upload}>
-
-📁 Choose File
 
 
 <input
@@ -219,28 +235,18 @@ type="file"
 
 accept="image/*,.pdf"
 
-hidden
-
 onChange={(e)=>
-setFile(
-e.target.files[0]
-)
+setFile(e.target.files[0])
 }
 
 />
 
 
-</label>
-
-
-
 {
 file &&
-
-<p style={fileText}>
+<p style={{color:"green"}}>
 ✅ {file.name}
 </p>
-
 }
 
 
@@ -249,127 +255,3 @@ file &&
 );
 
 }
-
-
-
-
-
-const page={
-
-minHeight:"100vh",
-
-background:
-"linear-gradient(135deg,#dcfce7,#eff6ff)",
-
-padding:20
-
-};
-
-
-
-const card={
-
-maxWidth:420,
-
-margin:"auto",
-
-background:"#fff",
-
-padding:25,
-
-borderRadius:25,
-
-boxShadow:
-"0 10px 30px rgba(0,0,0,0.12)"
-
-};
-
-
-
-const title={
-
-color:"#15803d",
-
-textAlign:"center"
-
-};
-
-
-const sub={
-
-textAlign:"center",
-
-color:"#555",
-
-marginBottom:25
-
-};
-
-
-
-const box={
-
-background:"#f8fafc",
-
-borderRadius:18,
-
-padding:15,
-
-marginBottom:15,
-
-border:
-"1px solid #e2e8f0"
-
-};
-
-
-
-const upload={
-
-display:"block",
-
-background:"#16a34a",
-
-color:"#fff",
-
-padding:12,
-
-borderRadius:12,
-
-textAlign:"center",
-
-cursor:"pointer"
-
-};
-
-
-
-const fileText={
-
-fontSize:13,
-
-color:"#15803d"
-
-};
-
-
-
-const button={
-
-width:"100%",
-
-padding:15,
-
-background:"#2563eb",
-
-color:"#fff",
-
-border:"none",
-
-borderRadius:15,
-
-fontSize:16,
-
-fontWeight:"bold"
-
-};
