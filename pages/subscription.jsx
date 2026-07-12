@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+
 import PhonePePayment from "../components/payment/PhonePePayment";
 import { supabase } from "../lib/supabase";
 
@@ -10,7 +11,11 @@ export default function SubscriptionPage(){
   const router = useRouter();
 
 
-  const [acres,setAcres] = useState("");
+  const [farms,setFarms] = useState([]);
+
+  const [amount,setAmount] = useState(0);
+
+  const [totalAcres,setTotalAcres] = useState(0);
 
   const [payment,setPayment] = useState(false);
 
@@ -20,8 +25,77 @@ export default function SubscriptionPage(){
 
 
 
-  const amount =
-  Number(acres || 0) * pricePerAcre;
+  useEffect(()=>{
+
+    loadFarms();
+
+  },[]);
+
+
+
+
+
+  async function loadFarms(){
+
+
+    const {
+      data:{
+        user
+      }
+    } =
+    await supabase.auth.getUser();
+
+
+
+    if(!user){
+
+      router.replace("/login");
+
+      return;
+
+    }
+
+
+
+
+    const {
+      data
+    } =
+    await supabase
+
+    .from("khets")
+
+    .select("acres")
+
+    .eq(
+      "user_id",
+      user.id
+    );
+
+
+
+    const acres =
+    (data || []).reduce(
+
+      (sum,item)=>
+      sum + Number(item.acres || 0),
+
+      0
+
+    );
+
+
+
+    setFarms(data || []);
+
+    setTotalAcres(acres);
+
+    setAmount(
+      acres * pricePerAcre
+    );
+
+
+  }
 
 
 
@@ -38,30 +112,19 @@ export default function SubscriptionPage(){
         data:{
           user
         }
-      } = await supabase.auth.getUser();
+      } =
+      await supabase.auth.getUser();
 
 
 
 
-
-      if(!user){
-
-        router.replace("/login");
-
-        return;
-
-      }
+      const startDate =
+      new Date();
 
 
 
-
-
-
-      const startDate = new Date();
-
-
-
-      const endDate = new Date();
+      const endDate =
+      new Date();
 
 
       endDate.setFullYear(
@@ -72,12 +135,10 @@ export default function SubscriptionPage(){
 
 
 
-
-
-
       const {
         error
-      } = await supabase
+      } =
+      await supabase
 
       .from("subscriptions")
 
@@ -85,7 +146,7 @@ export default function SubscriptionPage(){
 
         user_id:user.id,
 
-        acres:Number(acres),
+        acres:totalAcres,
 
         amount:amount,
 
@@ -93,19 +154,15 @@ export default function SubscriptionPage(){
 
         start_date:startDate,
 
-        end_date:endDate,
+        end_date:endDate
 
       });
 
 
 
 
-
-
       if(error)
         throw error;
-
-
 
 
 
@@ -120,14 +177,12 @@ export default function SubscriptionPage(){
 
 
 
-
-
     }
     catch(err){
 
-      console.log(err);
-
-      alert(err.message);
+      alert(
+        err.message
+      );
 
     }
 
@@ -142,7 +197,6 @@ export default function SubscriptionPage(){
 
   if(payment){
 
-
     return (
 
       <PhonePePayment
@@ -151,14 +205,11 @@ export default function SubscriptionPage(){
 
         onSuccess={paymentSuccess}
 
-        onBack={()=>
-          setPayment(false)
-        }
+        onBack={()=>setPayment(false)}
 
       />
 
     );
-
 
   }
 
@@ -167,148 +218,128 @@ export default function SubscriptionPage(){
 
 
 
-
   return (
 
-    <div
+    <div className="min-h-screen bg-green-50 p-5">
 
-      style={{
 
-        padding:20,
+      <div className="bg-white rounded-3xl shadow p-6">
 
-        background:"#F8FAFC",
 
-        minHeight:"100vh"
+        <button
+          onClick={()=>router.back()}
+          className="mb-4"
+        >
 
-      }}
+          ← Back
 
-    >
+        </button>
 
 
 
-      <button
-      onClick={()=>router.back()}
-      >
 
-        ← Back
+        <h1 className="text-3xl font-bold text-green-700">
 
-      </button>
+          👑 KisanSetu Subscription
 
+        </h1>
 
 
 
 
-      <h2>
-        👑 KisanSetu Subscription
-      </h2>
+        <div className="bg-green-100 rounded-2xl p-5 mt-5">
 
 
+          🌾 Total Farm Area
 
+          <h2 className="text-3xl font-bold">
 
+            {totalAcres} Acre
 
-      <h3>
-        ₹550 / Acre / Year
-      </h3>
+          </h2>
 
 
+        </div>
 
 
-      <p>
-        Subscription lene par service booking me 50% discount milega.
-      </p>
 
 
 
+        <div className="bg-yellow-100 rounded-2xl p-5 mt-4">
 
 
-      <input
+          💰 Rate
 
-      type="number"
+          <h3>
 
-      placeholder="Enter Total Farm Acres"
+            ₹550 / Acre / Year
 
-      value={acres}
+          </h3>
 
-      onChange={(e)=>
-        setAcres(e.target.value)
-      }
 
-      style={{
 
-        width:"100%",
+          <h2 className="text-2xl font-bold">
 
-        padding:12,
+            Pay ₹{amount}
 
-        marginTop:15
+          </h2>
 
-      }}
 
-      />
+        </div>
 
 
 
 
 
 
-      <h2>
-        Pay ₹{amount}
-      </h2>
+        <div className="bg-orange-100 p-4 rounded-xl mt-4">
 
+          🔥 Subscription ke baad
 
+          <br/>
 
+          🚜 Service booking par 50% OFF milega
 
+        </div>
 
 
 
-      <button
 
-      onClick={()=>{
 
 
-        if(!acres){
 
-          alert("Enter acres");
+        <button
 
-          return;
+          onClick={()=>{
 
-        }
 
+            if(totalAcres<=0){
 
-        setPayment(true);
+              alert(
+                "Pehle farm add kare"
+              );
 
+              return;
 
-      }}
+            }
 
 
+            setPayment(true);
 
-      style={{
 
-        width:"100%",
+          }}
 
-        padding:15,
 
-        background:"#f59e0b",
+          className="w-full bg-green-600 text-white p-4 rounded-2xl mt-5 font-bold"
 
-        color:"#fff",
+        >
 
-        border:"none",
+          👑 Buy Subscription
 
-        borderRadius:10,
+        </button>
 
-        fontSize:18
 
-      }}
-
-      >
-
-
-        👑 Buy Subscription
-
-
-      </button>
-
-
-
+      </div>
 
 
     </div>
