@@ -130,10 +130,14 @@ export default function AddFarm({
         .single();
 
       if (insertError) throw insertError;
-      await uploadDocuments(
-        insertedFarm.id,
-        user.id
-      );
+      try {
+  await uploadDocuments(
+    insertedFarm.id,
+    user.id
+  );
+} catch(uploadErr) {
+  console.log("Document upload failed:", uploadErr.message);
+      }
 
       setMessage("✅ Farm added successfully.");
 
