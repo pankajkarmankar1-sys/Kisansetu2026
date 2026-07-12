@@ -11,48 +11,35 @@ export default function LoginPage() {
 
     try {
 
-
-      const selectedRole =
-        localStorage.getItem("role");
-
-
       const {
         data:{ user }
-      } =
-      await supabase.auth.getUser();
-
+      } = await supabase.auth.getUser();
 
 
       if(!user){
-
         router.replace("/login");
         return;
+      }
 
+
+      const {
+        data: profile,
+        error
+      } = await supabase
+        .from("profiles")
+        .select("role, full_name")
+        .eq("auth_user_id", user.id)
+        .maybeSingle();
+
+
+
+      if(error){
+        console.log(error);
       }
 
 
 
-      const {
-        data:profile
-      } =
-      await supabase
-
-      .from("profiles")
-
-      .select("name, role")
-
-      .eq(
-        "auth_user_id",
-        user.id
-      )
-
-      .maybeSingle();
-
-
-
-
-
-      if(!profile || !profile.name){
+      if(!profile){
 
         router.replace(
           `/registration?phone=${user.phone || ""}`
@@ -64,11 +51,7 @@ export default function LoginPage() {
 
 
 
-
-
-      // TESTING ROLE LOGIN
-
-      if(selectedRole === "admin"){
+      if(profile.role === "admin"){
 
         router.replace("/admin");
         return;
@@ -77,7 +60,7 @@ export default function LoginPage() {
 
 
 
-      if(selectedRole === "driver"){
+      if(profile.role === "driver"){
 
         router.replace("/driver");
         return;
@@ -86,11 +69,16 @@ export default function LoginPage() {
 
 
 
-      // Farmer
+      if(profile.role === "farmer"){
+
+        router.replace("/dashboard");
+        return;
+
+      }
+
+
 
       router.replace("/dashboard");
-
-
 
 
     }
@@ -101,8 +89,6 @@ export default function LoginPage() {
     }
 
   }
-
-
 
 
 
