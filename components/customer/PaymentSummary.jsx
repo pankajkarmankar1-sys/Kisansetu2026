@@ -4,6 +4,7 @@ import PhonePePayment from "../payment/PhonePePayment";
 
 
 export default function PaymentSummary({
+
   user,
   selectedService,
   acres,
@@ -11,13 +12,13 @@ export default function PaymentSummary({
   setPaymentDone,
   next,
   back,
+
 }) {
 
 
   const [subscription,setSubscription] = useState(null);
 
   const [showPayment,setShowPayment] = useState(false);
-
 
 
 
@@ -30,64 +31,40 @@ export default function PaymentSummary({
 
 
 
-
-
   async function checkSubscription(){
 
 
-    try{
-
-
-      if(!user?.id)
-        return;
+    if(!user?.id)
+      return;
 
 
 
-      const {
-        data,
-        error
-      } = await supabase
+    const {
+      data
+    } = await supabase
 
-      .from("subscriptions")
+    .from("subscriptions")
 
-      .select("*")
+    .select("*")
 
-      .eq(
-        "user_id",
-        user.id
-      )
+    .eq(
+      "user_id",
+      user.id
+    )
 
-      .in(
-        "status",
-        [
-          "active",
-          "Active"
-        ]
-      )
+    .eq(
+      "status",
+      "active"
+    )
 
-      .maybeSingle();
+    .maybeSingle();
 
 
 
-
-
-      if(!error && data){
-
-        setSubscription(data);
-
-      }
-
-
-    }
-    catch(err){
-
-      console.log(err);
-
-    }
+    setSubscription(data || null);
 
 
   }
-
 
 
 
@@ -99,60 +76,59 @@ export default function PaymentSummary({
 
 
 
-
-
-  const normalPrice = 1100;
-
-
-
-  const price =
-
-    isSubscriber
-
-    ?
-
-    (
-      subscription?.rate_per_acre || 550
-    )
-
-    :
-
-    normalPrice;
+  const normalPrice =
+  Number(
+    selectedService?.price || 0
+  );
 
 
 
+  const subscriberPrice =
+  Number(
+    selectedService?.price_subscriber || 0
+  );
+
+
+
+  const payRate =
+
+  isSubscriber
+
+  ?
+
+  subscriberPrice
+
+  :
+
+  normalPrice;
+
+
+
+
+
+  const acresValue =
+  Number(acres || 0);
 
 
 
 
   const normalAmount =
-
-    normalPrice *
-
-    Number(acres || 0);
+  normalPrice *
+  acresValue;
 
 
 
 
-
-
-
-  const amount =
-
-    price *
-
-    Number(acres || 0);
-
-
-
+  const finalAmount =
+  payRate *
+  acresValue;
 
 
 
 
   const discount =
-
-    normalAmount - amount;
-
+  normalAmount -
+  finalAmount;
 
 
 
@@ -168,8 +144,7 @@ export default function PaymentSummary({
 
       <PhonePePayment
 
-        amount={amount}
-
+        amount={finalAmount}
 
         onSuccess={()=>{
 
@@ -179,13 +154,15 @@ export default function PaymentSummary({
 
         }}
 
+        onBack={()=>{
 
-        onBack={()=>setShowPayment(false)}
+          setShowPayment(false);
+
+        }}
 
       />
 
     );
-
 
   }
 
@@ -197,219 +174,209 @@ export default function PaymentSummary({
 
   return (
 
-    <div
-
-      style={{
-
-        padding:20,
-
-        background:"#F8FAFC",
-
-        minHeight:"100vh",
-
-      }}
-
-    >
+    <div className="min-h-screen bg-green-50 p-5">
 
 
-
-      <button onClick={back}>
-        ← Back
-      </button>
+      <div className="bg-white rounded-3xl shadow p-6">
 
 
+        <button
 
+          onClick={back}
 
-      <h2>
-        💳 Payment Summary
-      </h2>
+          className="bg-gray-200 px-4 py-2 rounded-xl"
+
+        >
+
+          ← Back
+
+        </button>
 
 
 
 
 
-      <div
+        <h1 className="text-2xl font-bold text-green-700 mt-5">
 
-        style={{
+          💳 Payment Summary
 
-          background:"#fff",
-
-          padding:15,
-
-          borderRadius:12
-
-        }}
-
-      >
+        </h1>
 
 
 
-        <p>
-          🚜 Service:
-          {" "}
+
+
+
+
+        <div className="bg-green-100 rounded-2xl p-5 mt-5">
+
+
+          <p className="font-bold">
+
+            🚜 Service
+
+          </p>
+
+
+          <h3>
+
+            {selectedService?.name_hi ||
+             selectedService?.name ||
+             "-"}
+
+          </h3>
+
+
+
+
+
+          <p className="mt-3">
+
+            🌾 Acres:
+
+            {" "}
+
+            {acresValue}
+
+          </p>
+
+
+
+
+
+          <p>
+
+            👑 Plan:
+
+            {" "}
+
+            {isSubscriber
+
+            ?
+
+            "Subscription Active"
+
+            :
+
+            "Normal Customer"
+
+            }
+
+          </p>
+
+
+        </div>
+
+
+
+
+
+
+
+        <div className="bg-white border rounded-2xl p-5 mt-5">
+
+
+          <p>
+
+            Normal Rate:
+
+            {" "}
+
+            ₹{normalPrice}/Acre
+
+          </p>
+
+
+
+
+
           {
-          selectedService?.name_hi ||
-          selectedService?.name ||
-          "-"
+            isSubscriber &&
+
+            <p className="text-green-600 font-bold">
+
+              🎉 50% Discount Applied
+
+              <br/>
+
+              Saved ₹{discount}
+
+            </p>
+
           }
-        </p>
 
 
 
 
 
-        <p>
-          🌾 Acres:
-          {" "}
-          {acres || 0}
-        </p>
+
+          <p>
+
+            Pay Rate:
+
+            {" "}
+
+            ₹{payRate}/Acre
+
+          </p>
 
 
 
 
 
-        <p>
-          👑 Plan:
-          {" "}
-          {
-          isSubscriber
-          ?
-          "Active Subscription"
-          :
-          "Normal Customer"
-          }
-        </p>
+          <h2 className="text-3xl font-bold mt-4">
+
+            Total ₹{finalAmount}
+
+          </h2>
 
 
 
+        </div>
 
 
-        <p>
-          💰 Normal Rate:
-          {" "}
-          ₹{normalPrice}/Acre
-        </p>
 
 
 
 
 
         {
-          isSubscriber &&
+          !paymentDone
 
-          <p>
-            🎉 Subscription Discount:
-            {" "}
-            ₹{discount}
-          </p>
+          ?
+
+          <button
+
+            onClick={()=>setShowPayment(true)}
+
+            className="w-full bg-green-600 text-white p-4 rounded-2xl mt-5 font-bold"
+
+          >
+
+            💳 Pay Now
+
+          </button>
+
+
+          :
+
+          <button
+
+            onClick={next}
+
+            className="w-full bg-green-600 text-white p-4 rounded-2xl mt-5 font-bold"
+
+          >
+
+            Continue →
+
+          </button>
 
         }
 
 
 
-
-
-        <p>
-          ✅ Pay Rate:
-          {" "}
-          ₹{price}/Acre
-        </p>
-
-
-
-
-
-        <h2>
-          Total:
-          {" "}
-          ₹{amount}
-        </h2>
-
-
-
-        <p>
-          Status:
-          {" "}
-          {
-          paymentDone
-          ?
-          "✅ Paid"
-          :
-          "⏳ Pending"
-          }
-        </p>
-
-
-
-
       </div>
-
-
-
-
-
-
-
-      {
-        !paymentDone
-
-        ?
-
-        <button
-
-          onClick={()=>setShowPayment(true)}
-
-          style={{
-
-            marginTop:20,
-
-            padding:12,
-
-            width:"100%",
-
-            background:"#16a34a",
-
-            color:"#fff",
-
-            border:"none",
-
-            borderRadius:10
-
-          }}
-
-        >
-
-          💳 Pay Now
-
-        </button>
-
-
-        :
-
-        <button
-
-          onClick={next}
-
-          style={{
-
-            marginTop:20,
-
-            padding:12,
-
-            width:"100%"
-
-          }}
-
-        >
-
-          Continue →
-
-        </button>
-
-      }
-
-
-
 
 
     </div>
