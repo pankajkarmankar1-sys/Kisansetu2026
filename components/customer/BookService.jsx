@@ -6,16 +6,15 @@ import PaymentSummary from "./PaymentSummary";
 import DateSelection from "./DateSelection";
 import ConfirmBooking from "./ConfirmBooking";
 import BookingSuccess from "./BookingSuccess";
+import AddFarm from "./AddFarm";
 
 
 export default function BookService({
-
   user,
   selKhet,
   setSelKhet,
   onNext,
   back,
-
 }) {
 
 
@@ -37,12 +36,9 @@ export default function BookService({
 
 
 
-
-
   return (
 
     <div>
-
 
 
       {
@@ -54,20 +50,34 @@ export default function BookService({
 
           selKhet={selKhet}
 
-          setSelKhet={(farm)=>{
-
-            setSelKhet(farm);
-
-            localStorage.setItem(
-              "selectedFarm",
-              JSON.stringify(farm)
-            );
-
-          }}
+          setSelKhet={setSelKhet}
 
           next={()=>setStep("service")}
 
+          addFarm={()=>setStep("addFarm")}
+
           back={back}
+
+        />
+
+      }
+
+
+
+
+
+      {
+        step==="addFarm" &&
+
+        <AddFarm
+
+          onSaved={()=>{
+
+            setStep("farm");
+
+          }}
+
+          back={()=>setStep("farm")}
 
         />
 
@@ -82,35 +92,27 @@ export default function BookService({
       {
         step==="service" &&
 
-
         <ServiceSelection
 
           user={user}
 
           selKhet={selKhet}
 
-
           selectedService={selectedService}
 
-
           setSelectedService={setSelectedService}
-
 
           acres={acres}
 
           setAcres={setAcres}
 
-
           next={()=>setStep("payment")}
 
-
           back={()=>setStep("farm")}
-
 
         />
 
       }
-
 
 
 
@@ -121,30 +123,21 @@ export default function BookService({
       {
         step==="payment" &&
 
-
         <PaymentSummary
-
 
           user={user}
 
-
           selectedService={selectedService}
-
 
           acres={acres}
 
-
           paymentDone={paymentDone}
-
 
           setPaymentDone={setPaymentDone}
 
-
           next={()=>setStep("date")}
 
-
           back={()=>setStep("service")}
-
 
         />
 
@@ -156,29 +149,20 @@ export default function BookService({
 
 
 
-
       {
         step==="date" &&
 
-
         <DateSelection
-
 
           date={date}
 
-
           setDate={setDate}
-
 
           note={note}
 
-
           setNote={setNote}
 
-
-
           next={()=>{
-
 
             setBookingData({
 
@@ -194,34 +178,21 @@ export default function BookService({
 
               selKhet,
 
-
               payment_status:
-
               paymentDone
-
               ?
-
               "Paid"
-
               :
-
               "Pending"
-
 
             });
 
 
-
             setStep("confirm");
-
 
           }}
 
-
-
           back={()=>setStep("payment")}
-
-
 
         />
 
@@ -233,18 +204,12 @@ export default function BookService({
 
 
 
-
-
       {
         step==="confirm" &&
 
-
         <ConfirmBooking
 
-
           bookingData={bookingData}
-
-
 
           onConfirm={(savedBooking)=>{
 
@@ -258,22 +223,16 @@ export default function BookService({
             });
 
 
-
             setStep("success");
 
 
           }}
 
-
-
           back={()=>setStep("date")}
-
-
 
         />
 
       }
-
 
 
 
@@ -285,28 +244,20 @@ export default function BookService({
       {
         step==="success" &&
 
-
         <BookingSuccess
-
 
           bookingData={bookingData}
 
-
           onDone={onNext}
-
 
         />
 
-
       }
-
-
 
 
 
     </div>
 
   );
-
 
 }
