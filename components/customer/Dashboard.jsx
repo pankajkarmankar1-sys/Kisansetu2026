@@ -2,6 +2,7 @@ import React from "react";
 
 export default function Dashboard({
   user,
+  farms = [],
   onBook,
   onBookings,
   onProfile,
@@ -21,40 +22,118 @@ export default function Dashboard({
 
 
 
+  const totalAcres = farms.reduce(
+    (sum,farm)=> sum + Number(farm.acres || 0),
+    0
+  );
+
+
+
+  const villageStats = {};
+
+  farms.forEach((farm)=>{
+
+    const village =
+    farm.village || "Unknown";
+
+
+    if(!villageStats[village]){
+
+      villageStats[village] = {
+        farms:0,
+        acres:0
+      };
+
+    }
+
+
+    villageStats[village].farms += 1;
+
+    villageStats[village].acres +=
+    Number(farm.acres || 0);
+
+
+  });
+
+
+
   return (
 
-    <div
-      style={{
-        padding:20,
-        minHeight:"100vh",
-        background:"#f5f7fb",
-      }}
-    >
-
-      <h1>
-        🚜 KisanSetu Dashboard
-      </h1>
+    <div className="min-h-screen bg-green-50 p-4">
 
 
-      <h2>
-        Welcome {user?.name || "User"}
-      </h2>
+      <div className="bg-gradient-to-r from-green-600 to-emerald-500 text-white rounded-3xl p-6 shadow">
+
+        <h1 className="text-3xl font-bold">
+          🚜 KisanSetu
+        </h1>
+
+        <p className="mt-2">
+          Namaste {user?.name || "Kisan"} 🌾
+        </p>
+
+      </div>
 
 
 
 
-      <div
-        style={{
-          background:"#fff",
-          padding:15,
-          borderRadius:12,
-          marginTop:15
-        }}
-      >
+      <div className="grid grid-cols-3 gap-3 mt-5">
 
-        <h3>
-          👑 Subscription Status
+
+        <div className="bg-white rounded-2xl p-4 shadow">
+
+          <p>
+            🌱 Farms
+          </p>
+
+          <h2 className="text-2xl font-bold text-green-700">
+            {farms.length}
+          </h2>
+
+        </div>
+
+
+
+        <div className="bg-white rounded-2xl p-4 shadow">
+
+          <p>
+            📏 Acres
+          </p>
+
+          <h2 className="text-2xl font-bold text-green-700">
+            {totalAcres}
+          </h2>
+
+        </div>
+
+
+
+        <div className="bg-white rounded-2xl p-4 shadow">
+
+          <p>
+            📄 7/12
+          </p>
+
+          <h2 className="text-2xl font-bold text-green-700">
+            {farms.length}
+          </h2>
+
+        </div>
+
+
+      </div>
+
+
+
+
+
+      <div className="bg-white rounded-2xl p-5 mt-5 shadow">
+
+
+        <h3 className="text-xl font-bold">
+          👑 Subscription
         </h3>
+
 
 
         {
@@ -62,23 +141,46 @@ export default function Dashboard({
 
           ?
 
-          <>
-            <p>
+          <div className="mt-3">
+
+            <p className="text-green-600 font-bold">
               ✅ Active
             </p>
 
             <p>
-              📅 Valid Till:
+              🔥 50% OFF Applied
+            </p>
+
+            <p>
+              Valid Till:
               {" "}
               {user?.subscription_end || "-"}
             </p>
-          </>
+
+          </div>
+
 
           :
 
-          <p>
-            ❌ No Active Subscription
-          </p>
+
+          <div className="mt-3">
+
+            <p className="text-red-500">
+              ❌ No Subscription
+            </p>
+
+
+            <button
+              onClick={onSubscription}
+              className="mt-3 bg-orange-500 text-white px-4 py-2 rounded-xl"
+            >
+
+              Buy Subscription
+
+            </button>
+
+
+          </div>
 
         }
 
@@ -89,22 +191,55 @@ export default function Dashboard({
 
 
 
+      <div className="bg-white rounded-2xl p-5 mt-5 shadow">
+
+
+        <h3 className="font-bold text-xl mb-3">
+          📍 Village Wise Stats
+        </h3>
+
+
+
+        {
+          Object.keys(villageStats).map((village)=>(
+
+            <div
+              key={village}
+              className="border-b py-3 flex justify-between"
+            >
+
+              <span>
+                🌾 {village}
+              </span>
+
+
+              <span>
+                {villageStats[village].farms} Farm /
+                {" "}
+                {villageStats[village].acres} Acre
+              </span>
+
+
+            </div>
+
+          ))
+        }
+
+
+      </div>
+
+
+
+
 
       {
         !documentsApproved && (
 
-          <div
-            style={{
-              background:"#fef3c7",
-              padding:15,
-              borderRadius:10,
-              marginTop:15
-            }}
-          >
+          <div className="bg-yellow-100 rounded-xl p-4 mt-5">
 
-            ⚠️ Documents verification pending.
+            ⚠️ Documents approval pending.
             <br/>
-            Aadhaar approve hone ke baad booking open hogi.
+            Approval ke baad booking open hogi.
 
           </div>
 
@@ -115,119 +250,65 @@ export default function Dashboard({
 
 
 
-      <div
-        style={{
-          display:"grid",
-          gap:12,
-          marginTop:25,
-        }}
-      >
 
+      <div className="space-y-3 mt-5">
 
 
         <button
           onClick={onAddFarm}
-          style={{
-            padding:15,
-            background:"#16a34a",
-            color:"#fff",
-            border:"none",
-            borderRadius:10,
-          }}
+          className="w-full bg-green-600 text-white p-4 rounded-2xl font-bold"
         >
-          🌾 Add New Farm
+          ➕ Add Another 7/12
         </button>
-
-
 
 
 
         <button
           onClick={documentsApproved ? onBook : undefined}
-          disabled={!documentsApproved}
-          style={{
-            padding:15,
-            opacity: documentsApproved ? 1 : 0.5
-          }}
+          className="w-full bg-blue-600 text-white p-4 rounded-2xl font-bold"
         >
-          📅 Book Service
+          🚜 Book Service
         </button>
-
-
-
-
-
-        <button
-          onClick={onSubscription}
-          style={{
-            padding:15,
-            background:"#f59e0b",
-            color:"#fff",
-            border:"none",
-            borderRadius:10,
-          }}
-        >
-          👑 Buy Subscription
-        </button>
-
-
 
 
 
         <button
           onClick={onBookings}
-          style={{
-            padding:15
-          }}
+          className="w-full bg-white p-4 rounded-2xl shadow font-bold"
         >
           📋 My Bookings
         </button>
 
 
 
-
-
         <button
           onClick={onProfile}
-          style={{
-            padding:15
-          }}
+          className="w-full bg-white p-4 rounded-2xl shadow font-bold"
         >
           👤 Profile
         </button>
 
 
 
-
-
         <button
           onClick={onNotifications}
-          style={{
-            padding:15
-          }}
+          className="w-full bg-white p-4 rounded-2xl shadow font-bold"
         >
           🔔 Notifications
         </button>
 
 
 
-
-
         <button
           onClick={onLogout}
-          style={{
-            padding:15,
-            background:"#dc2626",
-            color:"#fff",
-            border:"none",
-          }}
+          className="w-full bg-red-600 text-white p-4 rounded-2xl font-bold"
         >
           Logout
         </button>
 
 
-
       </div>
+
 
 
     </div>
