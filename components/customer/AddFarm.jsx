@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 
+
 export default function AddFarm({
   onSaved,
   back,
 }) {
+
 
   const [loading,setLoading] = useState(false);
 
@@ -13,7 +15,7 @@ export default function AddFarm({
     name:"",
     village:"",
     state:"Maharashtra",
-    district:"",
+    district:"", Chandrapur 
     taluka:"",
     farm_address:"",
     acres:"",
@@ -29,11 +31,14 @@ export default function AddFarm({
 
 
 
+
+
   function updateField(key,value){
 
     setFarm(prev=>({
 
       ...prev,
+
       [key]:value
 
     }));
@@ -43,34 +48,31 @@ export default function AddFarm({
 
 
 
+
+
   useEffect(()=>{
 
-    if(!navigator.geolocation)
-      return;
+    if(navigator.geolocation){
 
+      navigator.geolocation.getCurrentPosition(
 
-    navigator.geolocation.getCurrentPosition(
+        (pos)=>{
 
-      (position)=>{
+          setFarm(prev=>({
 
-        setFarm(prev=>({
+            ...prev,
 
-          ...prev,
+            latitude:pos.coords.latitude,
 
-          latitude:
-          position.coords.latitude,
+            longitude:pos.coords.longitude
 
-          longitude:
-          position.coords.longitude
+          }));
 
-        }));
+        }
 
-      },
+      );
 
-      ()=>{}
-
-    );
-
+    }
 
   },[]);
 
@@ -78,122 +80,51 @@ export default function AddFarm({
 
 
 
+
+
   function handleDocumentChange(e){
 
-    const files =
-    Array.from(
-      e.target.files || []
+    setDocuments(
+      Array.from(e.target.files || [])
     );
 
-
-    setDocuments(files);
-
   }
 
 
 
 
-  async function uploadDocuments(khetId,userId){
-
-
-    for(const file of documents){
-
-
-      const fileName =
-      `${userId}/${Date.now()}-${file.name}`;
 
 
 
-      const {
-        error:uploadError
-      }
-      =
-      await supabase.storage
-      .from("khet-documents")
-      .upload(
-        fileName,
-        file
-      );
-
-
-
-      if(uploadError)
-        throw uploadError;
-
-
-
-
-      const {
-        data:urlData
-      }
-      =
-      supabase.storage
-      .from("khet-documents")
-      .getPublicUrl(
-        fileName
-      );
-
-
-
-      const {
-        error:dbError
-      }
-      =
-      await supabase
-      .from("khet_documents")
-      .insert({
-
-        khet_id:khetId,
-
-        user_id:userId,
-
-        document_name:file.name,
-
-        document_url:
-        urlData.publicUrl,
-
-        document_type:"7/12"
-
-      });
-
-
-
-      if(dbError)
-        throw dbError;
-
-
-    }
-
-
-  }
   async function saveFarm(){
+
 
     try{
 
+
       setLoading(true);
+
       setMessage("");
 
 
 
       const {
+
         data:{
           user
-        },
-        error:userError
 
-      } =
-      await supabase.auth.getUser();
+        }
 
+      } = await supabase.auth.getUser();
 
 
-      if(userError)
-        throw userError;
 
 
 
       if(!user){
 
         alert("Login required");
+
         return;
 
       }
@@ -201,27 +132,15 @@ export default function AddFarm({
 
 
 
-      if(!farm.name.trim()){
-
-        alert("Farm Name bharna jaruri hai");
-        return;
-
-      }
 
 
 
-      if(!farm.village.trim()){
+      if(!farm.name || !farm.village || !farm.acres){
 
-        alert("Village bharna jaruri hai");
-        return;
+        alert(
+          "Farm Name, Village aur Acre bharna jaruri hai"
+        );
 
-      }
-
-
-
-      if(!farm.acres){
-
-        alert("Acres bharna jaruri hai");
         return;
 
       }
@@ -232,11 +151,12 @@ export default function AddFarm({
 
 
       const {
-        data:insertedFarm,
-        error:insertError
 
-      } =
-      await supabase
+        data,
+
+        error
+
+      } = await supabase
 
       .from("khets")
 
@@ -244,25 +164,9 @@ export default function AddFarm({
 
         user_id:user.id,
 
-        name:farm.name,
+        ...farm,
 
-        village:farm.village,
-
-        state:farm.state,
-
-        district:farm.district,
-
-        taluka:farm.taluka,
-
-        farm_address:farm.farm_address,
-
-        acres:Number(farm.acres),
-
-        latitude:
-        farm.latitude || null,
-
-        longitude:
-        farm.longitude || null
+        acres:Number(farm.acres)
 
       })
 
@@ -274,21 +178,8 @@ export default function AddFarm({
 
 
 
-      if(insertError)
-        throw insertError;
-
-
-
-
-
-
-      await uploadDocuments(
-
-        insertedFarm.id,
-
-        user.id
-
-      );
+      if(error)
+        throw error;
 
 
 
@@ -302,45 +193,23 @@ export default function AddFarm({
 
 
 
-      setFarm({
-
-        name:"",
-        village:"",
-        state:"Maharashtra",
-        district:"",
-        taluka:"",
-        farm_address:"",
-        acres:"",
-        latitude:"",
-        longitude:""
-
-      });
-
-
-
-      setDocuments([]);
-
-
-
 
       if(onSaved){
 
-        onSaved(insertedFarm);
+        onSaved(data);
 
       }
 
 
 
+
     }
 
-    catch(error){
+    catch(err){
 
-      console.log(error);
+      console.log(err);
 
-      setMessage(
-        error.message
-      );
-
+      alert(err.message);
 
     }
 
@@ -358,19 +227,27 @@ export default function AddFarm({
 
 
 
+
   return (
 
-    <div className="min-h-screen bg-green-50 p-5">
+    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white p-5">
 
 
-      <div className="bg-white rounded-3xl shadow p-5">
+      <div className="max-w-xl mx-auto bg-white rounded-3xl shadow-xl p-6">
 
 
-        <h2 className="text-2xl font-bold text-green-700 mb-5">
+        <h1 className="text-3xl font-bold text-green-700">
 
-          🌾 Add Another 7/12 Farm
+          🌾 Add New Farm
 
-        </h2>
+        </h1>
+
+
+        <p className="text-gray-500 mt-2">
+
+          Apna khet aur 7/12 details add kare
+
+        </p>
 
 
 
@@ -379,7 +256,7 @@ export default function AddFarm({
         {
           message &&
 
-          <div className="bg-green-100 p-3 rounded-xl mb-4">
+          <div className="bg-green-100 text-green-700 p-3 rounded-xl mt-4">
 
             {message}
 
@@ -390,104 +267,61 @@ export default function AddFarm({
 
 
 
-        <input
-          placeholder="Farm Name"
-          value={farm.name}
-          onChange={(e)=>
-            updateField(
-              "name",
-              e.target.value
-            )
-          }
-          className="w-full border rounded-xl p-3 mb-3"
-        />
 
-
-
-        <input
-          placeholder="Village Name"
-          value={farm.village}
-          onChange={(e)=>
-            updateField(
-              "village",
-              e.target.value
-            )
-          }
-          className="w-full border rounded-xl p-3 mb-3"
-        />
-
-
-
-        <input
-          placeholder="District"
-          value={farm.district}
-          onChange={(e)=>
-            updateField(
-              "district",
-              e.target.value
-            )
-          }
-          className="w-full border rounded-xl p-3 mb-3"
-        />
-
-
-
-        <input
-          placeholder="Taluka"
-          value={farm.taluka}
-          onChange={(e)=>
-            updateField(
-              "taluka",
-              e.target.value
-            )
-          }
-          className="w-full border rounded-xl p-3 mb-3"
-        />
-
-
-
-        <input
-          type="number"
-          placeholder="Area Acres"
-          value={farm.acres}
-          onChange={(e)=>
-            updateField(
-              "acres",
-              e.target.value
-            )
-          }
-          className="w-full border rounded-xl p-3 mb-3"
-        />
-        <input
-          placeholder="Farm Address"
-          value={farm.farm_address}
-          onChange={(e)=>
-            updateField(
-              "farm_address",
-              e.target.value
-            )
-          }
-          className="w-full border rounded-xl p-3 mb-3"
-        />
-
-
-
-        <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="space-y-4 mt-6">
 
 
           <input
-            value={farm.latitude}
-            readOnly
-            placeholder="Latitude"
-            className="border rounded-xl p-3 bg-gray-100"
+            placeholder="🌾 Farm Name"
+            value={farm.name}
+            onChange={(e)=>updateField("name",e.target.value)}
+            className="w-full p-4 rounded-2xl border"
           />
 
 
+
           <input
-            value={farm.longitude}
-            readOnly
-            placeholder="Longitude"
-            className="border rounded-xl p-3 bg-gray-100"
+            placeholder="📍 Village"
+            value={farm.village}
+            onChange={(e)=>updateField("village",e.target.value)}
+            className="w-full p-4 rounded-2xl border"
+          />
+
+
+
+          <input
+            placeholder="🏙 District"
+            value={farm.district}
+            onChange={(e)=>updateField("district",e.target.value)}
+            className="w-full p-4 rounded-2xl border"
+          />
+
+
+
+          <input
+            placeholder="📌 Taluka"
+            value={farm.taluka}
+            onChange={(e)=>updateField("taluka",e.target.value)}
+            className="w-full p-4 rounded-2xl border"
+          />
+
+
+
+          <input
+            type="number"
+            placeholder="📏 Total Acre"
+            value={farm.acres}
+            onChange={(e)=>updateField("acres",e.target.value)}
+            className="w-full p-4 rounded-2xl border"
+          />
+
+
+
+          <textarea
+            placeholder="🏡 Farm Address"
+            value={farm.farm_address}
+            onChange={(e)=>updateField("farm_address",e.target.value)}
+            className="w-full p-4 rounded-2xl border"
           />
 
 
@@ -497,15 +331,45 @@ export default function AddFarm({
 
 
 
-        <div className="bg-green-50 rounded-2xl p-4 mb-5">
+        <div className="bg-green-50 rounded-2xl p-4 mt-5">
 
 
-          <label className="font-bold block mb-2">
+          <h3 className="font-bold">
 
-            📄 Upload 7/12 Documents
+            📍 GPS Location
 
-          </label>
+          </h3>
 
+
+          <p className="text-sm mt-2">
+
+            Latitude: {farm.latitude || "Detecting..."}
+
+          </p>
+
+
+          <p className="text-sm">
+
+            Longitude: {farm.longitude || "Detecting..."}
+
+          </p>
+
+
+        </div>
+
+
+
+
+
+
+        <div className="mt-5">
+
+
+          <h3 className="font-bold mb-2">
+
+            📄 Upload 7/12 Document
+
+          </h3>
 
 
           <input
@@ -523,39 +387,6 @@ export default function AddFarm({
           />
 
 
-
-          {
-            documents.length > 0 &&
-
-            <div className="mt-3">
-
-              <p className="font-semibold">
-
-                Selected Files:
-
-              </p>
-
-
-              {
-                documents.map((file,index)=>(
-
-                  <p key={index}>
-
-                    📎 {file.name}
-
-                  </p>
-
-                ))
-
-              }
-
-
-            </div>
-
-          }
-
-
-
         </div>
 
 
@@ -563,15 +394,14 @@ export default function AddFarm({
 
 
 
-
-        <div className="flex gap-3">
+        <div className="flex gap-3 mt-6">
 
 
           <button
 
             onClick={back}
 
-            className="flex-1 bg-gray-300 rounded-xl p-3 font-bold"
+            className="flex-1 bg-gray-200 p-4 rounded-2xl font-bold"
 
           >
 
@@ -589,7 +419,7 @@ export default function AddFarm({
 
             disabled={loading}
 
-            className="flex-1 bg-green-600 text-white rounded-xl p-3 font-bold"
+            className="flex-1 bg-green-600 text-white p-4 rounded-2xl font-bold"
 
           >
 
@@ -601,12 +431,11 @@ export default function AddFarm({
               "💾 Save Farm"
             }
 
-
           </button>
 
 
-        </div>
 
+        </div>
 
 
 
@@ -617,6 +446,5 @@ export default function AddFarm({
 
 
   );
-
 
 }
