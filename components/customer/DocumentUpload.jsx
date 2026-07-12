@@ -1,37 +1,30 @@
 import React, { useState } from "react";
 import { supabase } from "../../lib/supabase";
 
-export default function DocumentUpload({
-  onDone,
-}) {
+export default function DocumentUpload({ onDone }) {
 
-  const [aadhaarFront, setAadhaarFront] = useState(null);
-  const [aadhaarBack, setAadhaarBack] = useState(null);
-  const [satbara, setSatbara] = useState(null);
+  const [aadhaarFront,setAadhaarFront] = useState(null);
+  const [aadhaarBack,setAadhaarBack] = useState(null);
+  const [satbara,setSatbara] = useState(null);
 
-  const [loading, setLoading] = useState(false);
+  const [loading,setLoading] = useState(false);
 
 
+  async function uploadFile(file,userId,type){
 
-  async function uploadFile(file, userId, type) {
-
-    if (!file) return null;
-
+    if(!file) return null;
 
     const path =
       `${userId}/${Date.now()}-${type}-${file.name}`;
 
 
-    const {
-      error
-    } = await supabase.storage
+    const {error} =
+      await supabase.storage
       .from("khet-documents")
-      .upload(path, file);
+      .upload(path,file);
 
 
-    if(error){
-      throw error;
-    }
+    if(error) throw error;
 
 
     return path;
@@ -40,8 +33,7 @@ export default function DocumentUpload({
 
 
 
-
-  async function handleSubmit(e){
+  async function submitDocuments(e){
 
     e.preventDefault();
 
@@ -51,38 +43,18 @@ export default function DocumentUpload({
       setLoading(true);
 
 
-
       const {
-        data:{
-          user
-        }
-      } = await supabase.auth.getUser();
+        data:{user}
+      } =
+      await supabase.auth.getUser();
+
+
+      if(!user)
+        throw new Error("Login required");
 
 
 
-      if(!user){
-
-        throw new Error(
-          "Login required"
-        );
-
-      }
-
-
-
-
-      if(!aadhaarFront || !aadhaarBack || !satbara){
-
-        throw new Error(
-          "Please upload all documents"
-        );
-
-      }
-
-
-
-
-      const aadhaarFrontPath =
+      const front =
       await uploadFile(
         aadhaarFront,
         user.id,
@@ -90,8 +62,7 @@ export default function DocumentUpload({
       );
 
 
-
-      const aadhaarBackPath =
+      const back =
       await uploadFile(
         aadhaarBack,
         user.id,
@@ -99,8 +70,7 @@ export default function DocumentUpload({
       );
 
 
-
-      const satbaraPath =
+      const seven =
       await uploadFile(
         satbara,
         user.id,
@@ -109,29 +79,14 @@ export default function DocumentUpload({
 
 
 
-
-
-      const {
-        error
-      } =
       await supabase
       .from("profiles")
       .update({
 
-        aadhaar_front:
-        aadhaarFrontPath,
-
-
-        aadhaar_back:
-        aadhaarBackPath,
-
-
-        satbara_7_12:
-        satbaraPath,
-
-
-        document_status:
-        "pending"
+        aadhaar_front:front,
+        aadhaar_back:back,
+        satbara_7_12:seven,
+        document_status:"pending"
 
       })
       .eq(
@@ -141,33 +96,16 @@ export default function DocumentUpload({
 
 
 
+      alert("✅ Documents Submitted");
 
-      if(error)
-        throw error;
-
-
-
-
-      alert(
-        "✅ Documents uploaded successfully"
-      );
-
-
-
-      if(onDone){
-
+      if(onDone)
         onDone();
-
-      }
-
 
 
     }
     catch(err){
 
-      alert(
-        err.message
-      );
+      alert(err.message);
 
     }
     finally{
@@ -176,182 +114,262 @@ export default function DocumentUpload({
 
     }
 
-
   }
 
 
 
 
 
+return (
 
+<div style={page}>
 
-  return (
 
-    <div className="min-h-screen bg-green-50 p-5">
+<div style={card}>
 
 
-      <div className="max-w-xl mx-auto bg-white rounded-3xl shadow-xl p-6">
+<h1 style={title}>
+🌱 Farmer Verification
+</h1>
 
 
-        <div className="text-center">
+<p style={sub}>
+Upload Aadhaar & 7/12 documents
+</p>
 
-          <div className="text-5xl">
-            📄
-          </div>
 
 
-          <h2 className="text-2xl font-bold text-green-700 mt-3">
-            Farmer Documents
-          </h2>
 
+<UploadBox
+title="🪪 Aadhaar Front"
+file={aadhaarFront}
+setFile={setAadhaarFront}
+/>
 
-          <p className="text-gray-500 mt-2">
-            Upload Aadhaar & 7/12 documents
-          </p>
 
 
-        </div>
+<UploadBox
+title="🪪 Aadhaar Back"
+file={aadhaarBack}
+setFile={setAadhaarBack}
+/>
 
 
 
+<UploadBox
+title="📄 7/12 Satbara"
+file={satbara}
+setFile={setSatbara}
+/>
 
 
-        <div className="mt-6 space-y-5">
 
 
+<button
+onClick={submitDocuments}
+disabled={loading}
+style={button}
+>
 
-          <div className="bg-green-50 rounded-2xl p-4">
+{
+loading
+?
+"Uploading..."
+:
+"✅ Submit Documents"
+}
 
-            <h3 className="font-bold">
-              🪪 Aadhaar Front
-            </h3>
+</button>
 
 
-            <input
-              type="file"
-              accept="image/*,.pdf"
-              onChange={(e)=>
-                setAadhaarFront(
-                  e.target.files[0]
-                )
-              }
-              className="mt-3 w-full"
-            />
 
+</div>
 
-            {
-              aadhaarFront &&
-              <p className="text-green-600 text-sm mt-2">
-                ✅ {aadhaarFront.name}
-              </p>
-            }
+</div>
 
-
-          </div>
-
-
-
-
-
-          <div className="bg-green-50 rounded-2xl p-4">
-
-            <h3 className="font-bold">
-              🪪 Aadhaar Back
-            </h3>
-
-
-            <input
-              type="file"
-              accept="image/*,.pdf"
-              onChange={(e)=>
-                setAadhaarBack(
-                  e.target.files[0]
-                )
-              }
-              className="mt-3 w-full"
-            />
-
-
-            {
-              aadhaarBack &&
-              <p className="text-green-600 text-sm mt-2">
-                ✅ {aadhaarBack.name}
-              </p>
-            }
-
-
-          </div>
-
-
-
-
-
-
-          <div className="bg-green-50 rounded-2xl p-4">
-
-            <h3 className="font-bold">
-              📜 7/12 Satbara
-            </h3>
-
-
-            <input
-              type="file"
-              accept="image/*,.pdf"
-              onChange={(e)=>
-                setSatbara(
-                  e.target.files[0]
-                )
-              }
-              className="mt-3 w-full"
-            />
-
-
-            {
-              satbara &&
-              <p className="text-green-600 text-sm mt-2">
-                ✅ {satbara.name}
-              </p>
-            }
-
-
-          </div>
-
-
-
-        </div>
-
-
-
-
-
-        <button
-
-          onClick={handleSubmit}
-
-          disabled={loading}
-
-          className="w-full mt-7 bg-green-600 text-white p-4 rounded-2xl font-bold text-lg"
-
-        >
-
-          {
-            loading
-            ?
-            "Uploading..."
-            :
-            "✅ Submit Documents"
-          }
-
-
-        </button>
-
-
-
-      </div>
-
-
-    </div>
-
-  );
+);
 
 }
+
+
+
+
+
+function UploadBox({
+title,
+file,
+setFile
+}){
+
+return (
+
+<div style={box}>
+
+<h3>{title}</h3>
+
+
+<label style={upload}>
+
+📁 Choose File
+
+
+<input
+
+type="file"
+
+accept="image/*,.pdf"
+
+hidden
+
+onChange={(e)=>
+setFile(
+e.target.files[0]
+)
+}
+
+/>
+
+
+</label>
+
+
+
+{
+file &&
+
+<p style={fileText}>
+✅ {file.name}
+</p>
+
+}
+
+
+</div>
+
+);
+
+}
+
+
+
+
+
+const page={
+
+minHeight:"100vh",
+
+background:
+"linear-gradient(135deg,#dcfce7,#eff6ff)",
+
+padding:20
+
+};
+
+
+
+const card={
+
+maxWidth:420,
+
+margin:"auto",
+
+background:"#fff",
+
+padding:25,
+
+borderRadius:25,
+
+boxShadow:
+"0 10px 30px rgba(0,0,0,0.12)"
+
+};
+
+
+
+const title={
+
+color:"#15803d",
+
+textAlign:"center"
+
+};
+
+
+const sub={
+
+textAlign:"center",
+
+color:"#555",
+
+marginBottom:25
+
+};
+
+
+
+const box={
+
+background:"#f8fafc",
+
+borderRadius:18,
+
+padding:15,
+
+marginBottom:15,
+
+border:
+"1px solid #e2e8f0"
+
+};
+
+
+
+const upload={
+
+display:"block",
+
+background:"#16a34a",
+
+color:"#fff",
+
+padding:12,
+
+borderRadius:12,
+
+textAlign:"center",
+
+cursor:"pointer"
+
+};
+
+
+
+const fileText={
+
+fontSize:13,
+
+color:"#15803d"
+
+};
+
+
+
+const button={
+
+width:"100%",
+
+padding:15,
+
+background:"#2563eb",
+
+color:"#fff",
+
+border:"none",
+
+borderRadius:15,
+
+fontSize:16,
+
+fontWeight:"bold"
+
+};
