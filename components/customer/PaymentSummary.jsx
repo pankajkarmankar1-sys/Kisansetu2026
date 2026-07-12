@@ -34,38 +34,52 @@ export default function PaymentSummary({
   async function checkSubscription(){
 
 
-    if(!user?.id)
-      return;
+    try{
+
+
+      if(!user?.id)
+        return;
 
 
 
-    const {
-      data
-    } = await supabase
+      const {
+        data,
+        error
+      } = await supabase
 
-    .from("subscriptions")
+      .from("subscriptions")
 
-    .select("*")
+      .select("*")
 
-    .eq(
-      "user_id",
-      user.id
-    )
+      .eq(
+        "user_id",
+        user.id
+      )
 
-    .eq(
-      "status",
-      "active"
-    )
+      .eq(
+        "status",
+        "active"
+      )
 
-    .maybeSingle();
+      .maybeSingle();
 
 
 
-    setSubscription(data || null);
+      if(!error){
 
+        setSubscription(data);
+
+      }
+
+
+    }
+    catch(err){
+
+      console.log(err);
+
+    }
 
   }
-
 
 
 
@@ -76,15 +90,13 @@ export default function PaymentSummary({
 
 
 
-  const normalPrice =
-  Number(
+
+  const normalPrice = Number(
     selectedService?.price || 0
   );
 
 
-
-  const subscriberPrice =
-  Number(
+  const subscriberPrice = Number(
     selectedService?.price_subscriber || 0
   );
 
@@ -92,7 +104,7 @@ export default function PaymentSummary({
 
   const payRate =
 
-  isSubscriber
+  isSubscriber && subscriberPrice > 0
 
   ?
 
@@ -105,31 +117,23 @@ export default function PaymentSummary({
 
 
 
-
   const acresValue =
   Number(acres || 0);
 
 
 
-
   const normalAmount =
-  normalPrice *
-  acresValue;
-
+  normalPrice * acresValue;
 
 
 
   const finalAmount =
-  payRate *
-  acresValue;
-
+  payRate * acresValue;
 
 
 
   const discount =
-  normalAmount -
-  finalAmount;
-
+  normalAmount - finalAmount;
 
 
 
@@ -195,7 +199,6 @@ export default function PaymentSummary({
 
 
 
-
         <h1 className="text-2xl font-bold text-green-700 mt-5">
 
           💳 Payment Summary
@@ -206,41 +209,29 @@ export default function PaymentSummary({
 
 
 
-
-
         <div className="bg-green-100 rounded-2xl p-5 mt-5">
 
 
-          <p className="font-bold">
-
-            🚜 Service
-
+          <p>
+            🚜 Service:
           </p>
 
 
-          <h3>
+          <h3 className="font-bold">
 
-            {selectedService?.name_hi ||
-             selectedService?.name ||
-             "-"}
+            {
+            selectedService?.name_hi ||
+            selectedService?.name ||
+            "-"
+            }
 
           </h3>
 
 
 
-
-
-          <p className="mt-3">
-
-            🌾 Acres:
-
-            {" "}
-
-            {acresValue}
-
+          <p>
+            🌾 Acres: {acresValue}
           </p>
-
-
 
 
 
@@ -250,16 +241,12 @@ export default function PaymentSummary({
 
             {" "}
 
-            {isSubscriber
-
+            {
+            isSubscriber
             ?
-
             "Subscription Active"
-
             :
-
             "Normal Customer"
-
             }
 
           </p>
@@ -271,56 +258,35 @@ export default function PaymentSummary({
 
 
 
-
-
-        <div className="bg-white border rounded-2xl p-5 mt-5">
+        <div className="border rounded-2xl p-5 mt-5">
 
 
           <p>
-
             Normal Rate:
-
-            {" "}
-
             ₹{normalPrice}/Acre
-
           </p>
 
 
 
-
-
           {
-            isSubscriber &&
+          isSubscriber &&
 
-            <p className="text-green-600 font-bold">
+          <p className="text-green-600 font-bold">
 
-              🎉 50% Discount Applied
+            🎉 Discount Saved ₹{discount}
 
-              <br/>
-
-              Saved ₹{discount}
-
-            </p>
+          </p>
 
           }
-
-
-
 
 
 
           <p>
 
             Pay Rate:
-
-            {" "}
-
             ₹{payRate}/Acre
 
           </p>
-
-
 
 
 
@@ -331,46 +297,55 @@ export default function PaymentSummary({
           </h2>
 
 
-
         </div>
 
 
 
 
 
-
-
         {
-          !paymentDone
+        !paymentDone
 
-          ?
+        ?
 
-          <button
+        <button
 
-            onClick={()=>setShowPayment(true)}
+          onClick={()=>{
 
-            className="w-full bg-green-600 text-white p-4 rounded-2xl mt-5 font-bold"
+            if(finalAmount <= 0){
 
-          >
+              alert("Amount calculation error");
 
-            💳 Pay Now
+              return;
 
-          </button>
+            }
+
+            setShowPayment(true);
+
+          }}
+
+          className="w-full bg-green-600 text-white p-4 rounded-2xl mt-5 font-bold"
+
+        >
+
+          💳 Pay Now
+
+        </button>
 
 
-          :
+        :
 
-          <button
+        <button
 
-            onClick={next}
+          onClick={next}
 
-            className="w-full bg-green-600 text-white p-4 rounded-2xl mt-5 font-bold"
+          className="w-full bg-green-600 text-white p-4 rounded-2xl mt-5 font-bold"
 
-          >
+        >
 
-            Continue →
+          Continue →
 
-          </button>
+        </button>
 
         }
 
@@ -382,6 +357,5 @@ export default function PaymentSummary({
     </div>
 
   );
-
 
 }
