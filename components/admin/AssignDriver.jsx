@@ -156,28 +156,19 @@ export default function AssignDriver({ booking }) {
       .from("bookings")
 
       .update({
+.update({
 
-        driver_id:
-        driver.id,
+  driver_id: driver.id,
 
+  driver_name: driver.name,
 
-        driver_name:
-        driver.name,
+  driver_phone: driver.phone,
 
+  status: "Assigned",
 
-        driver_phone:
-        driver.phone,
+  assigned_at: new Date().toISOString()
 
-
-        status:
-        "Pending",
-
-
-        assigned_at:
-        new Date().toISOString()
-
-      })
-
+})
       .eq(
         "id",
         booking.id
