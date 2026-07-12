@@ -1,45 +1,80 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 
+
 export default function AssignDriver({ booking }) {
 
+
   const [drivers,setDrivers] = useState([]);
+
   const [selectedDriver,setSelectedDriver] = useState("");
+
   const [loading,setLoading] = useState(false);
 
 
+
+
   useEffect(()=>{
+
     loadDrivers();
+
   },[]);
+
+
 
 
 
   async function loadDrivers(){
 
-    const {
-      data,
-      error
-    } = await supabase
-    .from("drivers")
-    .select(`
-      id,
-      auth_user_id,
-      name,
-      phone
-    `)
-    .eq("approval_status","approved")
-    .order("name");
+
+    try{
 
 
-    if(error){
+      const {
+        data,
+        error
+      } = await supabase
 
-      console.log(error.message);
-      return;
+      .from("drivers")
+
+      .select(`
+        id,
+        auth_user_id,
+        name,
+        phone
+      `)
+
+      .eq(
+        "approval_status",
+        "approved"
+      )
+
+      .order(
+        "name"
+      );
+
+
+
+
+      if(error)
+        throw error;
+
+
+
+
+      setDrivers(
+        data || []
+      );
+
+
+
+    }
+    catch(err){
+
+      console.log(err.message);
 
     }
 
-
-    setDrivers(data || []);
 
   }
 
@@ -47,44 +82,70 @@ export default function AssignDriver({ booking }) {
 
 
 
+
   async function assignDriver(){
+
 
     try{
 
 
       if(!booking?.id){
 
-        alert("Booking not found");
+        alert(
+          "Booking not found"
+        );
+
         return;
 
       }
+
+
 
 
       if(!selectedDriver){
 
-        alert("Select Driver");
+        alert(
+          "Select Driver"
+        );
+
         return;
 
       }
 
 
+
+
       const driver =
+
       drivers.find(
-        d=>d.id === selectedDriver
+
+        d =>
+        d.id === selectedDriver
+
       );
+
+
 
 
 
       if(!driver){
 
-        alert("Driver not found");
+        alert(
+          "Driver not found"
+        );
+
         return;
 
       }
 
 
 
+
+
       setLoading(true);
+
+
+
 
 
 
@@ -96,13 +157,24 @@ export default function AssignDriver({ booking }) {
 
       .update({
 
-        driver_id:driver.id,
+        driver_id:
+        driver.id,
 
-        driver_name:driver.name,
 
-        driver_phone:driver.phone,
+        driver_name:
+        driver.name,
 
-        status:"Assigned"
+
+        driver_phone:
+        driver.phone,
+
+
+        status:
+        "Pending",
+
+
+        assigned_at:
+        new Date().toISOString()
 
       })
 
@@ -114,19 +186,32 @@ export default function AssignDriver({ booking }) {
 
 
 
+
       if(error)
         throw error;
 
 
 
-      alert("✅ Driver Assigned");
+
+
+
+      alert(
+        "✅ Driver Assigned Successfully"
+      );
+
+
+
+
+      window.location.reload();
 
 
 
     }
     catch(err){
 
-      alert(err.message);
+      alert(
+        err.message
+      );
 
     }
     finally{
@@ -135,7 +220,9 @@ export default function AssignDriver({ booking }) {
 
     }
 
+
   }
+
 
 
 
@@ -144,49 +231,76 @@ export default function AssignDriver({ booking }) {
   return (
 
     <div
+
       style={{
+
         display:"flex",
+
         gap:10
+
       }}
+
     >
+
+
 
       <select
 
         value={selectedDriver}
 
         onChange={(e)=>
-          setSelectedDriver(e.target.value)
+          setSelectedDriver(
+            e.target.value
+          )
         }
 
         style={{
+
           flex:1,
-          padding:10
+
+          padding:10,
+
+          borderRadius:8
+
         }}
 
       >
 
+
         <option value="">
+
           Select Driver
+
         </option>
 
 
+
         {
-          drivers.map(driver=>(
+          drivers.map((driver)=>(
+
 
             <option
+
               key={driver.id}
+
               value={driver.id}
+
             >
 
               {driver.name} - {driver.phone}
 
             </option>
 
+
           ))
+
         }
 
 
       </select>
+
+
+
 
 
 
@@ -197,11 +311,17 @@ export default function AssignDriver({ booking }) {
         disabled={loading}
 
         style={{
+
           padding:"10px 15px",
+
           background:"#16a34a",
+
           color:"#fff",
+
           border:"none",
+
           borderRadius:8
+
         }}
 
       >
@@ -214,11 +334,15 @@ export default function AssignDriver({ booking }) {
           "Assign"
         }
 
+
       </button>
+
+
 
 
     </div>
 
   );
+
 
 }
