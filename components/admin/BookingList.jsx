@@ -457,32 +457,45 @@ export default function BookingList(){
 
 
 
-            <p>
-              Date:
-              {" "}
-              {booking.booking_date ||
-              booking.date ||
-              "-"}
-            </p>
+            <h3 style={{color:"#16a34a"}}>
+  🚜 {booking.service_name || "-"}
+</h3>
 
+<p>👨‍🌾 <b>Customer:</b> {booking.customer_name || "-"}</p>
 
+<p>📞 <b>Mobile:</b> {booking.customer_phone || "-"}</p>
 
-            <p>
-              Status:
-              {" "}
-              {booking.status}
-            </p>
+<p>🌾 <b>Acres:</b> {booking.acres || 0}</p>
 
+<p>📍 <b>Village:</b> {booking.village || "-"}</p>
 
+<p>🏡 <b>Farm:</b> {booking.farm_name || "-"}</p>
 
-            <p>
-              Driver:
-              {" "}
-              {booking.driver_name ||
-              "Not Assigned"}
-            </p>
+<p>📌 <b>Farm Address:</b> {booking.farm_address || "-"}</p>
 
+<p>📅 <b>Booking Date:</b> {booking.booking_date || "-"}</p>
 
+<p>💰 <b>Amount:</b> ₹{booking.amount || 0}</p>
+
+<p>🚜 <b>Driver:</b> {booking.driver_name || "Not Assigned"}</p>
+
+<p>
+  📊 <b>Status:</b>
+  <span
+    style={{
+      color:
+        booking.status === "Completed"
+          ? "green"
+          : booking.status === "Cancelled"
+          ? "red"
+          : "#2563eb",
+      fontWeight: "bold",
+      marginLeft: 8
+    }}
+  >
+    {booking.status}
+  </span>
+</p>
 
 
 
