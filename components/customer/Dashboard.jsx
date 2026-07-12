@@ -1,311 +1,201 @@
 import React from "react";
 
+
 export default function Dashboard({
   user,
-  farms = [],
   onBook,
   onBookings,
   onProfile,
   onNotifications,
   onSubscription,
-  onAddFarm,
   onLogout,
 }) {
 
 
-  const documentsApproved =
-    user?.document_status === "approved";
+return (
 
+<div className="min-h-screen bg-green-50 p-4">
 
-  const subscriptionActive =
-    user?.subscription_status === "active";
 
+{/* Header */}
 
-  const totalAcres = farms.reduce(
-    (sum, farm) =>
-      sum + Number(farm.acres || 0),
-    0
-  );
+<div className="bg-gradient-to-r from-green-600 to-emerald-500 text-white rounded-3xl p-6 shadow">
 
+<h1 className="text-3xl font-bold">
+🚜 KisanSetu
+</h1>
 
+<p className="mt-2 text-lg">
+Namaste {user?.name || "Kisan"} 🌾
+</p>
 
-  return (
+</div>
 
-    <div className="min-h-screen bg-green-50 p-4">
 
 
-      {/* Header */}
 
-      <div className="bg-gradient-to-r from-green-600 to-emerald-500 text-white rounded-3xl p-6 shadow-xl">
 
-        <h1 className="text-3xl font-bold">
-          🚜 KisanSetu
-        </h1>
+{/* Subscription Banner */}
 
-        <p className="mt-2 text-lg">
-          Namaste {user?.name || "Kisan"} 🌾
-        </p>
+<div className="mt-5 bg-gradient-to-r from-orange-500 to-yellow-400 rounded-3xl p-6 text-white shadow">
 
-      </div>
 
+<h2 className="text-2xl font-bold">
+🔥 50% OFF Subscription
+</h2>
 
 
+<p className="mt-2 text-lg">
+₹550 / Acre / Yearly Plan
+</p>
 
 
-      {/* Farm Summary */}
+<p className="mt-2">
+Har service me special farmer discount
+</p>
 
-      <div className="grid grid-cols-2 gap-4 mt-5">
 
+<button
 
-        <div className="bg-white rounded-2xl p-5 shadow">
+onClick={onSubscription}
 
-          <p>
-            🌱 My Farms
-          </p>
+className="mt-4 bg-white text-orange-600 px-6 py-3 rounded-xl font-bold"
 
-          <h2 className="text-3xl font-bold text-green-700">
-            {farms.length}
-          </h2>
+>
 
-        </div>
+Buy Subscription
 
+</button>
 
 
+</div>
 
-        <div className="bg-white rounded-2xl p-5 shadow">
 
-          <p>
-            📏 Total Acre
-          </p>
 
-          <h2 className="text-3xl font-bold text-green-700">
-            {totalAcres}
-          </h2>
 
-        </div>
 
 
-      </div>
 
+<h2 className="text-2xl font-bold mt-6">
+🚜 Services
+</h2>
 
 
 
 
+<div className="grid gap-4 mt-4">
 
-      {/* Subscription */}
 
-      <div className="bg-white rounded-3xl p-5 mt-5 shadow-xl border">
 
+<button
 
-        <h2 className="text-2xl font-bold text-green-700">
-          👑 KisanSetu Subscription
-        </h2>
+onClick={onBook}
 
+className="bg-white rounded-3xl p-6 shadow text-left"
 
+>
 
-        {
-          subscriptionActive
+<h3 className="text-xl font-bold text-green-700">
+🌱 Tractor Service
+</h3>
 
-          ?
 
-          <div className="mt-4 bg-green-50 rounded-2xl p-4">
+<p>
+Book tractor, rotavator, cultivator services
+</p>
 
-            <h3 className="text-green-700 font-bold text-xl">
-              ✅ Active Subscription
-            </h3>
+</button>
 
-            <p className="mt-2">
-              🎉 50% OFF Applied
-            </p>
 
-            <p>
-              Valid Till: {user?.subscription_end || "-"}
-            </p>
 
-          </div>
 
 
-          :
 
+<button
 
-          <div className="mt-4 bg-orange-50 rounded-2xl p-4">
+onClick={onBookings}
 
-            <p className="text-xl font-bold">
-              🔥 50% OFF Offer
-            </p>
+className="bg-white rounded-3xl p-6 shadow text-left"
 
+>
 
-            <p className="text-2xl font-bold text-green-700 mt-2">
-              ₹550 / Acre / Year
-            </p>
+<h3 className="text-xl font-bold text-blue-700">
+📋 My Bookings
+</h3>
 
 
-            <p className="text-gray-600 mt-2">
-              Subscription lene ke baad har service par special rate milega.
-            </p>
+<p>
+Check your service history
+</p>
 
+</button>
 
 
-            <button
 
-              onClick={onSubscription}
+</div>
 
-              className="w-full mt-4 bg-orange-500 text-white p-4 rounded-2xl font-bold"
 
-            >
 
-              Buy Subscription
 
-            </button>
 
 
-          </div>
+<div className="space-y-3 mt-6">
 
-        }
 
 
-      </div>
+<button
 
+onClick={onProfile}
 
+className="w-full bg-white p-4 rounded-2xl shadow font-bold"
 
+>
 
+👤 Profile
 
+</button>
 
 
 
-      {/* Services */}
 
-      <div className="bg-white rounded-3xl p-5 mt-5 shadow-xl">
 
+<button
 
-        <h2 className="text-2xl font-bold text-green-700 mb-4">
-          🚜 Our Services
-        </h2>
+onClick={onNotifications}
 
+className="w-full bg-white p-4 rounded-2xl shadow font-bold"
 
+>
 
-        <div className="grid grid-cols-2 gap-4">
+🔔 Notifications
 
+</button>
 
-          <button
-            onClick={documentsApproved ? onBook : undefined}
-            className="bg-green-100 p-5 rounded-2xl font-bold"
-          >
-            🚜 Tractor
-          </button>
 
 
 
-          <button
-            onClick={documentsApproved ? onBook : undefined}
-            className="bg-blue-100 p-5 rounded-2xl font-bold"
-          >
-            🌱 Cultivator
-          </button>
 
 
+<button
 
-          <button
-            onClick={documentsApproved ? onBook : undefined}
-            className="bg-yellow-100 p-5 rounded-2xl font-bold"
-          >
-            ⚙️ Rotavator
-          </button>
+onClick={onLogout}
 
+className="w-full bg-red-600 text-white p-4 rounded-2xl font-bold"
 
+>
 
-          <button
-            onClick={documentsApproved ? onBook : undefined}
-            className="bg-purple-100 p-5 rounded-2xl font-bold"
-          >
-            🌾 Harvester
-          </button>
+Logout
 
+</button>
 
-        </div>
 
 
-      </div>
+</div>
 
 
 
+</div>
 
-
-
-      {
-        !documentsApproved && (
-
-          <div className="bg-yellow-100 rounded-2xl p-4 mt-5">
-
-            ⚠️ Documents approval pending.
-            <br/>
-            Approval ke baad booking open hogi.
-
-          </div>
-
-        )
-      }
-
-
-
-
-
-
-
-      {/* Buttons */}
-
-      <div className="space-y-3 mt-5">
-
-
-        <button
-          onClick={onAddFarm}
-          className="w-full bg-green-600 text-white p-4 rounded-2xl font-bold"
-        >
-          ➕ Add Farm / 7-12
-        </button>
-
-
-
-        <button
-          onClick={onBookings}
-          className="w-full bg-white p-4 rounded-2xl shadow font-bold"
-        >
-          📋 My Bookings
-        </button>
-
-
-
-        <button
-          onClick={onProfile}
-          className="w-full bg-white p-4 rounded-2xl shadow font-bold"
-        >
-          👤 Profile
-        </button>
-
-
-
-        <button
-          onClick={onNotifications}
-          className="w-full bg-white p-4 rounded-2xl shadow font-bold"
-        >
-          🔔 Notifications
-        </button>
-
-
-
-        <button
-          onClick={onLogout}
-          className="w-full bg-red-600 text-white p-4 rounded-2xl font-bold"
-        >
-          Logout
-        </button>
-
-
-      </div>
-
-
-    </div>
-
-  );
+);
 
 }
