@@ -1,350 +1,216 @@
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-
-import PhonePePayment from "../components/payment/PhonePePayment";
+import React, { useState } from "react";
 import { supabase } from "../lib/supabase";
+import { useRouter } from "next/router";
 
 
 export default function SubscriptionPage(){
 
+const router = useRouter();
 
-  const router = useRouter();
+const [acres,setAcres] = useState("");
+const [loading,setLoading] = useState(false);
 
 
-  const [farms,setFarms] = useState([]);
 
-  const [amount,setAmount] = useState(0);
+async function buySubscription(){
 
-  const [totalAcres,setTotalAcres] = useState(0);
+try{
 
-  const [payment,setPayment] = useState(false);
+setLoading(true);
 
 
+const {
+ data:{
+  user
+ }
+}= await supabase.auth.getUser();
 
-  const pricePerAcre = 550;
 
 
+if(!user){
 
-  useEffect(()=>{
+alert("Login required");
+return;
 
-    loadFarms();
+}
 
-  },[]);
 
 
+if(!acres || Number(acres)<=0){
 
+alert("Enter acres");
+return;
 
+}
 
-  async function loadFarms(){
 
 
-    const {
-      data:{
-        user
-      }
-    } =
-    await supabase.auth.getUser();
+const amount =
+Number(acres) * 550;
 
 
 
-    if(!user){
+const {
+error
+}= await supabase
+.from("subscriptions")
+.insert({
 
-      router.replace("/login");
+user_id:user.id,
 
-      return;
+acres:Number(acres),
 
-    }
+amount,
 
+status:"active",
 
+start_date:new Date()
 
+});
 
-    const {
-      data
-    } =
-    await supabase
 
-    .from("khets")
 
-    .select("acres")
+if(error)
+throw error;
 
-    .eq(
-      "user_id",
-      user.id
-    );
 
 
+alert(
+"✅ Subscription Activated"
+);
 
-    const acres =
-    (data || []).reduce(
 
-      (sum,item)=>
-      sum + Number(item.acres || 0),
 
-      0
+router.replace("/dashboard");
 
-    );
 
 
+}
+catch(err){
 
-    setFarms(data || []);
+alert(err.message);
 
-    setTotalAcres(acres);
+}
+finally{
 
-    setAmount(
-      acres * pricePerAcre
-    );
+setLoading(false);
 
+}
 
-  }
 
+}
 
 
 
 
+return(
 
-  async function paymentSuccess(){
+<div className="min-h-screen bg-green-50 p-5">
 
 
-    try{
+<div className="max-w-xl mx-auto bg-white rounded-3xl shadow p-6">
 
 
-      const {
-        data:{
-          user
-        }
-      } =
-      await supabase.auth.getUser();
+<div className="text-center">
 
 
+<div className="text-5xl">
+👑
+</div>
 
 
-      const startDate =
-      new Date();
+<h1 className="text-3xl font-bold text-green-700 mt-3">
+KisanSetu Subscription
+</h1>
 
 
+<p className="mt-2 text-gray-600">
+Special Farmer Discount Plan
+</p>
 
-      const endDate =
-      new Date();
 
+</div>
 
-      endDate.setFullYear(
-        endDate.getFullYear()+1
-      );
 
 
 
 
+<div className="mt-6 bg-orange-500 text-white rounded-3xl p-6">
 
-      const {
-        error
-      } =
-      await supabase
 
-      .from("subscriptions")
+<h2 className="text-3xl font-bold">
+🔥 50% OFF
+</h2>
 
-      .insert({
 
-        user_id:user.id,
+<p className="text-xl mt-2">
+₹550 / Acre / Year
+</p>
 
-        acres:totalAcres,
 
-        amount:amount,
+<p className="mt-2">
+Subscription active hone ke baad ye discount expiry tak milega.
+</p>
 
-        status:"active",
 
-        start_date:startDate,
+</div>
 
-        end_date:endDate
 
-      });
 
 
 
 
-      if(error)
-        throw error;
+<label className="block mt-6 font-bold">
+Your Farm Acre
+</label>
 
 
+<input
 
+type="number"
 
-      alert(
-        "✅ Subscription Activated"
-      );
+value={acres}
 
+onChange={(e)=>setAcres(e.target.value)}
 
+placeholder="Enter acres"
 
-      router.replace("/dashboard");
+className="w-full border p-4 rounded-xl mt-2"
 
+/>
 
 
-    }
-    catch(err){
 
-      alert(
-        err.message
-      );
 
-    }
 
+<button
 
-  }
+onClick={buySubscription}
 
+disabled={loading}
 
+className="w-full mt-6 bg-green-600 text-white p-4 rounded-2xl font-bold text-lg"
 
+>
 
+{
+loading
+?
+"Processing..."
+:
+"Activate Subscription"
+}
 
+</button>
 
 
-  if(payment){
 
-    return (
+</div>
 
-      <PhonePePayment
 
-        amount={amount}
+</div>
 
-        onSuccess={paymentSuccess}
-
-        onBack={()=>setPayment(false)}
-
-      />
-
-    );
-
-  }
-
-
-
-
-
-
-  return (
-
-    <div className="min-h-screen bg-green-50 p-5">
-
-
-      <div className="bg-white rounded-3xl shadow p-6">
-
-
-        <button
-          onClick={()=>router.back()}
-          className="mb-4"
-        >
-
-          ← Back
-
-        </button>
-
-
-
-
-        <h1 className="text-3xl font-bold text-green-700">
-
-          👑 KisanSetu Subscription
-
-        </h1>
-
-
-
-
-        <div className="bg-green-100 rounded-2xl p-5 mt-5">
-
-
-          🌾 Total Farm Area
-
-          <h2 className="text-3xl font-bold">
-
-            {totalAcres} Acre
-
-          </h2>
-
-
-        </div>
-
-
-
-
-
-        <div className="bg-yellow-100 rounded-2xl p-5 mt-4">
-
-
-          💰 Rate
-
-          <h3>
-
-            ₹550 / Acre / Year
-
-          </h3>
-
-
-
-          <h2 className="text-2xl font-bold">
-
-            Pay ₹{amount}
-
-          </h2>
-
-
-        </div>
-
-
-
-
-
-
-        <div className="bg-orange-100 p-4 rounded-xl mt-4">
-
-          🔥 Subscription ke baad
-
-          <br/>
-
-          🚜 Service booking par 50% OFF milega
-
-        </div>
-
-
-
-
-
-
-
-        <button
-
-          onClick={()=>{
-
-
-            if(totalAcres<=0){
-
-              alert(
-                "Pehle farm add kare"
-              );
-
-              return;
-
-            }
-
-
-            setPayment(true);
-
-
-          }}
-
-
-          className="w-full bg-green-600 text-white p-4 rounded-2xl mt-5 font-bold"
-
-        >
-
-          👑 Buy Subscription
-
-        </button>
-
-
-      </div>
-
-
-    </div>
-
-  );
+);
 
 
 }
