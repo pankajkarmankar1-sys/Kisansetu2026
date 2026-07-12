@@ -60,11 +60,6 @@ Role: {user?.role || "farmer"}
 </p>
 
 
-<p className="mt-2">
-Har service me special farmer discount
-</p>
-
-
 <button
 
 onClick={onSubscription}
@@ -85,17 +80,13 @@ Buy Subscription
 
 
 
-
-
 <h2 className="text-2xl font-bold mt-6">
 🚜 Services
 </h2>
 
 
 
-
 <div className="grid gap-4 mt-4">
-
 
 
 <button
@@ -110,16 +101,11 @@ className="bg-white rounded-3xl p-6 shadow text-left"
 🌱 Tractor Service
 </h3>
 
-
 <p>
 Book tractor, rotavator, cultivator services
 </p>
 
 </button>
-
-
-
-
 
 
 
@@ -135,7 +121,6 @@ className="bg-white rounded-3xl p-6 shadow text-left"
 📋 My Bookings
 </h3>
 
-
 <p>
 Check your service history
 </p>
@@ -143,7 +128,6 @@ Check your service history
 </button>
 
 
-
 </div>
 
 
@@ -151,30 +135,22 @@ Check your service history
 
 
 
-
-{/* ADMIN CONTROL */}
+{/* ADMIN */}
 
 {
-
 user?.role === "admin" && (
 
-<div className="mt-6 bg-purple-100 rounded-3xl p-6 shadow">
+<div className="mt-6 bg-purple-100 rounded-3xl p-5 shadow">
 
-<h2 className="text-2xl font-bold text-purple-700">
+<h2 className="text-xl font-bold text-purple-700">
 👑 Admin Control
 </h2>
-
-
-<p className="mt-2">
-Manage users, drivers, bookings and reports
-</p>
-
 
 <button
 
 onClick={onAdmin}
 
-className="mt-4 w-full bg-purple-600 text-white p-4 rounded-xl font-bold"
+className="mt-3 w-full bg-purple-600 text-white p-4 rounded-xl font-bold"
 
 >
 
@@ -182,7 +158,6 @@ Open Admin Dashboard
 
 </button>
 
-
 </div>
 
 )
@@ -195,30 +170,22 @@ Open Admin Dashboard
 
 
 
-
-{/* DRIVER CONTROL */}
+{/* DRIVER */}
 
 {
-
 user?.role === "driver" && (
 
-<div className="mt-6 bg-blue-100 rounded-3xl p-6 shadow">
+<div className="mt-6 bg-blue-100 rounded-3xl p-5 shadow">
 
-<h2 className="text-2xl font-bold text-blue-700">
+<h2 className="text-xl font-bold text-blue-700">
 🚜 Driver Panel
 </h2>
-
-
-<p className="mt-2">
-Manage tractor services and bookings
-</p>
-
 
 <button
 
 onClick={onDriver}
 
-className="mt-4 w-full bg-blue-600 text-white p-4 rounded-xl font-bold"
+className="mt-3 w-full bg-blue-600 text-white p-4 rounded-xl font-bold"
 
 >
 
@@ -226,14 +193,11 @@ Open Driver Dashboard
 
 </button>
 
-
 </div>
 
 )
 
 }
-
-
 
 
 
@@ -272,7 +236,6 @@ className="w-full bg-white p-4 rounded-2xl shadow font-bold"
 🔔 Notifications
 
 </button>
-
 
 
 
