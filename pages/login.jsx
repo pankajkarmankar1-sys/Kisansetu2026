@@ -6,83 +6,73 @@ export default function LoginPage() {
 
   const router = useRouter();
 
-
   async function handleSuccess() {
 
     try {
 
       const {
-        data:{ user }
+        data: { user }
       } = await supabase.auth.getUser();
 
-
-      if(!user){
+      if (!user) {
         router.replace("/login");
         return;
       }
-
 
       const {
         data: profile,
         error
       } = await supabase
         .from("profiles")
-        .select("role, full_name")
+        .select("*")
         .eq("auth_user_id", user.id)
         .maybeSingle();
 
-
-
-      if(error){
+      if (error) {
         console.log(error);
+        return;
       }
 
+      if (!profile) {
+        router.replace(`/registration?phone=${user.phone || ""}`);
+        return;
+      }
 
+      const selectedRole = localStorage.getItem("role");
 
-      if(!profile){
+      if (
+        selectedRole &&
+        profile.role !== selectedRole
+      ) {
 
-        router.replace(
-          `/registration?phone=${user.phone || ""}`
+        alert(
+          `This account is registered as ${profile.role}. Please use ${profile.role} Login.`
         );
 
+        await supabase.auth.signOut();
+        router.replace("/");
         return;
-
       }
 
+      switch (profile.role) {
 
+        case "admin":
+          router.replace("/admin");
+          break;
 
-      if(profile.role === "admin"){
+        case "driver":
+          router.replace("/driver");
+          break;
 
-        router.replace("/admin");
-        return;
+        case "farmer":
+          router.replace("/dashboard");
+          break;
 
+        default:
+          router.replace("/");
       }
 
-
-
-      if(profile.role === "driver"){
-
-        router.replace("/driver");
-        return;
-
-      }
-
-
-
-      if(profile.role === "farmer"){
-
-        router.replace("/dashboard");
-        return;
-
-      }
-
-
-
-      router.replace("/dashboard");
-
-
-    }
-    catch(err){
+    } catch (err) {
 
       console.log(err);
 
@@ -90,14 +80,10 @@ export default function LoginPage() {
 
   }
 
-
-
   return (
-
     <OTPLogin
       onSuccess={handleSuccess}
     />
-
   );
 
 }
