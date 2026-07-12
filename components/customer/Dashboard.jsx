@@ -31,17 +31,16 @@ return (
 🚜 KisanSetu
 </h1>
 
+
 <p className="mt-2 text-lg">
 Namaste {user?.name || "Kisan"} 🌾
 </p>
 
-<p>
-ROLE TEST: {user?.role}
-</p> 
-  
+
 <p className="mt-1">
 Role: {user?.role || "farmer"}
 </p>
+
 
 </div>
 
@@ -84,6 +83,7 @@ Buy Subscription
 
 
 
+
 <h2 className="text-2xl font-bold mt-6">
 🚜 Services
 </h2>
@@ -113,6 +113,8 @@ Book tractor, rotavator, cultivator services
 
 
 
+
+
 <button
 
 onClick={onBookings}
@@ -139,7 +141,6 @@ Check your service history
 
 
 
-{/* ADMIN */}
 
 {
 user?.role === "admin" && (
@@ -149,6 +150,7 @@ user?.role === "admin" && (
 <h2 className="text-xl font-bold text-purple-700">
 👑 Admin Control
 </h2>
+
 
 <button
 
@@ -162,10 +164,10 @@ Open Admin Dashboard
 
 </button>
 
+
 </div>
 
 )
-
 }
 
 
@@ -174,16 +176,17 @@ Open Admin Dashboard
 
 
 
-{/* DRIVER */}
 
 {
 user?.role === "driver" && (
 
 <div className="mt-6 bg-blue-100 rounded-3xl p-5 shadow">
 
+
 <h2 className="text-xl font-bold text-blue-700">
 🚜 Driver Panel
 </h2>
+
 
 <button
 
@@ -197,11 +200,12 @@ Open Driver Dashboard
 
 </button>
 
+
 </div>
 
 )
-
 }
+
 
 
 
