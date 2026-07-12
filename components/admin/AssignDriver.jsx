@@ -26,33 +26,26 @@ export default function AssignDriver({ booking }) {
 
   async function loadDrivers(){
 
-
     try{
-
 
       const {
         data,
         error
       } = await supabase
-
       .from("drivers")
-
       .select(`
         id,
         auth_user_id,
         name,
         phone
       `)
-
       .eq(
         "approval_status",
         "approved"
       )
-
       .order(
         "name"
       );
-
 
 
 
@@ -61,11 +54,9 @@ export default function AssignDriver({ booking }) {
 
 
 
-
       setDrivers(
         data || []
       );
-
 
 
     }
@@ -75,9 +66,7 @@ export default function AssignDriver({ booking }) {
 
     }
 
-
   }
-
 
 
 
@@ -85,16 +74,12 @@ export default function AssignDriver({ booking }) {
 
   async function assignDriver(){
 
-
     try{
 
 
       if(!booking?.id){
 
-        alert(
-          "Booking not found"
-        );
-
+        alert("Booking not found");
         return;
 
       }
@@ -104,10 +89,7 @@ export default function AssignDriver({ booking }) {
 
       if(!selectedDriver){
 
-        alert(
-          "Select Driver"
-        );
-
+        alert("Select Driver");
         return;
 
       }
@@ -115,9 +97,7 @@ export default function AssignDriver({ booking }) {
 
 
 
-      const driver =
-
-      drivers.find(
+      const driver = drivers.find(
 
         d =>
         d.id === selectedDriver
@@ -130,10 +110,7 @@ export default function AssignDriver({ booking }) {
 
       if(!driver){
 
-        alert(
-          "Driver not found"
-        );
-
+        alert("Driver not found");
         return;
 
       }
@@ -141,9 +118,7 @@ export default function AssignDriver({ booking }) {
 
 
 
-
       setLoading(true);
-
 
 
 
@@ -156,22 +131,25 @@ export default function AssignDriver({ booking }) {
       .from("bookings")
 
       .update({
-.update({
 
-  driver_id: driver.id,
+        driver_id: driver.id,
 
-  driver_name: driver.name,
+        driver_name: driver.name,
 
-  driver_phone: driver.phone,
+        driver_phone: driver.phone,
 
-  status: "Assigned",
+        status: "Assigned",
 
-  assigned_at: new Date().toISOString()
+        assigned_at: new Date().toISOString()
 
-})
+      })
+
       .eq(
+
         "id",
+
         booking.id
+
       );
 
 
@@ -185,11 +163,9 @@ export default function AssignDriver({ booking }) {
 
 
 
-
       alert(
         "✅ Driver Assigned Successfully"
       );
-
 
 
 
@@ -218,7 +194,6 @@ export default function AssignDriver({ booking }) {
 
 
 
-
   return (
 
     <div
@@ -232,7 +207,6 @@ export default function AssignDriver({ booking }) {
       }}
 
     >
-
 
 
       <select
@@ -269,7 +243,6 @@ export default function AssignDriver({ booking }) {
         {
           drivers.map((driver)=>(
 
-
             <option
 
               key={driver.id}
@@ -282,14 +255,11 @@ export default function AssignDriver({ booking }) {
 
             </option>
 
-
           ))
-
         }
 
 
       </select>
-
 
 
 
@@ -325,9 +295,7 @@ export default function AssignDriver({ booking }) {
           "Assign"
         }
 
-
       </button>
-
 
 
 
