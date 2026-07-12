@@ -4,15 +4,17 @@ import { supabase } from "../../lib/supabase";
 export default function StatsCard() {
 
   const [stats, setStats] = useState({
-    total: 0,
-    today: 0,
-    pending: 0,
-    completed: 0,
-    cancelled: 0,
-    drivers: 0,
-    customers: 0,
-    revenue: 0,
-  });
+  total: 0,
+  today: 0,
+  pending: 0,
+  assigned: 0,
+  accepted: 0,
+  completed: 0,
+  cancelled: 0,
+  drivers: 0,
+  customers: 0,
+  revenue: 0,
+});
 
   useEffect(() => {
 
@@ -63,14 +65,14 @@ export default function StatsCard() {
         .eq("role", "driver");
 
       const {
-        count: customers,
+        count: farmer,
       } = await supabase
         .from("profiles")
         .select("*", {
           count: "exact",
           head: true,
         })
-        .eq("role", "customer");
+        .eq("role", "farmer");
 
       const today =
         new Date()
