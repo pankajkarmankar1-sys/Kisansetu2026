@@ -15,6 +15,9 @@ export default function Dashboard({
   onAdmin,
   onDriver,
 
+  <p>
+ROLE TEST: {user?.role}
+</p>
 }) {
 
 
