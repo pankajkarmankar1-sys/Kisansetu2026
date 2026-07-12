@@ -2,15 +2,15 @@ import React, { useState } from "react";
 
 
 export default function PhonePePayment({
+
   amount,
   onSuccess,
   onBack,
+
 }) {
 
 
   const [loading,setLoading] = useState(false);
-
-
 
 
 
@@ -24,8 +24,8 @@ export default function PhonePePayment({
 
 
 
-      // Temporary testing payment flow
-      // Real PhonePe API integration baad me connect karenge
+      // Demo payment
+      // Real PhonePe API integration later
 
 
 
@@ -73,98 +73,120 @@ export default function PhonePePayment({
 
 
 
-
   return (
 
-    <div
-
-      style={{
-
-        padding:20,
-
-        background:"#fff",
-
-        borderRadius:12
-
-      }}
-
-    >
+    <div className="min-h-screen bg-green-50 p-5">
 
 
-      <h2>
-        💳 PhonePe Payment
-      </h2>
+      <div className="bg-white rounded-3xl shadow p-6">
+
+
+        <h1 className="text-2xl font-bold text-green-700">
+
+          💳 Secure Payment
+
+        </h1>
 
 
 
-      <h3>
-        Amount: ₹{amount}
-      </h3>
+        <div className="bg-green-100 rounded-2xl p-5 mt-5">
+
+
+          <p>
+
+            Payment Amount
+
+          </p>
 
 
 
+          <h2 className="text-3xl font-bold">
 
-      <button
+            ₹{amount}
 
-        onClick={startPayment}
-
-        disabled={loading}
-
-        style={{
-
-          width:"100%",
-
-          padding:14,
-
-          background:"#16a34a",
-
-          color:"#fff",
-
-          border:"none",
-
-          borderRadius:10,
-
-          fontSize:18
-
-        }}
-
-      >
-
-        {
-          loading
-          ?
-          "Processing..."
-          :
-          "Pay Now"
-        }
+          </h2>
 
 
-      </button>
+        </div>
 
 
 
 
 
-      <button
+        <div className="mt-5 bg-gray-100 rounded-xl p-4">
 
-        onClick={onBack}
 
-        style={{
+          <p>
 
-          width:"100%",
+            🟣 PhonePe
 
-          padding:12,
+          </p>
 
-          marginTop:10
 
-        }}
+          <p>
 
-      >
+            🔒 Secure Payment
 
-        ← Back
+          </p>
 
-      </button>
 
+        </div>
+
+
+
+
+
+
+
+        <button
+
+          onClick={startPayment}
+
+          disabled={loading}
+
+          className="w-full bg-green-600 text-white p-4 rounded-2xl mt-6 font-bold"
+
+
+        >
+
+          {
+
+            loading
+
+            ?
+
+            "Processing..."
+
+            :
+
+            "Pay Now"
+
+          }
+
+
+        </button>
+
+
+
+
+
+
+        <button
+
+          onClick={onBack}
+
+          className="w-full bg-gray-200 p-3 rounded-xl mt-3"
+
+        >
+
+          ← Back
+
+        </button>
+
+
+
+
+      </div>
 
 
     </div>
