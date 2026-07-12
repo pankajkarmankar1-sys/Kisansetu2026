@@ -3,142 +3,173 @@ import { supabase } from "../../lib/supabase";
 
 export default function LocationSelector({ onSelect }) {
 
+  const [states, setStates] = useState([]);
+  const [districts, setDistricts] = useState([]);
   const [talukas, setTalukas] = useState([]);
   const [villages, setVillages] = useState([]);
 
+  const [state, setState] = useState("");
+  const [district, setDistrict] = useState("");
   const [taluka, setTaluka] = useState("");
   const [village, setVillage] = useState("");
-  const [searchVillage, setSearchVillage] = useState("");
 
+  const [searchVillage, setSearchVillage] = useState("");
   const [loading, setLoading] = useState(false);
 
-
-
   useEffect(() => {
-    loadTalukas();
+    loadStates();
   }, []);
 
+  async function loadStates() {
 
-
-  async function loadTalukas(){
-
-    const {data,error}=await supabase
+    const { data, error } = await supabase
       .from("villages")
-      .select("taluka");
+      .select("state");
 
-
-    if(error){
+    if (error) {
       console.log(error);
       return;
     }
 
+    const uniqueStates = [
+      ...new Set(data.map(x => x.state))
+    ].sort();
 
-    setTalukas(
-      [...new Set(
-        data.map(x=>x.taluka)
-      )].sort()
-    );
-
+    setStates(uniqueStates);
   }
 
+  async function loadDistricts(selectedState) {
 
+    const { data, error } = await supabase
+      .from("villages")
+      .select("district")
+      .eq("state", selectedState);
 
+    if (error) {
+      console.log(error);
+      return;
+    }
 
-  async function loadVillages(t){
+    const uniqueDistricts = [
+      ...new Set(data.map(x => x.district))
+    ].sort();
 
-    const {data,error}=await supabase
+    setDistricts(uniqueDistricts);
+  }
+
+  async function loadTalukas(selectedDistrict) {
+
+    const { data, error } = await supabase
+      .from("villages")
+      .select("taluka")
+      .eq("district", selectedDistrict);
+
+    if (error) {
+      console.log(error);
+      return;
+    }
+
+    const uniqueTalukas = [
+      ...new Set(data.map(x => x.taluka))
+    ].sort();
+
+    setTalukas(uniqueTalukas);
+  }
+  async function loadVillages(selectedState, selectedDistrict, selectedTaluka) {
+
+    const { data, error } = await supabase
       .from("villages")
       .select("village")
-      .eq("taluka",t)
+      .eq("state", selectedState)
+      .eq("district", selectedDistrict)
+      .eq("taluka", selectedTaluka)
       .order("village");
 
-
-    if(error){
+    if (error) {
       console.log(error);
       return;
     }
 
-
     setVillages(data || []);
-
   }
 
+  useEffect(() => {
+    if (state) {
+      loadDistricts(state);
+      setDistrict("");
+      setTaluka("");
+      setVillage("");
+      setVillages([]);
+    }
+  }, [state]);
 
+  useEffect(() => {
+    if (district) {
+      loadTalukas(district);
+      setTaluka("");
+      setVillage("");
+      setVillages([]);
+    }
+  }, [district]);
 
+  useEffect(() => {
+    if (taluka) {
+      loadVillages(state, district, taluka);
+      setVillage("");
+      setSearchVillage("");
+    }
+  }, [taluka]);
 
-  function saveLocation(){
+  function saveLocation() {
 
-    if(!taluka || !village){
-
-      alert("Please select Taluka and Village");
-
+    if (!state || !district || !taluka || !village) {
+      alert("Please select State, District, Taluka and Village");
       return;
-
     }
 
-
-    const data={
-
-      state:"Maharashtra",
-
-      district:"Chandrapur",
-
+    const data = {
+      state,
+      district,
       taluka,
-
       village
-
     };
-
 
     localStorage.setItem(
       "location",
       JSON.stringify(data)
     );
 
-
-    if(onSelect){
+    if (onSelect) {
       onSelect(data);
     }
-
   }
 
-
-
-
-
-  function useCurrentLocation(){
+  function useCurrentLocation() {
 
     setLoading(true);
 
-
     navigator.geolocation.getCurrentPosition(
 
-      (p)=>{
+      (p) => {
 
-        const data={
-
-          state:"Maharashtra",
-
-          district:"Chandrapur",
-
-          latitude:p.coords.latitude,
-
-          longitude:p.coords.longitude
-
+        const data = {
+          state,
+          district,
+          taluka,
+          village,
+          latitude: p.coords.latitude,
+          longitude: p.coords.longitude
         };
 
-
-        if(onSelect){
+        if (onSelect) {
           onSelect(data);
         }
-
 
         setLoading(false);
 
       },
 
-
-      ()=>{
+      () => {
 
         alert("Location permission denied");
 
@@ -149,267 +180,146 @@ export default function LocationSelector({ onSelect }) {
     );
 
   }
-
-
-
-
-  useEffect(()=>{
-
-    if(taluka){
-
-      loadVillages(taluka);
-
-      setVillage("");
-
-      setSearchVillage("");
-
-    }
-
-  },[taluka]);
-
-
-
-
-
   return (
 
     <div
-
       style={{
-
-        maxWidth:400,
-
-        margin:"20px auto",
-
-        padding:20,
-
-        background:"#fff",
-
-        borderRadius:10
-
+        maxWidth: 420,
+        margin: "20px auto",
+        padding: 20,
+        background: "#fff",
+        borderRadius: 12
       }}
-
     >
 
-
-      <h2>
-        📍 Select Farm Location
-      </h2>
-
-
-      <p>
-        <b>State:</b> Maharashtra
-      </p>
-
-
-      <p>
-        <b>District:</b> Chandrapur
-      </p>
-
-
-
+      <h2>📍 Select Farm Location</h2>
 
       <select
-
-        value={taluka}
-
-        onChange={(e)=>setTaluka(e.target.value)}
-
-        style={{
-
-          width:"100%",
-
-          padding:10,
-
-          marginBottom:10
-
-        }}
-
+        value={state}
+        onChange={(e) => setState(e.target.value)}
+        style={{ width: "100%", padding: 10, marginBottom: 10 }}
       >
+        <option value="">Select State</option>
 
-        <option value="">
-          Select Taluka
-        </option>
-
-
-        {
-          talukas.map(t=>(
-
-            <option key={t} value={t}>
-
-              {t}
-
-            </option>
-
-          ))
-        }
-
+        {states.map((s) => (
+          <option key={s} value={s}>
+            {s}
+          </option>
+        ))}
 
       </select>
 
+      <select
+        value={district}
+        disabled={!state}
+        onChange={(e) => setDistrict(e.target.value)}
+        style={{ width: "100%", padding: 10, marginBottom: 10 }}
+      >
+        <option value="">Select District</option>
 
+        {districts.map((d) => (
+          <option key={d} value={d}>
+            {d}
+          </option>
+        ))}
 
+      </select>
 
+      <select
+        value={taluka}
+        disabled={!district}
+        onChange={(e) => setTaluka(e.target.value)}
+        style={{ width: "100%", padding: 10, marginBottom: 10 }}
+      >
+        <option value="">Select Taluka</option>
+
+        {talukas.map((t) => (
+          <option key={t} value={t}>
+            {t}
+          </option>
+        ))}
+
+      </select>
 
       <input
-
         value={searchVillage}
-
         disabled={!taluka}
-
-        placeholder="Type Village Name"
-
-        onChange={(e)=>{
-
+        placeholder="Search Village"
+        onChange={(e) => {
           setSearchVillage(e.target.value);
-
           setVillage(e.target.value);
-
         }}
-
         style={{
-
-          width:"100%",
-
-          padding:10
-
+          width: "100%",
+          padding: 10,
+          marginBottom: 5
         }}
-
       />
 
-
-
-
-
-      {
-
-        searchVillage &&
-
+      {searchVillage && (
         <div
-
           style={{
-
-            border:"1px solid #ccc",
-
-            maxHeight:150,
-
-            overflow:"auto"
-
+            border: "1px solid #ccc",
+            maxHeight: 160,
+            overflow: "auto",
+            marginBottom: 10
           }}
-
         >
-
-        {
-
-          villages
-
-          .filter(v=>
-
-            v.village
-
-            .toLowerCase()
-
-            .includes(
-
-              searchVillage.toLowerCase()
-
+          {villages
+            .filter((v) =>
+              v.village
+                .toLowerCase()
+                .includes(searchVillage.toLowerCase())
             )
-
-          )
-
-          .map(v=>(
-
-            <div
-
-              key={v.village}
-
-              onClick={()=>{
-
-                setVillage(v.village);
-
-                setSearchVillage(v.village);
-
-              }}
-
-              style={{
-
-                padding:10
-
-              }}
-
-            >
-
-              {v.village}
-
-            </div>
-
-          ))
-
-        }
-
+            .map((v) => (
+              <div
+                key={v.village}
+                onClick={() => {
+                  setVillage(v.village);
+                  setSearchVillage(v.village);
+                }}
+                style={{
+                  padding: 10,
+                  cursor: "pointer",
+                  borderBottom: "1px solid #eee"
+                }}
+              >
+                {v.village}
+              </div>
+            ))}
         </div>
-
-      }
-
-
-
-
+      )}
 
       <button
-
         onClick={saveLocation}
-
         style={{
-
-          width:"100%",
-
-          marginTop:15,
-
-          padding:12,
-
-          background:"#16a34a",
-
-          color:"#fff"
-
+          width: "100%",
+          padding: 12,
+          background: "#16a34a",
+          color: "#fff",
+          border: "none",
+          borderRadius: 8,
+          marginTop: 10
         }}
-
       >
-
-        Save Location
-
+        ✅ Save Location
       </button>
-
-
-
-
 
       <button
-
         onClick={useCurrentLocation}
-
         disabled={loading}
-
         style={{
-
-          width:"100%",
-
-          marginTop:10,
-
-          padding:12,
-
-          background:"#2563eb",
-
-          color:"#fff"
-
+          width: "100%",
+          padding: 12,
+          background: "#2563eb",
+          color: "#fff",
+          border: "none",
+          borderRadius: 8,
+          marginTop: 10
         }}
-
       >
-
-        📍 Use GPS
-
+        {loading ? "Getting GPS..." : "📍 Use GPS"}
       </button>
-
-
 
     </div>
 
