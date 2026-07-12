@@ -2,112 +2,245 @@ import React, { useState } from "react";
 import { supabase } from "../../lib/supabase";
 
 export default function DocumentUpload({
-  khetId,
   onDone,
 }) {
-  const [files, setFiles] = useState([]);
+
+  const [aadhaarFront, setAadhaarFront] = useState(null);
+  const [aadhaarBack, setAadhaarBack] = useState(null);
+  const [satbara, setSatbara] = useState(null);
+
   const [loading, setLoading] = useState(false);
 
-  function selectFiles(e) {
-    setFiles(Array.from(e.target.files || []));
+
+  async function uploadFile(file, userId, type) {
+
+    if (!file) return null;
+
+
+    const path =
+      `${userId}/${Date.now()}-${type}-${file.name}`;
+
+
+    const {
+      error
+    } = await supabase.storage
+      .from("khet-documents")
+      .upload(path, file);
+
+
+    if (error) {
+      throw error;
+    }
+
+
+    return path;
   }
 
-  async function uploadDocuments() {
+
+
+  async function handleSubmit(e) {
+
+    e.preventDefault();
+
+
     try {
+
       setLoading(true);
 
-      if (files.length === 0) {
-        alert("Please select at least one document.");
-        return;
-      }
+
 
       const {
-        data: { user },
-        error: userError,
+        data:{
+          user
+        }
       } = await supabase.auth.getUser();
 
-      if (userError) throw userError;
 
-      if (!user) {
-        alert("Login required");
-        return;
+
+      if(!user){
+
+        throw new Error(
+          "Login required"
+        );
+
       }
 
-      if (!khetId) {
-        alert("Farm not found.");
-        return;
-      }
 
-      for (const file of files) {
-        const path = `${user.id}/${khetId}/${Date.now()}-${file.name}`;
 
-        const { error: uploadError } = await supabase.storage
-          .from("khet-documents")
-          .upload(path, file);
+      const aadhaarFrontPath =
+        await uploadFile(
+          aadhaarFront,
+          user.id,
+          "aadhaar-front"
+        );
 
-        if (uploadError) throw uploadError;
 
-        const {
-          data: { publicUrl },
-        } = supabase.storage
-          .from("khet-documents")
-          .getPublicUrl(path);
+      const aadhaarBackPath =
+        await uploadFile(
+          aadhaarBack,
+          user.id,
+          "aadhaar-back"
+        );
 
-        const { error: dbError } = await supabase
-          .from("khet_documents")
-          .insert({
-            khet_id: khetId,
-            user_id: user.id,
-            document_type: "7/12",
-            document_name: file.name,
-            file_url: path,
-            document_url: publicUrl,
-          });
 
-        if (dbError) {
-          await supabase.storage
-            .from("khet-documents")
-            .remove([path]);
+      const satbaraPath =
+        await uploadFile(
+          satbara,
+          user.id,
+          "7-12"
+        );
 
-          throw dbError;
-        }
-      }
 
-      alert("✅ Documents uploaded successfully.");
 
-      if (onDone) {
+
+      const {
+        error
+      } =
+      await supabase
+      .from("profiles")
+      .update({
+
+        aadhaar_front:
+          aadhaarFrontPath,
+
+        aadhaar_back:
+          aadhaarBackPath,
+
+        satbara_7_12:
+          satbaraPath,
+
+        document_status:
+          "pending"
+
+      })
+      .eq(
+        "auth_user_id",
+        user.id
+      );
+
+
+
+      if(error)
+        throw error;
+
+
+
+
+      alert(
+        "✅ Documents uploaded successfully"
+      );
+
+
+      if(onDone){
+
         onDone();
+
       }
-    } catch (err) {
-      alert(err.message);
-    } finally {
-      setLoading(false);
+
+
+
     }
+    catch(err){
+
+      alert(
+        err.message
+      );
+
+    }
+    finally{
+
+      setLoading(false);
+
+    }
+
   }
 
+
+
+
+
   return (
+
     <div className="min-h-screen bg-green-50 p-5">
+
       <div className="bg-white rounded-3xl shadow p-6 max-w-xl mx-auto">
+
+
         <h2 className="text-2xl font-bold text-green-700">
-          📄 Upload Documents
+          📄 Farmer Documents
         </h2>
+
+
+
+        <label className="block mt-5">
+          Aadhaar Front
+        </label>
 
         <input
           type="file"
-          multiple
-          accept=".pdf,image/*"
-          onChange={selectFiles}
-          className="w-full mt-5 border p-3 rounded-xl"
+          accept="image/*,.pdf"
+          onChange={(e)=>
+            setAadhaarFront(
+              e.target.files[0]
+            )
+          }
         />
 
+
+
+        <label className="block mt-5">
+          Aadhaar Back
+        </label>
+
+        <input
+          type="file"
+          accept="image/*,.pdf"
+          onChange={(e)=>
+            setAadhaarBack(
+              e.target.files[0]
+            )
+          }
+        />
+
+
+
+        <label className="block mt-5">
+          7/12 (Satbara)
+        </label>
+
+        <input
+          type="file"
+          accept="image/*,.pdf"
+          onChange={(e)=>
+            setSatbara(
+              e.target.files[0]
+            )
+          }
+        />
+
+
+
         <button
-          onClick={uploadDocuments}
+          onClick={handleSubmit}
           disabled={loading}
-          className="w-full mt-5 bg-green-600 text-white p-4 rounded-xl font-bold"
+          className="w-full mt-6 bg-green-600 text-white p-4 rounded-xl font-bold"
         >
-          {loading ? "Uploading..." : "Upload 7/12 Documents"}
+
+          {
+            loading
+            ?
+            "Uploading..."
+            :
+            "Submit Documents"
+          }
+
         </button>
+
+
       </div>
+
     </div>
+
   );
+
 }
