@@ -12,13 +12,14 @@ export default function DashboardPage() {
 
   const router = useRouter();
 
+
   const [user,setUser] = useState(null);
+
+  const [farms,setFarms] = useState([]);
 
   const [loading,setLoading] = useState(true);
 
   const [showAddFarm,setShowAddFarm] = useState(false);
-
-
 
 
 
@@ -32,9 +33,7 @@ export default function DashboardPage() {
 
 
 
-
   async function loadUser(){
-
 
     try{
 
@@ -47,11 +46,9 @@ export default function DashboardPage() {
 
 
 
-
       if(!user){
 
         router.replace("/login");
-
         return;
 
       }
@@ -60,13 +57,10 @@ export default function DashboardPage() {
 
 
 
-
       const {
         data:profile
       } = await supabase
-
       .from("profiles")
-
       .select(`
         name,
         phone,
@@ -75,14 +69,11 @@ export default function DashboardPage() {
         aadhaar_back,
         satbara_7_12
       `)
-
       .eq(
         "auth_user_id",
         user.id
       )
-
       .maybeSingle();
-
 
 
 
@@ -92,27 +83,49 @@ export default function DashboardPage() {
       const {
         data:subscription
       } = await supabase
-
       .from("subscriptions")
-
       .select(`
         status,
         acres,
         amount,
         start_date
       `)
-
       .eq(
         "user_id",
         user.id
       )
-
       .eq(
         "status",
         "active"
       )
-
       .maybeSingle();
+
+
+
+
+
+
+      const {
+        data:farmData
+      } = await supabase
+      .from("khets")
+      .select("*")
+      .eq(
+        "user_id",
+        user.id
+      )
+      .order(
+        "created_at",
+        {
+          ascending:false
+        }
+      );
+
+
+
+      setFarms(
+        farmData || []
+      );
 
 
 
@@ -123,6 +136,7 @@ export default function DashboardPage() {
       setUser({
 
         id:user.id,
+
 
         name:
         profile?.name ||
@@ -173,7 +187,12 @@ export default function DashboardPage() {
           subscription.start_date
         ).toLocaleDateString()
         :
-        null
+        null,
+
+
+        subscription_amount:
+        subscription?.amount || 0
+
 
       });
 
@@ -198,8 +217,6 @@ export default function DashboardPage() {
 
 
 
-
-
   async function logout(){
 
     await supabase.auth.signOut();
@@ -213,14 +230,15 @@ export default function DashboardPage() {
 
 
 
-
-
   if(loading){
 
-    return <h2>Loading...</h2>;
+    return (
+      <h2>
+        Loading...
+      </h2>
+    );
 
   }
-
 
 
 
@@ -237,7 +255,10 @@ export default function DashboardPage() {
 
           setShowAddFarm(false);
 
+          loadUser();
+
         }}
+
 
         back={()=>{
 
@@ -256,13 +277,15 @@ export default function DashboardPage() {
 
 
 
-
   return (
 
     <Dashboard
 
 
       user={user}
+
+
+      farms={farms}
 
 
 
