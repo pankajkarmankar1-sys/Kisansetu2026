@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "../../lib/supabase";
 
@@ -14,6 +14,45 @@ export default function AdminDashboard() {
 
 
   const router = useRouter();
+
+  const [isMobile,setIsMobile] = useState(false);
+
+
+
+  useEffect(()=>{
+
+
+    function checkScreen(){
+
+      setIsMobile(
+        window.innerWidth < 768
+      );
+
+    }
+
+
+    checkScreen();
+
+
+    window.addEventListener(
+      "resize",
+      checkScreen
+    );
+
+
+    return ()=>{
+
+      window.removeEventListener(
+        "resize",
+        checkScreen
+      );
+
+    };
+
+
+  },[]);
+
+
 
 
 
@@ -31,16 +70,7 @@ export default function AdminDashboard() {
 
 
 
-  const isMobile =
-    typeof window !== "undefined" &&
-    window.innerWidth < 768;
-
-
-
-
-
   return (
-
 
     <div
 
@@ -67,8 +97,6 @@ export default function AdminDashboard() {
 
 
 
-
-
       <AdminSidebar
 
         onLogout={logout}
@@ -79,9 +107,7 @@ export default function AdminDashboard() {
 
 
 
-
-
-      <div
+      <main
 
         style={{
 
@@ -108,17 +134,11 @@ export default function AdminDashboard() {
 
 
 
-
-
-
         <div style={{marginTop:20}}>
 
           <StatsCard />
 
         </div>
-
-
-
 
 
 
@@ -134,16 +154,11 @@ export default function AdminDashboard() {
 
 
 
-
-
         <div style={{marginTop:25}}>
 
           <DriverList />
 
         </div>
-
-
-
 
 
 
@@ -159,9 +174,6 @@ export default function AdminDashboard() {
 
 
 
-
-
-
         <div style={{marginTop:25}}>
 
           <SubscriptionList />
@@ -171,15 +183,12 @@ export default function AdminDashboard() {
 
 
 
-
-      </div>
+      </main>
 
 
 
     </div>
 
-
   );
-
 
 }
