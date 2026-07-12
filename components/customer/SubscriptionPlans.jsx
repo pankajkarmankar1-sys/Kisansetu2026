@@ -1,13 +1,19 @@
-import React, { useState } from "react";
+import React from "react";
 
 
 export default function SubscriptionPlans({
+  farms = [],
   onSelect,
   back,
 }) {
 
 
-  const [acres,setAcres] = useState("");
+
+  const totalAcres = farms.reduce(
+    (sum,farm)=>
+      sum + Number(farm.acres || 0),
+    0
+  );
 
 
 
@@ -16,170 +22,182 @@ export default function SubscriptionPlans({
 
 
   const amount =
-    Number(acres || 0) * pricePerAcre;
-
+    totalAcres * pricePerAcre;
 
 
 
 
   return (
 
-    <div
-      style={{
-        padding:20,
-        background:"#F8FAFC",
-        minHeight:"100vh"
-      }}
-    >
 
+    <div className="min-h-screen bg-green-50 p-5">
 
-      <h2>
-        👑 KisanSetu Subscription
-      </h2>
 
+      <div className="bg-white rounded-3xl shadow p-6">
 
 
+        <h1 className="text-3xl font-bold text-green-700">
 
-      <h3>
-        ₹550 / Acre / Year
-      </h3>
+          👑 KisanSetu Subscription
 
+        </h1>
 
 
 
-      <p>
-        Subscription lene par service booking me 50% discount milega.
-      </p>
+        <p className="mt-3 text-gray-600">
 
+          Aapke registered farms ke hisab se
+          subscription automatically calculate hoga.
 
+        </p>
 
 
-      <input
 
-        type="number"
 
-        placeholder="Enter Farm Acres"
 
-        value={acres}
+        <div className="bg-green-100 rounded-2xl p-5 mt-5">
 
-        onChange={(e)=>
-          setAcres(e.target.value)
-        }
 
-        style={{
+          <h3 className="font-bold text-xl">
 
-          width:"100%",
+            🌾 Total Farm Area
 
-          padding:12,
+          </h3>
 
-          marginTop:15,
 
-          borderRadius:8,
+          <p className="text-3xl font-bold text-green-700">
 
-          border:"1px solid #ccc"
+            {totalAcres} Acre
 
-        }}
+          </p>
 
-      />
 
+        </div>
 
 
 
 
-      <h2>
-        Pay Amount: ₹{amount}
-      </h2>
 
+        <div className="bg-yellow-100 rounded-2xl p-5 mt-4">
 
 
+          <h3 className="font-bold">
 
+            💰 Subscription Rate
 
-      <button
+          </h3>
 
-        onClick={()=>{
 
+          <p>
 
-          if(!acres){
+            ₹550 / Acre / Year
 
-            alert(
-              "Please enter acres"
-            );
+          </p>
 
-            return;
 
-          }
 
+          <h2 className="text-2xl font-bold mt-3">
 
-          onSelect({
+            Pay Amount:
+            ₹{amount}
 
-            acres:Number(acres),
+          </h2>
 
-            price:amount,
 
-            duration:"365 Days"
+        </div>
 
-          });
 
 
-        }}
 
 
-        style={{
 
-          width:"100%",
+        <div className="bg-orange-100 rounded-2xl p-4 mt-4">
 
-          padding:15,
 
-          background:"#16a34a",
+          🔥 Subscription Active hone ke baad
 
-          color:"#fff",
+          <br/>
 
-          border:"none",
+          🚜 Service booking par 50% OFF milega
 
-          borderRadius:10,
 
-          fontSize:18
+        </div>
 
-        }}
 
-      >
 
-        👑 Subscribe Now
 
-      </button>
 
 
-
-
-
-      {
-        back &&
 
         <button
 
-          onClick={back}
+          onClick={()=>{
 
-          style={{
 
-            width:"100%",
+            if(totalAcres <= 0){
 
-            padding:12,
+              alert(
+                "Pehle Farm add kare"
+              );
 
-            marginTop:15
+              return;
+
+            }
+
+
+
+            onSelect({
+
+              acres:totalAcres,
+
+              price:amount,
+
+              duration:"365 Days"
+
+            });
+
 
           }}
 
+
+          className="w-full bg-green-600 text-white p-4 rounded-2xl mt-5 font-bold text-lg"
+
         >
 
-          ← Back
+          👑 Subscribe Now
 
         </button>
 
-      }
 
+
+
+
+
+
+        {
+          back &&
+
+          <button
+
+            onClick={back}
+
+            className="w-full bg-gray-200 p-3 rounded-xl mt-3"
+
+          >
+
+            ← Back
+
+          </button>
+
+        }
+
+
+
+      </div>
 
 
     </div>
+
 
   );
 
