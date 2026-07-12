@@ -9,27 +9,31 @@ import BookingSuccess from "./BookingSuccess";
 
 
 export default function BookService({
+
   user,
   selKhet,
   setSelKhet,
   onNext,
   back,
+
 }) {
 
 
-  const [selectedService, setSelectedService] = useState(null);
+  const [selectedService,setSelectedService] = useState(null);
 
-  const [acres, setAcres] = useState("");
+  const [acres,setAcres] = useState("");
 
-  const [paymentDone, setPaymentDone] = useState(false);
+  const [paymentDone,setPaymentDone] = useState(false);
 
-  const [date, setDate] = useState("");
+  const [date,setDate] = useState("");
 
-  const [note, setNote] = useState("");
+  const [note,setNote] = useState("");
 
-  const [bookingData, setBookingData] = useState(null);
+  const [bookingData,setBookingData] = useState(null);
 
-  const [step, setStep] = useState("farm");
+  const [step,setStep] = useState("farm");
+
+
 
 
 
@@ -40,10 +44,9 @@ export default function BookService({
     <div>
 
 
-      {
-      step === "farm" &&
 
-      (
+      {
+        step==="farm" &&
 
         <FarmSelection
 
@@ -51,7 +54,16 @@ export default function BookService({
 
           selKhet={selKhet}
 
-          setSelKhet={setSelKhet}
+          setSelKhet={(farm)=>{
+
+            setSelKhet(farm);
+
+            localStorage.setItem(
+              "selectedFarm",
+              JSON.stringify(farm)
+            );
+
+          }}
 
           next={()=>setStep("service")}
 
@@ -59,17 +71,17 @@ export default function BookService({
 
         />
 
-      )
       }
 
 
 
 
 
-      {
-      step === "service" &&
 
-      (
+
+      {
+        step==="service" &&
+
 
         <ServiceSelection
 
@@ -77,27 +89,26 @@ export default function BookService({
 
           selKhet={selKhet}
 
-          setSelKhet={setSelKhet}
 
           selectedService={selectedService}
 
+
           setSelectedService={setSelectedService}
+
 
           acres={acres}
 
           setAcres={setAcres}
 
-          paymentDone={paymentDone}
-
-          setPaymentDone={setPaymentDone}
 
           next={()=>setStep("payment")}
 
+
           back={()=>setStep("farm")}
+
 
         />
 
-      )
       }
 
 
@@ -105,30 +116,38 @@ export default function BookService({
 
 
 
-      {
-      step === "payment" &&
 
-      (
+
+      {
+        step==="payment" &&
+
 
         <PaymentSummary
 
+
           user={user}
+
 
           selectedService={selectedService}
 
+
           acres={acres}
+
 
           paymentDone={paymentDone}
 
+
           setPaymentDone={setPaymentDone}
+
 
           next={()=>setStep("date")}
 
+
           back={()=>setStep("service")}
+
 
         />
 
-      )
       }
 
 
@@ -136,20 +155,26 @@ export default function BookService({
 
 
 
-      {
-      step === "date" &&
 
-      (
+
+      {
+        step==="date" &&
+
 
         <DateSelection
 
+
           date={date}
+
 
           setDate={setDate}
 
+
           note={note}
 
+
           setNote={setNote}
+
 
 
           next={()=>{
@@ -169,12 +194,19 @@ export default function BookService({
 
               selKhet,
 
+
               payment_status:
+
               paymentDone
+
               ?
+
               "Paid"
+
               :
+
               "Pending"
+
 
             });
 
@@ -186,11 +218,13 @@ export default function BookService({
           }}
 
 
+
           back={()=>setStep("payment")}
+
+
 
         />
 
-      )
       }
 
 
@@ -200,14 +234,16 @@ export default function BookService({
 
 
 
-      {
-      step === "confirm" &&
 
-      (
+      {
+        step==="confirm" &&
+
 
         <ConfirmBooking
 
+
           bookingData={bookingData}
+
 
 
           onConfirm={(savedBooking)=>{
@@ -232,10 +268,12 @@ export default function BookService({
 
           back={()=>setStep("date")}
 
+
+
         />
 
-      )
       }
+
 
 
 
@@ -245,25 +283,30 @@ export default function BookService({
 
 
       {
-      step === "success" &&
+        step==="success" &&
 
-      (
 
         <BookingSuccess
 
+
           bookingData={bookingData}
+
 
           onDone={onNext}
 
+
         />
 
-      )
+
       }
+
+
 
 
 
     </div>
 
   );
+
 
 }
