@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 
-
 export default function FarmSelection({
   user,
   selKhet,
@@ -11,17 +10,14 @@ export default function FarmSelection({
   back,
 }) {
 
-
   const [farms,setFarms] = useState([]);
   const [documents,setDocuments] = useState([]);
   const [loading,setLoading] = useState(true);
 
 
-
   useEffect(()=>{
     loadFarms();
   },[]);
-
 
 
 
@@ -36,25 +32,21 @@ export default function FarmSelection({
       } = await supabase.auth.getUser();
 
 
-
       if(!authUser)
         return;
 
 
-
-      const {data:farmData,error:farmError}=
-
-      await supabase
+      const {
+        data:farmData,
+        error:farmError
+      } = await supabase
 
       .from("khets")
-
       .select("*")
-
       .eq(
         "user_id",
         authUser.id
       )
-
       .order(
         "created_at",
         {
@@ -63,37 +55,27 @@ export default function FarmSelection({
       );
 
 
-
       if(farmError)
         throw farmError;
 
 
-
-      setFarms(
-        farmData || []
-      );
+      setFarms(farmData || []);
 
 
 
-
-      const {data:docData}=
-
-      await supabase
+      const {
+        data:docData
+      } = await supabase
 
       .from("khet_documents")
-
       .select("*")
-
       .eq(
         "user_id",
         authUser.id
       );
 
 
-
-      setDocuments(
-        docData || []
-      );
+      setDocuments(docData || []);
 
 
     }
@@ -112,172 +94,241 @@ export default function FarmSelection({
 
 
 
-
-
-
   if(loading){
 
-    return(
-      <div className="p-5">
-        🌾 Loading Farms...
+    return (
+
+      <div className="min-h-screen flex items-center justify-center bg-green-50">
+
+        <div className="text-xl font-bold text-green-700">
+
+          🌾 Loading Farms...
+
+        </div>
+
       </div>
+
     );
 
   }
 
 
 
+  return (
+
+    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white p-5">
 
 
-  return(
-
-    <div className="min-h-screen bg-green-50 p-4">
+      <div className="max-w-xl mx-auto">
 
 
-      <h2 className="text-3xl font-bold text-green-700 mb-5">
-
-        🌾 Mera Khet
-
-      </h2>
+        <div className="bg-white rounded-3xl shadow-lg p-6">
 
 
+          <h1 className="text-3xl font-bold text-green-700">
+
+            🌾 Mera Khet
+
+          </h1>
 
 
-      <button
+          <p className="text-gray-500 mt-2">
 
-        onClick={addFarm}
+            Service booking ke liye apna farm select kare
 
-        className="w-full bg-green-600 text-white p-4 rounded-xl mb-5"
-
-      >
-
-        ➕ Add Another 7/12
-
-      </button>
+          </p>
 
 
 
 
+          <button
 
+            onClick={addFarm}
 
-      {
-        farms.length===0 &&
-
-        <div className="bg-white p-5 rounded-xl">
-
-          No Farm Added
-
-        </div>
-
-      }
-
-
-
-
-
-
-      {
-        farms.map((farm)=>(
-
-
-          <div
-
-            key={farm.id}
-
-            className="bg-white p-5 rounded-xl mb-4 shadow"
+            className="w-full mt-6 bg-green-600 hover:bg-green-700 text-white py-4 rounded-2xl font-bold text-lg shadow"
 
           >
 
+            ➕ Add New Farm / 7-12
 
-            <h3 className="text-xl font-bold text-green-700">
+          </button>
 
-              🌾 {farm.name}
+
+
+        </div>
+
+
+
+
+
+        {
+          farms.length===0 &&
+
+          <div className="bg-white rounded-3xl shadow p-6 mt-5 text-center">
+
+            <div className="text-5xl">
+              🌱
+            </div>
+
+            <h3 className="font-bold text-xl mt-3">
+
+              No Farm Added
 
             </h3>
 
+            <p className="text-gray-500">
 
-
-            <p>
-              📍 Village: {farm.village}
-            </p>
-
-
-            <p>
-              📌 District: {farm.district}
-            </p>
-
-
-            <p>
-              🌱 Acres: {farm.acres}
-            </p>
-
-
-
-
-            <p>
-
-              📄 Documents:
-
-              {
-                documents.filter(
-                  d=>d.khet_id===farm.id
-                ).length
-              }
+              Pehle apna farm add kare
 
             </p>
-
-
-
-
-
-            <button
-
-              onClick={()=>{
-
-                setSelKhet(farm);
-
-                next();
-
-              }}
-
-              className="w-full mt-4 bg-green-600 text-white p-3 rounded-xl"
-
-            >
-
-              ✅ Select This Farm
-
-            </button>
-
 
 
           </div>
 
-
-        ))
-
-      }
+        }
 
 
 
 
 
-      <button
+        {
+          farms.map((farm)=>(
 
-        onClick={back}
 
-        className="w-full bg-gray-300 p-3 rounded-xl"
+            <div
 
-      >
+              key={farm.id}
 
-        ← Back
+              className="bg-white rounded-3xl shadow-lg p-6 mt-5 border border-green-100"
 
-      </button>
+            >
 
+
+
+              <div className="flex justify-between items-center">
+
+
+                <h2 className="text-xl font-bold text-green-700">
+
+                  🌾 {farm.name}
+
+                </h2>
+
+
+
+                <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold">
+
+                  {farm.acres} Acre
+
+                </span>
+
+
+              </div>
+
+
+
+
+
+              <div className="mt-4 space-y-2 text-gray-700">
+
+
+                <p>
+                  📍 Village:
+                  <b> {farm.village}</b>
+                </p>
+
+
+
+                <p>
+                  🏛 District:
+                  <b> {farm.district || "-"}</b>
+                </p>
+
+
+
+                <p>
+                  📌 Taluka:
+                  <b> {farm.taluka || "-"}</b>
+                </p>
+
+
+
+
+                <p>
+
+                  📄 Documents:
+
+                  <b>
+                    {" "}
+                    {
+                      documents.filter(
+                        d=>d.khet_id===farm.id
+                      ).length
+                    }
+                  </b>
+
+                </p>
+
+
+
+              </div>
+
+
+
+
+
+
+              <button
+
+                onClick={()=>{
+
+                  setSelKhet(farm);
+
+                  next();
+
+                }}
+
+                className="w-full mt-5 bg-green-600 text-white py-4 rounded-2xl font-bold text-lg"
+
+              >
+
+                ✅ Select This Farm
+
+              </button>
+
+
+
+
+            </div>
+
+
+          ))
+
+        }
+
+
+
+
+
+        <button
+
+          onClick={back}
+
+          className="w-full mt-5 bg-gray-200 py-4 rounded-2xl font-bold"
+
+        >
+
+          ← Back
+
+        </button>
+
+
+
+      </div>
 
 
     </div>
 
   );
-
 
 }
