@@ -1,11 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabase";
-import PhonePePayment from "../payment/PhonePePayment";
+import React from "react";
 
 
 export default function PaymentSummary({
 
-  user,
   selectedService,
   acres,
   paymentDone,
@@ -16,346 +13,168 @@ export default function PaymentSummary({
 }) {
 
 
-  const [subscription,setSubscription] = useState(null);
+const normalAmount =
+Number(acres || 0) *
+Number(selectedService?.price || 0);
 
-  const [showPayment,setShowPayment] = useState(false);
 
 
+const subscriptionActive = false;
 
-  useEffect(()=>{
 
-    checkSubscription();
+// Abhi user subscription table se connect karenge
+// next step me isko real data se replace karenge
 
-  },[]);
 
+const discount =
+subscriptionActive
+?
+normalAmount * 0.50
+:
+normalAmount;
 
 
 
-  async function checkSubscription(){
+return(
 
+<div className="min-h-screen bg-green-50 p-5">
 
-    try{
 
+<div className="max-w-xl mx-auto bg-white rounded-3xl shadow p-6">
 
-      if(!user?.id)
-        return;
 
 
+<button
 
-      const {
-        data,
-        error
-      } = await supabase
+onClick={back}
 
-      .from("subscriptions")
+className="bg-white shadow px-4 py-2 rounded-xl"
 
-      .select("*")
+>
 
-      .eq(
-        "user_id",
-        user.id
-      )
+← Back
 
-      .eq(
-        "status",
-        "active"
-      )
+</button>
 
-      .maybeSingle();
 
 
 
-      if(!error){
 
-        setSubscription(data);
+<h1 className="text-2xl font-bold text-green-700 mt-5">
 
-      }
+Payment Summary 💳
 
+</h1>
 
-    }
-    catch(err){
 
-      console.log(err);
 
-    }
 
-  }
 
 
+<div className="mt-5 bg-green-50 rounded-2xl p-5">
 
 
+<p>
+Service:
+{" "}
+<b>
+{selectedService?.name}
+</b>
+</p>
 
-  const isSubscriber =
-  !!subscription;
 
 
+<p className="mt-2">
 
+Area:
+{" "}
+<b>
+{acres} Acre
+</b>
 
-  const normalPrice = Number(
-    selectedService?.price || 0
-  );
+</p>
 
 
-  const subscriberPrice = Number(
-    selectedService?.price_subscriber || 0
-  );
 
 
 
-  const payRate =
+<p className="mt-3 text-lg">
 
-  isSubscriber && subscriberPrice > 0
+Amount:
+{" "}
 
-  ?
+<b>
+₹{discount}
+</b>
 
-  subscriberPrice
+</p>
 
-  :
 
-  normalPrice;
 
+{
+subscriptionActive &&
 
+<p className="text-green-600 font-bold mt-2">
 
+🔥 50% Subscription Discount Applied
 
-  const acresValue =
-  Number(acres || 0);
+</p>
 
+}
 
 
-  const normalAmount =
-  normalPrice * acresValue;
 
+</div>
 
 
-  const finalAmount =
-  payRate * acresValue;
 
 
 
-  const discount =
-  normalAmount - finalAmount;
 
 
+<button
 
+onClick={()=>{
 
+setPaymentDone(true);
 
+alert("Payment Successful ✅");
 
+next();
 
-  if(showPayment && !paymentDone){
+}}
 
+className="w-full mt-6 bg-green-600 text-white p-4 rounded-2xl font-bold"
 
-    return (
+>
 
-      <PhonePePayment
+{
 
-        amount={finalAmount}
+paymentDone
 
-        onSuccess={()=>{
+?
 
-          setPaymentDone(true);
+"Continue"
 
-          setShowPayment(false);
+:
 
-        }}
+"Pay Now"
 
-        onBack={()=>{
+}
 
-          setShowPayment(false);
+</button>
 
-        }}
 
-      />
 
-    );
 
-  }
 
+</div>
 
 
+</div>
 
 
+);
 
-
-  return (
-
-    <div className="min-h-screen bg-green-50 p-5">
-
-
-      <div className="bg-white rounded-3xl shadow p-6">
-
-
-        <button
-
-          onClick={back}
-
-          className="bg-gray-200 px-4 py-2 rounded-xl"
-
-        >
-
-          ← Back
-
-        </button>
-
-
-
-
-        <h1 className="text-2xl font-bold text-green-700 mt-5">
-
-          💳 Payment Summary
-
-        </h1>
-
-
-
-
-
-        <div className="bg-green-100 rounded-2xl p-5 mt-5">
-
-
-          <p>
-            🚜 Service:
-          </p>
-
-
-          <h3 className="font-bold">
-
-            {
-            selectedService?.name_hi ||
-            selectedService?.name ||
-            "-"
-            }
-
-          </h3>
-
-
-
-          <p>
-            🌾 Acres: {acresValue}
-          </p>
-
-
-
-          <p>
-
-            👑 Plan:
-
-            {" "}
-
-            {
-            isSubscriber
-            ?
-            "Subscription Active"
-            :
-            "Normal Customer"
-            }
-
-          </p>
-
-
-        </div>
-
-
-
-
-
-        <div className="border rounded-2xl p-5 mt-5">
-
-
-          <p>
-            Normal Rate:
-            ₹{normalPrice}/Acre
-          </p>
-
-
-
-          {
-          isSubscriber &&
-
-          <p className="text-green-600 font-bold">
-
-            🎉 Discount Saved ₹{discount}
-
-          </p>
-
-          }
-
-
-
-          <p>
-
-            Pay Rate:
-            ₹{payRate}/Acre
-
-          </p>
-
-
-
-          <h2 className="text-3xl font-bold mt-4">
-
-            Total ₹{finalAmount}
-
-          </h2>
-
-
-        </div>
-
-
-
-
-
-        {
-        !paymentDone
-
-        ?
-
-        <button
-
-          onClick={()=>{
-
-            if(finalAmount <= 0){
-
-              alert("Amount calculation error");
-
-              return;
-
-            }
-
-            setShowPayment(true);
-
-          }}
-
-          className="w-full bg-green-600 text-white p-4 rounded-2xl mt-5 font-bold"
-
-        >
-
-          💳 Pay Now
-
-        </button>
-
-
-        :
-
-        <button
-
-          onClick={next}
-
-          className="w-full bg-green-600 text-white p-4 rounded-2xl mt-5 font-bold"
-
-        >
-
-          Continue →
-
-        </button>
-
-        }
-
-
-
-      </div>
-
-
-    </div>
-
-  );
 
 }
