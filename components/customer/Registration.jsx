@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { supabase } from "../../lib/supabase";
-import CustomerLocation from "./CustomerLocation";
 import LocationSelector from "../maps/LocationSelector";
 
 
@@ -17,8 +16,9 @@ export default function Registration({
 
   const [acres,setAcres] = useState("");
 
-  const [location,setLocation] = useState(null);
+  const [role,setRole] = useState("farmer");
 
+  const [location,setLocation] = useState(null);
 
   const [loading,setLoading] = useState(false);
 
@@ -49,38 +49,9 @@ export default function Registration({
 
 
 
-
-
     if(!name){
 
-      setError(
-        "Please enter your name"
-      );
-
-      return;
-
-    }
-
-
-
-    if(!farmAddress){
-
-      setError(
-        "Please enter farm address"
-      );
-
-      return;
-
-    }
-
-
-
-    if(!acres || Number(acres)<=0){
-
-      setError(
-        "Enter valid acres"
-      );
-
+      setError("Please enter your name");
       return;
 
     }
@@ -89,14 +60,10 @@ export default function Registration({
 
     if(!location){
 
-      setError(
-        "Please select location"
-      );
-
+      setError("Please select location");
       return;
 
     }
-
 
 
 
@@ -109,13 +76,11 @@ export default function Registration({
 
 
 
-
       const {
         data:{
           user
         }
-      } =
-      await supabase.auth.getUser();
+      } = await supabase.auth.getUser();
 
 
 
@@ -134,98 +99,88 @@ export default function Registration({
 
 
 
+
       const {
         error
-      } =
-      await supabase
+      } = await supabase
 
-        .from("profiles")
+      .from("profiles")
 
-        .upsert({
+      .upsert({
 
-          auth_user_id:
-            user.id,
-
+        auth_user_id:
+        user.id,
 
 
-          phone:
-            phone ||
-            user.phone,
+        phone:
+        phone || user.phone,
 
 
-
-          role:
-            "farmer",
-
+        role:
+        role,
 
 
-          name:
-            name,
+        name:
+        name,
 
 
 
-          farm_address:
-            farmAddress,
+        farm_address:
+        farmAddress,
 
 
 
-          acres:
-            Number(acres),
+        acres:
+        Number(acres || 0),
 
 
 
-
-          village:
-            location.village || "",
-
-
-
-          state:
-            location.state || "",
+        village:
+        location.village || "",
 
 
 
-          district:
-            location.district || "",
+        state:
+        location.state || "",
 
 
 
-          taluka:
-            location.taluka || "",
+        district:
+        location.district || "",
 
 
 
-
-          latitude:
-            location.latitude ||
-            location.lat ||
-            null,
+        taluka:
+        location.taluka || "",
 
 
 
-          longitude:
-            location.longitude ||
-            location.lng ||
-            null,
+        latitude:
+        location.latitude ||
+        location.lat ||
+        null,
 
 
 
-          document_status:
-            "pending",
+        longitude:
+        location.longitude ||
+        location.lng ||
+        null,
 
 
-        },
 
-        {
-
-          onConflict:
-            "auth_user_id"
-
-        }
-
-      );
+        document_status:
+        "pending"
 
 
+      },
+
+      {
+
+        onConflict:
+        "auth_user_id"
+
+      });
 
 
 
@@ -233,8 +188,6 @@ export default function Registration({
 
       if(error)
         throw error;
-
-
 
 
 
@@ -258,8 +211,6 @@ export default function Registration({
 
 
 
-
-
     }
     catch(err){
 
@@ -277,7 +228,6 @@ export default function Registration({
     }
 
 
-
   }
 
 
@@ -291,13 +241,32 @@ export default function Registration({
 
     <div
       style={{
-        padding:20
+        padding:20,
+        background:"#f0fdf4",
+        minHeight:"100vh"
       }}
     >
 
 
+      <div
+
+      style={{
+
+        background:"#fff",
+
+        padding:20,
+
+        borderRadius:20,
+
+        boxShadow:"0 2px 10px #ddd"
+
+      }}
+
+      >
+
+
       <h2>
-        👨‍🌾 Farmer Registration
+        🌾 KisanSetu Registration
       </h2>
 
 
@@ -307,43 +276,34 @@ export default function Registration({
       <form onSubmit={handleSubmit}>
 
 
+        <select
+
+        value={role}
+
+        onChange={(e)=>
+          setRole(e.target.value)
+        }
+
+        style={input}
+
+        >
+
+          <option value="farmer">
+            👨‍🌾 Farmer
+          </option>
 
 
-
-        <input
-
-          placeholder="Full Name"
-
-          value={name}
-
-          onChange={(e)=>
-            setName(e.target.value)
-          }
-
-          style={input}
-
-        />
+          <option value="driver">
+            🚜 Driver
+          </option>
 
 
+          <option value="admin">
+            🛠 Admin
+          </option>
 
 
-
-
-        <input
-
-          placeholder="Farm Address"
-
-          value={farmAddress}
-
-          onChange={(e)=>
-            setFarmAddress(e.target.value)
-          }
-
-          style={input}
-
-        />
-
-
+        </select>
 
 
 
@@ -351,21 +311,55 @@ export default function Registration({
 
         <input
 
-          type="number"
+        placeholder="Full Name"
 
-          placeholder="Farm Acres"
+        value={name}
 
-          value={acres}
+        onChange={(e)=>
+          setName(e.target.value)
+        }
 
-          onChange={(e)=>
-            setAcres(e.target.value)
-          }
-
-          style={input}
+        style={input}
 
         />
 
 
+
+
+
+        <input
+
+        placeholder="Farm Address"
+
+        value={farmAddress}
+
+        onChange={(e)=>
+          setFarmAddress(e.target.value)
+        }
+
+        style={input}
+
+        />
+
+
+
+
+
+        <input
+
+        type="number"
+
+        placeholder="Acres"
+
+        value={acres}
+
+        onChange={(e)=>
+          setAcres(e.target.value)
+        }
+
+        style={input}
+
+        />
 
 
 
@@ -373,16 +367,9 @@ export default function Registration({
 
         <LocationSelector
 
-          onSelect={handleLocation}
+        onSelect={handleLocation}
 
         />
-
-
-
-
-
-
-        
 
 
 
@@ -392,13 +379,9 @@ export default function Registration({
         {
           error &&
 
-          <p
-            style={{
-              color:"red"
-            }}
-          >
+          <p style={{color:"red"}}>
 
-            {error}
+          {error}
 
           </p>
 
@@ -412,24 +395,24 @@ export default function Registration({
 
         <button
 
-          type="submit"
+        type="submit"
 
-          disabled={loading}
+        disabled={loading}
 
-          style={button}
+        style={button}
 
         >
 
-          {
-            loading
-            ?
-            "Saving..."
-            :
-            "✅ Complete Registration"
-          }
-
+        {
+          loading
+          ?
+          "Saving..."
+          :
+          "✅ Complete Registration"
+        }
 
         </button>
+
 
 
 
@@ -441,19 +424,23 @@ export default function Registration({
 
           <button
 
-            type="button"
+          type="button"
 
-            onClick={back}
+          onClick={back}
 
-            style={{
-              ...button,
-              background:"#ddd",
-              color:"#000"
-            }}
+          style={{
+
+            ...button,
+
+            background:"#ddd",
+
+            color:"#000"
+
+          }}
 
           >
 
-            ← Back
+          ← Back
 
           </button>
 
@@ -462,8 +449,9 @@ export default function Registration({
 
 
 
-
       </form>
+
+      </div>
 
 
     </div>
@@ -476,17 +464,19 @@ export default function Registration({
 
 
 
+
+
 const input={
 
-  width:"100%",
+width:"100%",
 
-  padding:12,
+padding:12,
 
-  marginBottom:12,
+marginBottom:12,
 
-  borderRadius:8,
+borderRadius:10,
 
-  border:"1px solid #ccc"
+border:"1px solid #ccc"
 
 };
 
@@ -495,18 +485,20 @@ const input={
 
 const button={
 
-  width:"100%",
+width:"100%",
 
-  padding:14,
+padding:14,
 
-  marginTop:15,
+marginTop:15,
 
-  background:"#16a34a",
+background:"#16a34a",
 
-  color:"#fff",
+color:"#fff",
 
-  border:"none",
+border:"none",
 
-  borderRadius:10
+borderRadius:10,
+
+fontWeight:"bold"
 
 };
