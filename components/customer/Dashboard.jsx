@@ -15,9 +15,6 @@ export default function Dashboard({
   onAdmin,
   onDriver,
 
-  <p>
-ROLE TEST: {user?.role}
-</p>
 }) {
 
 
@@ -38,6 +35,10 @@ return (
 Namaste {user?.name || "Kisan"} 🌾
 </p>
 
+<p>
+ROLE TEST: {user?.role}
+</p> 
+  
 <p className="mt-1">
 Role: {user?.role || "farmer"}
 </p>
