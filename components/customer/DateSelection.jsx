@@ -1,27 +1,39 @@
 import React from "react";
 
+
 export default function DateSelection({
+
   date,
   setDate,
   note,
   setNote,
   next,
   back,
+
 }) {
 
 
-  const minDate = new Date();
+
+  const minDate =
+    new Date();
+
 
   minDate.setDate(
-    minDate.getDate() + 1
+    minDate.getDate()+1
   );
+
+
+
 
 
   function handleNext(){
 
+
     if(!date){
 
-      alert("Please select booking date");
+      alert(
+        "Booking date select kare"
+      );
 
       return;
 
@@ -30,102 +42,168 @@ export default function DateSelection({
 
     next();
 
+
   }
+
+
+
 
 
 
 
   return (
 
-    <div
-      style={{
-        padding:20,
-        background:"#F8FAFC",
-        minHeight:"100vh",
-      }}
-    >
+    <div className="min-h-screen bg-green-50 p-5">
 
 
-      <h2>
-        📅 Select Booking Date
-      </h2>
+      <div className="bg-white rounded-3xl shadow p-6">
 
 
 
+        <h1 className="text-2xl font-bold text-green-700">
 
-      <div
-        style={{
-          background:"#fff",
-          padding:15,
-          borderRadius:12,
-        }}
-      >
+          📅 Select Booking Date
+
+        </h1>
 
 
 
-        <label>
-          Booking Date
-        </label>
+
+        <div className="mt-5 bg-green-100 rounded-2xl p-5">
+
+
+          <label className="font-bold">
+
+            🚜 Service Date
+
+          </label>
 
 
 
-        <input
+          <input
 
-          type="date"
+            type="date"
 
-          min={
-            minDate
-            .toISOString()
-            .split("T")[0]
-          }
-
-
-          value={date}
+            min={
+              minDate
+              .toISOString()
+              .split("T")[0]
+            }
 
 
-          onChange={(e)=>
-            setDate(e.target.value)
-          }
+            value={date}
 
 
-          style={{
-            padding:10,
-            width:"100%",
-            marginTop:10,
-          }}
+            onChange={(e)=>
+              setDate(e.target.value)
+            }
 
-        />
+
+            className="w-full mt-3 p-3 rounded-xl border"
+
+          />
+
+
+        </div>
 
 
 
 
 
-        <br/>
-        <br/>
+
+
+        <div className="mt-5">
+
+
+          <label className="font-bold">
+
+            📝 Customer Note
+
+          </label>
+
+
+          <textarea
+
+
+            rows="4"
+
+
+            placeholder="Driver ke liye message (optional)"
+
+
+            value={note}
+
+
+            onChange={(e)=>
+              setNote(e.target.value)
+            }
+
+
+            className="w-full mt-3 p-3 rounded-xl border"
+
+          />
+
+
+        </div>
 
 
 
 
-        <textarea
-
-          rows={4}
-
-          placeholder="Customer Note (Optional)"
-
-          value={note}
-
-          onChange={(e)=>
-            setNote(e.target.value)
-          }
 
 
-          style={{
-            width:"100%",
-            padding:10,
-            borderRadius:8,
-          }}
 
-        />
+        <div className="flex gap-3 mt-6">
+
+
+
+          <button
+
+            onClick={back}
+
+            className="flex-1 bg-gray-200 p-3 rounded-xl font-bold"
+
+          >
+
+            ← Back
+
+          </button>
+
+
+
+
+
+          <button
+
+            onClick={handleNext}
+
+            disabled={!date}
+
+
+            className={`flex-1 p-3 rounded-xl font-bold text-white ${
+              
+              date
+
+              ?
+
+              "bg-green-600"
+
+              :
+
+              "bg-gray-400"
+
+            }`}
+
+          >
+
+            Continue →
+
+          </button>
+
+
+
+
+        </div>
+
 
 
 
@@ -133,62 +211,8 @@ export default function DateSelection({
 
 
 
-
-
-
-      <button
-
-        onClick={back}
-
-        style={{
-
-          marginTop:20,
-
-          padding:12,
-
-          width:"48%",
-
-        }}
-
-      >
-
-        ← Back
-
-      </button>
-
-
-
-
-
-      <button
-
-        onClick={handleNext}
-
-        disabled={!date}
-
-
-        style={{
-
-          marginTop:20,
-
-          marginLeft:"4%",
-
-          padding:12,
-
-          width:"48%",
-
-        }}
-
-      >
-
-        Continue →
-
-      </button>
-
-
-
-
     </div>
+
 
   );
 
