@@ -137,18 +137,7 @@ export default function AddFarm({
     user.id
   );
 
-} catch (uploadErr) {
 
-  console.error(
-    "Document upload failed:",
-    uploadErr
-  );
-
-  alert(
-    "Upload Error: " + uploadErr.message
-  );
-
-  }
 
       setMessage("✅ Farm added successfully.");
 
