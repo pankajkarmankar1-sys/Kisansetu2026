@@ -21,39 +21,11 @@ export default function Dashboard({
     user?.subscription_status === "active";
 
 
-
   const totalAcres = farms.reduce(
-    (sum,farm)=> sum + Number(farm.acres || 0),
+    (sum, farm) =>
+      sum + Number(farm.acres || 0),
     0
   );
-
-
-
-  const villageStats = {};
-
-  farms.forEach((farm)=>{
-
-    const village =
-    farm.village || "Unknown";
-
-
-    if(!villageStats[village]){
-
-      villageStats[village] = {
-        farms:0,
-        acres:0
-      };
-
-    }
-
-
-    villageStats[village].farms += 1;
-
-    villageStats[village].acres +=
-    Number(farm.acres || 0);
-
-
-  });
 
 
 
@@ -62,13 +34,15 @@ export default function Dashboard({
     <div className="min-h-screen bg-green-50 p-4">
 
 
-      <div className="bg-gradient-to-r from-green-600 to-emerald-500 text-white rounded-3xl p-6 shadow">
+      {/* Header */}
+
+      <div className="bg-gradient-to-r from-green-600 to-emerald-500 text-white rounded-3xl p-6 shadow-xl">
 
         <h1 className="text-3xl font-bold">
           🚜 KisanSetu
         </h1>
 
-        <p className="mt-2">
+        <p className="mt-2 text-lg">
           Namaste {user?.name || "Kisan"} 🌾
         </p>
 
@@ -77,16 +51,19 @@ export default function Dashboard({
 
 
 
-      <div className="grid grid-cols-3 gap-3 mt-5">
+
+      {/* Farm Summary */}
+
+      <div className="grid grid-cols-2 gap-4 mt-5">
 
 
-        <div className="bg-white rounded-2xl p-4 shadow">
+        <div className="bg-white rounded-2xl p-5 shadow">
 
           <p>
-            🌱 Farms
+            🌱 My Farms
           </p>
 
-          <h2 className="text-2xl font-bold text-green-700">
+          <h2 className="text-3xl font-bold text-green-700">
             {farms.length}
           </h2>
 
@@ -94,28 +71,15 @@ export default function Dashboard({
 
 
 
-        <div className="bg-white rounded-2xl p-4 shadow">
+
+        <div className="bg-white rounded-2xl p-5 shadow">
 
           <p>
-            📏 Acres
+            📏 Total Acre
           </p>
 
-          <h2 className="text-2xl font-bold text-green-700">
+          <h2 className="text-3xl font-bold text-green-700">
             {totalAcres}
-          </h2>
-
-        </div>
-
-
-
-        <div className="bg-white rounded-2xl p-4 shadow">
-
-          <p>
-            📄 7/12
-          </p>
-
-          <h2 className="text-2xl font-bold text-green-700">
-            {farms.length}
           </h2>
 
         </div>
@@ -127,12 +91,15 @@ export default function Dashboard({
 
 
 
-      <div className="bg-white rounded-2xl p-5 mt-5 shadow">
+
+      {/* Subscription */}
+
+      <div className="bg-white rounded-3xl p-5 mt-5 shadow-xl border">
 
 
-        <h3 className="text-xl font-bold">
-          👑 Subscription
-        </h3>
+        <h2 className="text-2xl font-bold text-green-700">
+          👑 KisanSetu Subscription
+        </h2>
 
 
 
@@ -141,20 +108,18 @@ export default function Dashboard({
 
           ?
 
-          <div className="mt-3">
+          <div className="mt-4 bg-green-50 rounded-2xl p-4">
 
-            <p className="text-green-600 font-bold">
-              ✅ Active
+            <h3 className="text-green-700 font-bold text-xl">
+              ✅ Active Subscription
+            </h3>
+
+            <p className="mt-2">
+              🎉 50% OFF Applied
             </p>
 
             <p>
-              🔥 50% OFF Applied
-            </p>
-
-            <p>
-              Valid Till:
-              {" "}
-              {user?.subscription_end || "-"}
+              Valid Till: {user?.subscription_end || "-"}
             </p>
 
           </div>
@@ -163,16 +128,30 @@ export default function Dashboard({
           :
 
 
-          <div className="mt-3">
+          <div className="mt-4 bg-orange-50 rounded-2xl p-4">
 
-            <p className="text-red-500">
-              ❌ No Subscription
+            <p className="text-xl font-bold">
+              🔥 50% OFF Offer
             </p>
 
 
+            <p className="text-2xl font-bold text-green-700 mt-2">
+              ₹550 / Acre / Year
+            </p>
+
+
+            <p className="text-gray-600 mt-2">
+              Subscription lene ke baad har service par special rate milega.
+            </p>
+
+
+
             <button
+
               onClick={onSubscription}
-              className="mt-3 bg-orange-500 text-white px-4 py-2 rounded-xl"
+
+              className="w-full mt-4 bg-orange-500 text-white p-4 rounded-2xl font-bold"
+
             >
 
               Buy Subscription
@@ -191,39 +170,59 @@ export default function Dashboard({
 
 
 
-      <div className="bg-white rounded-2xl p-5 mt-5 shadow">
-
-
-        <h3 className="font-bold text-xl mb-3">
-          📍 Village Wise Stats
-        </h3>
 
 
 
-        {
-          Object.keys(villageStats).map((village)=>(
+      {/* Services */}
 
-            <div
-              key={village}
-              className="border-b py-3 flex justify-between"
-            >
-
-              <span>
-                🌾 {village}
-              </span>
+      <div className="bg-white rounded-3xl p-5 mt-5 shadow-xl">
 
 
-              <span>
-                {villageStats[village].farms} Farm /
-                {" "}
-                {villageStats[village].acres} Acre
-              </span>
+        <h2 className="text-2xl font-bold text-green-700 mb-4">
+          🚜 Our Services
+        </h2>
 
 
-            </div>
 
-          ))
-        }
+        <div className="grid grid-cols-2 gap-4">
+
+
+          <button
+            onClick={documentsApproved ? onBook : undefined}
+            className="bg-green-100 p-5 rounded-2xl font-bold"
+          >
+            🚜 Tractor
+          </button>
+
+
+
+          <button
+            onClick={documentsApproved ? onBook : undefined}
+            className="bg-blue-100 p-5 rounded-2xl font-bold"
+          >
+            🌱 Cultivator
+          </button>
+
+
+
+          <button
+            onClick={documentsApproved ? onBook : undefined}
+            className="bg-yellow-100 p-5 rounded-2xl font-bold"
+          >
+            ⚙️ Rotavator
+          </button>
+
+
+
+          <button
+            onClick={documentsApproved ? onBook : undefined}
+            className="bg-purple-100 p-5 rounded-2xl font-bold"
+          >
+            🌾 Harvester
+          </button>
+
+
+        </div>
 
 
       </div>
@@ -232,10 +231,11 @@ export default function Dashboard({
 
 
 
+
       {
         !documentsApproved && (
 
-          <div className="bg-yellow-100 rounded-xl p-4 mt-5">
+          <div className="bg-yellow-100 rounded-2xl p-4 mt-5">
 
             ⚠️ Documents approval pending.
             <br/>
@@ -251,6 +251,9 @@ export default function Dashboard({
 
 
 
+
+      {/* Buttons */}
+
       <div className="space-y-3 mt-5">
 
 
@@ -258,16 +261,7 @@ export default function Dashboard({
           onClick={onAddFarm}
           className="w-full bg-green-600 text-white p-4 rounded-2xl font-bold"
         >
-          ➕ Add Another 7/12
-        </button>
-
-
-
-        <button
-          onClick={documentsApproved ? onBook : undefined}
-          className="w-full bg-blue-600 text-white p-4 rounded-2xl font-bold"
-        >
-          🚜 Book Service
+          ➕ Add Farm / 7-12
         </button>
 
 
@@ -308,7 +302,6 @@ export default function Dashboard({
 
 
       </div>
-
 
 
     </div>
