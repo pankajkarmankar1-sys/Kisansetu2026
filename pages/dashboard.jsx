@@ -9,16 +9,11 @@ import { supabase } from "../lib/supabase";
 
 export default function DashboardPage() {
 
-
   const router = useRouter();
 
-
   const [user,setUser] = useState(null);
-
   const [farms,setFarms] = useState([]);
-
   const [loading,setLoading] = useState(true);
-
   const [showAddFarm,setShowAddFarm] = useState(false);
 
 
@@ -28,8 +23,6 @@ export default function DashboardPage() {
     loadUser();
 
   },[]);
-
-
 
 
 
@@ -55,13 +48,12 @@ export default function DashboardPage() {
 
 
 
-
-
       const {
         data:profile
       } = await supabase
       .from("profiles")
       .select(`
+        role,
         name,
         phone,
         document_status,
@@ -75,6 +67,26 @@ export default function DashboardPage() {
       )
       .maybeSingle();
 
+
+
+      // ROLE REDIRECT START
+
+      if(profile?.role === "admin"){
+
+        router.replace("/admin");
+        return;
+
+      }
+
+
+      if(profile?.role === "driver"){
+
+        router.replace("/driver");
+        return;
+
+      }
+
+      // ROLE REDIRECT END
 
 
 
@@ -131,11 +143,14 @@ export default function DashboardPage() {
 
 
 
-
-
       setUser({
 
         id:user.id,
+
+
+        role:
+        profile?.role ||
+        "farmer",
 
 
         name:
@@ -179,18 +194,8 @@ export default function DashboardPage() {
 
 
 
-        subscription_end:
-
-        subscription?.start_date
-        ?
-        new Date(
-          subscription.start_date
-        ).toLocaleDateString()
-        :
-        null,
-
-
         subscription_amount:
+
         subscription?.amount || 0
 
 
@@ -216,7 +221,6 @@ export default function DashboardPage() {
 
 
 
-
   async function logout(){
 
     await supabase.auth.signOut();
@@ -224,7 +228,6 @@ export default function DashboardPage() {
     router.replace("/");
 
   }
-
 
 
 
@@ -239,7 +242,6 @@ export default function DashboardPage() {
     );
 
   }
-
 
 
 
@@ -276,14 +278,11 @@ export default function DashboardPage() {
 
 
 
-
   return (
 
     <Dashboard
 
-
       user={user}
-
 
       farms={farms}
 
@@ -294,9 +293,6 @@ export default function DashboardPage() {
         setShowAddFarm(true);
 
       }}
-
-
-
 
 
 
@@ -324,15 +320,11 @@ export default function DashboardPage() {
 
 
 
-
-
       onSubscription={()=>{
 
         router.push("/subscription");
 
       }}
-
-
 
 
 
@@ -346,15 +338,11 @@ export default function DashboardPage() {
 
 
 
-
-
       onProfile={()=>{
 
         router.push("/profile");
 
       }}
-
-
 
 
 
@@ -368,10 +356,7 @@ export default function DashboardPage() {
 
 
 
-
-
       onLogout={logout}
-
 
 
     />
