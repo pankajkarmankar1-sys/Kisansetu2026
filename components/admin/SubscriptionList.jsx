@@ -12,9 +12,52 @@ export default function SubscriptionList(){
 
 
 
+
   useEffect(()=>{
 
+
     loadSubscriptions();
+
+
+
+    const channel = supabase
+
+    .channel("admin-subscriptions")
+
+    .on(
+
+      "postgres_changes",
+
+      {
+
+        event:"*",
+
+        schema:"public",
+
+        table:"subscriptions"
+
+      },
+
+      ()=>{
+
+        loadSubscriptions();
+
+      }
+
+    )
+
+    .subscribe();
+
+
+
+
+
+    return ()=>{
+
+      supabase.removeChannel(channel);
+
+    };
+
 
   },[]);
 
@@ -30,28 +73,48 @@ export default function SubscriptionList(){
     try{
 
 
+      setLoading(true);
+
+
+
       const {
+
         data,
+
         error
+
       } = await supabase
 
       .from("subscriptions")
 
       .select(`
+
         id,
+
         user_id,
+
         acres,
+
         amount,
+
         status,
-        start_date
+
+        start_date,
+
+        created_at
+
       `)
 
       .order(
+
         "created_at",
+
         {
           ascending:false
         }
+
       );
+
 
 
 
@@ -63,28 +126,39 @@ export default function SubscriptionList(){
 
 
 
+
+
       const updated = await Promise.all(
 
         (data || []).map(async(sub)=>{
 
 
           const {
+
             data:profile
+
           } = await supabase
 
           .from("profiles")
 
           .select(`
+
             name,
+
             phone
+
           `)
 
           .eq(
+
             "auth_user_id",
+
             sub.user_id
+
           )
 
           .maybeSingle();
+
 
 
 
@@ -94,13 +168,19 @@ export default function SubscriptionList(){
             ...sub,
 
             name:
+
             profile?.name ||
+
             "Kisan",
 
 
+
             phone:
+
             profile?.phone ||
+
             "-"
+
 
           };
 
@@ -118,11 +198,13 @@ export default function SubscriptionList(){
 
 
     }
+
     catch(err){
 
-      console.log(err);
+      console.log(err.message);
 
     }
+
     finally{
 
       setLoading(false);
@@ -138,6 +220,23 @@ export default function SubscriptionList(){
 
 
 
+  if(loading){
+
+    return (
+
+      <h3>
+        Loading Subscriptions...
+      </h3>
+
+    );
+
+  }
+
+
+
+
+
+
 
   return (
 
@@ -147,7 +246,7 @@ export default function SubscriptionList(){
 
         background:"#fff",
 
-        padding:15,
+        padding:20,
 
         borderRadius:12
 
@@ -157,42 +256,25 @@ export default function SubscriptionList(){
 
 
       <h2>
-        👑 Subscription List
+        👑 Subscription Management
       </h2>
 
 
 
 
 
+
       {
-        loading
-
-        ?
-
-        <p>
-          Loading...
-        </p>
-
-
-
-        :
-
-
-
         subscriptions.length === 0
 
-
         ?
-
 
         <p>
           No Subscription Found
         </p>
 
 
-
         :
-
 
 
         subscriptions.map((sub)=>(
@@ -208,13 +290,14 @@ export default function SubscriptionList(){
 
             padding:15,
 
-            marginTop:10,
+            marginTop:15,
 
             borderRadius:10
 
           }}
 
           >
+
 
 
             <h3>
@@ -224,44 +307,42 @@ export default function SubscriptionList(){
 
 
             <p>
-              📱 {sub.phone}
-            </p>
-
-
-
-
-            <p>
-              🌾 Land:
+              📱 Mobile:
               {" "}
-              {sub.acres} Acre
+              {sub.phone}
             </p>
 
 
 
-
             <p>
-              💰 Paid:
+              🌾 Subscription Acre:
               {" "}
-              ₹{sub.amount}
+              {sub.acres || 0}
             </p>
 
 
 
+            <p>
+              💰 Amount:
+              {" "}
+              ₹{sub.amount || 0}
+            </p>
+
+
 
             <p>
-              📅 Start:
+              📅 Start Date:
               {" "}
               {
-              sub.start_date
-              ?
-              new Date(
                 sub.start_date
-              ).toLocaleDateString()
-              :
-              "-"
+                ?
+                new Date(
+                  sub.start_date
+                ).toLocaleDateString()
+                :
+                "-"
               }
             </p>
-
 
 
 
@@ -270,7 +351,6 @@ export default function SubscriptionList(){
               {" "}
               {sub.status}
             </p>
-
 
 
 
@@ -284,6 +364,7 @@ export default function SubscriptionList(){
 
 
     </div>
+
 
   );
 
