@@ -4,17 +4,17 @@ import { supabase } from "../../lib/supabase";
 export default function StatsCard() {
 
   const [stats, setStats] = useState({
-  total: 0,
-  today: 0,
-  pending: 0,
-  assigned: 0,
-  accepted: 0,
-  completed: 0,
-  cancelled: 0,
-  drivers: 0,
-  customers: 0,
-  revenue: 0,
-});
+    total: 0,
+    today: 0,
+    pending: 0,
+    assigned: 0,
+    accepted: 0,
+    completed: 0,
+    cancelled: 0,
+    drivers: 0,
+    customers: 0,
+    revenue: 0,
+  });
 
   useEffect(() => {
 
@@ -113,6 +113,17 @@ export default function StatsCard() {
               b.status === "Pending"
           ).length || 0,
 
+        assigned:
+          bookings?.filter(
+            (b) =>
+              b.status === "Assigned"
+          ).length || 0,
+
+        accepted:
+          bookings?.filter(
+            (b) =>
+              b.status === "Accepted"
+          ).length || 0,
         completed:
           bookings?.filter(
             (b) =>
@@ -129,9 +140,10 @@ export default function StatsCard() {
           drivers || 0,
 
         customers:
-          customers || 0,
+          farmer || 0,
 
         revenue,
+
       });
 
     } catch (err) {
@@ -142,6 +154,7 @@ export default function StatsCard() {
       );
 
     }
+
   }
 
   const card = {
@@ -152,6 +165,7 @@ export default function StatsCard() {
     boxShadow: "0 2px 8px rgba(0,0,0,.1)",
     textAlign: "center",
   };
+
   return (
 
     <div>
@@ -179,7 +193,6 @@ export default function StatsCard() {
           gap: 20,
         }}
       >
-
         <div style={card}>
           <h3>📋 Total Bookings</h3>
           <h1>{stats.total}</h1>
@@ -196,6 +209,16 @@ export default function StatsCard() {
         </div>
 
         <div style={card}>
+          <h3>🚜 Assigned</h3>
+          <h1>{stats.assigned}</h1>
+        </div>
+
+        <div style={card}>
+          <h3>👍 Accepted</h3>
+          <h1>{stats.accepted}</h1>
+        </div>
+
+        <div style={card}>
           <h3>✅ Completed</h3>
           <h1>{stats.completed}</h1>
         </div>
@@ -206,7 +229,7 @@ export default function StatsCard() {
         </div>
 
         <div style={card}>
-          <h3>👨‍🌾 Customers</h3>
+          <h3>👨‍🌾 Farmers</h3>
           <h1>{stats.customers}</h1>
         </div>
 
