@@ -6,58 +6,85 @@ export default function AddFarm({
   back,
 }) {
 
-  const [loading, setLoading] = useState(false);
+  const [loading,setLoading] = useState(false);
 
-  const [farm, setFarm] = useState({
-    name: "",
-    village: "",
-    state: "Maharashtra",
-    district: "",
-    taluka: "",
-    farm_address: "",
-    acres: "",
-    latitude: "",
-    longitude: "",
+  const [farm,setFarm] = useState({
+
+    name:"",
+    village:"",
+    state:"Maharashtra",
+    district:"",
+    taluka:"",
+    farm_address:"",
+    acres:"",
+    latitude:"",
+    longitude:""
+
   });
 
-  const [documents, setDocuments] = useState([]);
-  const [message, setMessage] = useState("");
+
+  const [documents,setDocuments] = useState([]);
+
+  const [message,setMessage] = useState("");
+
 
 
   function updateField(key,value){
+
     setFarm(prev=>({
+
       ...prev,
       [key]:value
+
     }));
+
   }
+
+
 
 
   useEffect(()=>{
 
-    if(!navigator.geolocation) return;
+    if(!navigator.geolocation)
+      return;
+
 
     navigator.geolocation.getCurrentPosition(
+
       (position)=>{
 
         setFarm(prev=>({
+
           ...prev,
-          latitude:position.coords.latitude,
-          longitude:position.coords.longitude
+
+          latitude:
+          position.coords.latitude,
+
+          longitude:
+          position.coords.longitude
+
         }));
 
       },
+
       ()=>{}
+
     );
+
 
   },[]);
 
 
 
+
+
   function handleDocumentChange(e){
 
-    const files = Array.from(
+    const files =
+    Array.from(
       e.target.files || []
     );
+
 
     setDocuments(files);
 
@@ -65,7 +92,9 @@ export default function AddFarm({
 
 
 
+
   async function uploadDocuments(khetId,userId){
+
 
     for(const file of documents){
 
@@ -77,7 +106,8 @@ export default function AddFarm({
 
       const {
         error:uploadError
-      } =
+      }
+      =
       await supabase.storage
       .from("khet-documents")
       .upload(
@@ -86,14 +116,17 @@ export default function AddFarm({
       );
 
 
+
       if(uploadError)
-      throw uploadError;
+        throw uploadError;
+
 
 
 
       const {
         data:urlData
-      } =
+      }
+      =
       supabase.storage
       .from("khet-documents")
       .getPublicUrl(
@@ -101,36 +134,38 @@ export default function AddFarm({
       );
 
 
+
       const {
         error:dbError
-      } =
+      }
+      =
       await supabase
       .from("khet_documents")
       .insert({
 
         khet_id:khetId,
+
         user_id:userId,
-        document_type:"7/12",
+
         document_name:file.name,
-        document_url:urlData.publicUrl,
-        file_url:urlData.publicUrl
+
+        document_url:
+        urlData.publicUrl,
+
+        document_type:"7/12"
 
       });
 
 
 
       if(dbError)
-      throw dbError;
+        throw dbError;
 
 
     }
 
+
   }
-
-
-
-
-
   async function saveFarm(){
 
     try{
@@ -141,16 +176,18 @@ export default function AddFarm({
 
 
       const {
-        data:{user},
+        data:{
+          user
+        },
         error:userError
-      }
-      =
+
+      } =
       await supabase.auth.getUser();
 
 
 
       if(userError)
-      throw userError;
+        throw userError;
 
 
 
@@ -163,9 +200,10 @@ export default function AddFarm({
 
 
 
+
       if(!farm.name.trim()){
 
-        alert("Enter Farm Name");
+        alert("Farm Name bharna jaruri hai");
         return;
 
       }
@@ -174,7 +212,7 @@ export default function AddFarm({
 
       if(!farm.village.trim()){
 
-        alert("Enter Village");
+        alert("Village bharna jaruri hai");
         return;
 
       }
@@ -183,58 +221,106 @@ export default function AddFarm({
 
       if(!farm.acres){
 
-        alert("Enter Acres");
+        alert("Acres bharna jaruri hai");
         return;
 
       }
 
 
 
+
+
+
       const {
         data:insertedFarm,
         error:insertError
-      }
-      =
+
+      } =
       await supabase
+
       .from("khets")
+
       .insert({
 
         user_id:user.id,
+
         name:farm.name,
+
         village:farm.village,
+
         state:farm.state,
+
         district:farm.district,
+
         taluka:farm.taluka,
+
         farm_address:farm.farm_address,
+
         acres:Number(farm.acres),
-        latitude:farm.latitude,
-        longitude:farm.longitude
+
+        latitude:
+        farm.latitude || null,
+
+        longitude:
+        farm.longitude || null
 
       })
+
       .select()
+
       .single();
 
 
 
+
+
       if(insertError)
-      throw insertError;
+        throw insertError;
 
 
 
-      if(documents.length > 0){
 
-        await uploadDocuments(
-          insertedFarm.id,
-          user.id
-        );
 
-      }
+
+      await uploadDocuments(
+
+        insertedFarm.id,
+
+        user.id
+
+      );
+
+
+
 
 
 
       setMessage(
         "✅ Farm Added Successfully"
       );
+
+
+
+
+      setFarm({
+
+        name:"",
+        village:"",
+        state:"Maharashtra",
+        district:"",
+        taluka:"",
+        farm_address:"",
+        acres:"",
+        latitude:"",
+        longitude:""
+
+      });
+
+
+
+      setDocuments([]);
+
+
 
 
       if(onSaved){
@@ -246,20 +332,24 @@ export default function AddFarm({
 
 
     }
+
     catch(error){
 
       console.log(error);
 
-      alert(
+      setMessage(
         error.message
       );
 
+
     }
+
     finally{
 
       setLoading(false);
 
     }
+
 
   }
 
@@ -267,165 +357,266 @@ export default function AddFarm({
 
 
 
-return (
 
-<div className="min-h-screen bg-green-50 p-5">
+  return (
 
+    <div className="min-h-screen bg-green-50 p-5">
 
-<div className="bg-white rounded-2xl shadow-lg p-5">
 
+      <div className="bg-white rounded-3xl shadow p-5">
 
-<h2 className="text-2xl font-bold text-green-700 mb-5">
-🌾 Add New Farm
-</h2>
 
+        <h2 className="text-2xl font-bold text-green-700 mb-5">
 
-{message &&
+          🌾 Add Another 7/12 Farm
 
-<div className="bg-green-100 p-3 rounded mb-4">
-{message}
-</div>
+        </h2>
 
-}
 
 
 
-<input
-className="w-full border p-3 rounded-xl mb-3"
-placeholder="Farm Name"
-value={farm.name}
-onChange={(e)=>updateField("name",e.target.value)}
-/>
 
+        {
+          message &&
 
+          <div className="bg-green-100 p-3 rounded-xl mb-4">
 
-<input
-className="w-full border p-3 rounded-xl mb-3"
-placeholder="Village"
-value={farm.village}
-onChange={(e)=>updateField("village",e.target.value)}
-/>
+            {message}
 
+          </div>
 
+        }
 
-<input
-className="w-full border p-3 rounded-xl mb-3"
-placeholder="District"
-value={farm.district}
-onChange={(e)=>updateField("district",e.target.value)}
-/>
 
 
 
-<input
-className="w-full border p-3 rounded-xl mb-3"
-placeholder="Taluka"
-value={farm.taluka}
-onChange={(e)=>updateField("taluka",e.target.value)}
-/>
+        <input
+          placeholder="Farm Name"
+          value={farm.name}
+          onChange={(e)=>
+            updateField(
+              "name",
+              e.target.value
+            )
+          }
+          className="w-full border rounded-xl p-3 mb-3"
+        />
 
 
 
-<input
-className="w-full border p-3 rounded-xl mb-3"
-placeholder="Area Acres"
-type="number"
-value={farm.acres}
-onChange={(e)=>updateField("acres",e.target.value)}
-/>
+        <input
+          placeholder="Village Name"
+          value={farm.village}
+          onChange={(e)=>
+            updateField(
+              "village",
+              e.target.value
+            )
+          }
+          className="w-full border rounded-xl p-3 mb-3"
+        />
 
 
 
-<input
-className="w-full border p-3 rounded-xl mb-3"
-placeholder="Farm Address"
-value={farm.farm_address}
-onChange={(e)=>updateField("farm_address",e.target.value)}
-/>
+        <input
+          placeholder="District"
+          value={farm.district}
+          onChange={(e)=>
+            updateField(
+              "district",
+              e.target.value
+            )
+          }
+          className="w-full border rounded-xl p-3 mb-3"
+        />
 
 
 
-<div className="bg-green-100 rounded-xl p-3 mb-4">
+        <input
+          placeholder="Taluka"
+          value={farm.taluka}
+          onChange={(e)=>
+            updateField(
+              "taluka",
+              e.target.value
+            )
+          }
+          className="w-full border rounded-xl p-3 mb-3"
+        />
 
-📍 GPS Saved
 
-<br/>
 
-Lat:
-{farm.latitude}
+        <input
+          type="number"
+          placeholder="Area Acres"
+          value={farm.acres}
+          onChange={(e)=>
+            updateField(
+              "acres",
+              e.target.value
+            )
+          }
+          className="w-full border rounded-xl p-3 mb-3"
+        />
+        <input
+          placeholder="Farm Address"
+          value={farm.farm_address}
+          onChange={(e)=>
+            updateField(
+              "farm_address",
+              e.target.value
+            )
+          }
+          className="w-full border rounded-xl p-3 mb-3"
+        />
 
-<br/>
 
-Long:
-{farm.longitude}
 
-</div>
+        <div className="grid grid-cols-2 gap-3 mb-4">
 
 
+          <input
+            value={farm.latitude}
+            readOnly
+            placeholder="Latitude"
+            className="border rounded-xl p-3 bg-gray-100"
+          />
 
 
-<div className="border rounded-xl p-4 mb-4">
+          <input
+            value={farm.longitude}
+            readOnly
+            placeholder="Longitude"
+            className="border rounded-xl p-3 bg-gray-100"
+          />
 
 
-<label className="font-bold">
-📄 Upload 7/12 Documents
-</label>
+        </div>
 
 
-<input
-type="file"
-multiple
-accept="image/*,.pdf"
-onChange={handleDocumentChange}
-className="mt-3 w-full"
-/>
 
 
 
-</div>
+        <div className="bg-green-50 rounded-2xl p-4 mb-5">
 
 
+          <label className="font-bold block mb-2">
 
+            📄 Upload 7/12 Documents
 
-<div className="flex gap-3">
+          </label>
 
 
-<button
-onClick={back}
-className="flex-1 bg-gray-300 p-3 rounded-xl"
->
-Back
-</button>
 
+          <input
 
+            type="file"
 
-<button
-onClick={saveFarm}
-disabled={loading}
-className="flex-1 bg-green-600 text-white p-3 rounded-xl"
->
+            multiple
 
-{
-loading
-?
-"Saving..."
-:
-"Save Farm"
-}
+            accept=".pdf,image/*"
 
-</button>
+            onChange={handleDocumentChange}
 
+            className="w-full border p-3 rounded-xl"
 
+          />
 
-</div>
 
 
-</div>
+          {
+            documents.length > 0 &&
 
+            <div className="mt-3">
 
-</div>
+              <p className="font-semibold">
 
-);
+                Selected Files:
+
+              </p>
+
+
+              {
+                documents.map((file,index)=>(
+
+                  <p key={index}>
+
+                    📎 {file.name}
+
+                  </p>
+
+                ))
+
+              }
+
+
+            </div>
+
+          }
+
+
+
+        </div>
+
+
+
+
+
+
+
+        <div className="flex gap-3">
+
+
+          <button
+
+            onClick={back}
+
+            className="flex-1 bg-gray-300 rounded-xl p-3 font-bold"
+
+          >
+
+            ← Back
+
+          </button>
+
+
+
+
+
+          <button
+
+            onClick={saveFarm}
+
+            disabled={loading}
+
+            className="flex-1 bg-green-600 text-white rounded-xl p-3 font-bold"
+
+          >
+
+            {
+              loading
+              ?
+              "Saving..."
+              :
+              "💾 Save Farm"
+            }
+
+
+          </button>
+
+
+        </div>
+
+
+
+
+      </div>
+
+
+    </div>
+
+
+  );
 
 
 }
