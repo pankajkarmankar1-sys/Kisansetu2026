@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
-import LocationSelector from "./LocationSelector";
+import LocationSelector from "../maps/LocationSelector";
 
 export default function AddFarm({
   onSaved,
