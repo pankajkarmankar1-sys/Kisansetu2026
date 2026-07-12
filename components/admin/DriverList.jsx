@@ -3,52 +3,87 @@ import { supabase } from "../../lib/supabase";
 
 export default function DriverList() {
 
-  const [drivers, setDrivers] = useState([]);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
+
+  const [drivers,setDrivers] = useState([]);
+
+  const [search,setSearch] = useState("");
+
+  const [loading,setLoading] = useState(true);
 
 
-  useEffect(() => {
+
+
+
+  useEffect(()=>{
+
 
     loadDrivers();
 
 
+
     const channel = supabase
-      .channel("admin-drivers")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "drivers",
-        },
-        () => {
-          loadDrivers();
-        }
-      )
-      .subscribe();
+
+    .channel("admin-drivers")
+
+    .on(
+
+      "postgres_changes",
+
+      {
+
+        event:"*",
+
+        schema:"public",
+
+        table:"drivers"
+
+      },
+
+      ()=>{
+
+        loadDrivers();
+
+      }
+
+    )
+
+    .subscribe();
 
 
-    return () => {
+
+
+
+    return ()=>{
+
       supabase.removeChannel(channel);
+
     };
 
 
-  }, []);
+  },[]);
 
 
 
 
-  async function loadDrivers() {
 
-    try {
+
+
+  async function loadDrivers(){
+
+
+    try{
+
 
       setLoading(true);
 
 
+
       const {
+
         data,
+
         error
+
       } = await supabase
 
       .from("drivers")
@@ -56,11 +91,16 @@ export default function DriverList() {
       .select("*")
 
       .order(
+
         "created_at",
+
         {
           ascending:false
         }
+
       );
+
+
 
 
 
@@ -69,20 +109,28 @@ export default function DriverList() {
 
 
 
+
+
       setDrivers(data || []);
 
 
+
     }
+
     catch(err){
+
+      console.log(err.message);
 
       alert(err.message);
 
     }
+
     finally{
 
       setLoading(false);
 
     }
+
 
   }
 
@@ -91,20 +139,29 @@ export default function DriverList() {
 
 
 
-  async function deleteDriver(id) {
+
+  async function deleteDriver(id){
 
 
-    if(
-      !window.confirm(
-        "Delete driver?"
-      )
-    )
-    return;
+    const confirmDelete =
+
+    window.confirm(
+      "Delete driver?"
+    );
+
+
+
+    if(!confirmDelete)
+      return;
+
+
 
 
 
     const {
+
       error
+
     } = await supabase
 
     .from("drivers")
@@ -112,9 +169,13 @@ export default function DriverList() {
     .delete()
 
     .eq(
+
       "id",
+
       id
+
     );
+
 
 
 
@@ -128,7 +189,16 @@ export default function DriverList() {
     }
 
 
+
+
+    alert(
+      "Driver Deleted"
+    );
+
+
+
     loadDrivers();
+
 
 
   }
@@ -138,17 +208,24 @@ export default function DriverList() {
 
 
 
-  const filteredDrivers = drivers.filter(
-    (driver)=>
 
-      JSON.stringify(driver)
 
-      .toLowerCase()
+  const filteredDrivers =
 
-      .includes(
-        search.toLowerCase()
-      )
+  drivers.filter((driver)=>
+
+    JSON.stringify(driver)
+
+    .toLowerCase()
+
+    .includes(
+
+      search.toLowerCase()
+
+    )
+
   );
+
 
 
 
@@ -157,7 +234,13 @@ export default function DriverList() {
 
   if(loading){
 
-    return <h3>Loading Drivers...</h3>;
+    return (
+
+      <h3>
+        Loading Drivers...
+      </h3>
+
+    );
 
   }
 
@@ -168,19 +251,29 @@ export default function DriverList() {
 
   return (
 
+
     <div
+
       style={{
+
         background:"#fff",
+
         padding:20,
+
         marginTop:20,
-        borderRadius:12,
+
+        borderRadius:12
+
       }}
+
     >
+
 
 
       <h2>
         🚜 Driver Management
       </h2>
+
 
 
 
@@ -196,13 +289,20 @@ export default function DriverList() {
         }
 
         style={{
+
           width:"100%",
+
           padding:10,
+
           margin:"15px 0",
-          borderRadius:8,
+
+          borderRadius:8
+
         }}
 
       />
+
+
 
 
 
@@ -213,12 +313,19 @@ export default function DriverList() {
         onClick={loadDrivers}
 
         style={{
+
           padding:10,
+
           background:"#16a34a",
+
           color:"#fff",
+
           border:"none",
+
           borderRadius:8,
+
           marginBottom:15
+
         }}
 
       >
@@ -232,6 +339,19 @@ export default function DriverList() {
 
 
 
+
+      <div
+
+        style={{
+
+          overflowX:"auto"
+
+        }}
+
+      >
+
+
+
       <table
 
         width="100%"
@@ -241,6 +361,7 @@ export default function DriverList() {
         cellPadding="8"
 
       >
+
 
         <thead>
 
@@ -264,105 +385,142 @@ export default function DriverList() {
 
 
 
+
+
         <tbody>
 
 
         {
-          filteredDrivers.length===0
 
-          ?
+        filteredDrivers.length === 0
+
+        ?
+
+        (
 
           <tr>
 
             <td colSpan="6">
+
               No Drivers Found
+
             </td>
 
           </tr>
 
-
-          :
-
-
-          filteredDrivers.map(
-            (driver)=>(
-
-            <tr key={driver.id}>
+        )
 
 
-              <td>
-                {driver.name || "-"}
-              </td>
+        :
 
 
+        filteredDrivers.map((driver)=>(
 
-              <td>
-                {driver.phone || "-"}
-              </td>
+
+          <tr key={driver.id}>
+
+
+            <td>
+
+              {driver.name || "-"}
+
+            </td>
 
 
 
-              <td>
-                {driver.village || "-"}
-              </td>
+            <td>
+
+              {driver.phone || "-"}
+
+            </td>
 
 
 
-              <td>
-                {driver.tractor_num || "-"}
-              </td>
+            <td>
+
+              {driver.village || "-"}
+
+            </td>
 
 
 
-              <td>
-                {driver.approval_status || "Pending"}
-              </td>
+            <td>
+
+              {driver.tractor_num || "-"}
+
+            </td>
 
 
 
-              <td>
+            <td>
 
-                <button
+              {driver.approval_status || "Pending"}
 
-                  onClick={()=>
-                    deleteDriver(
-                      driver.id
-                    )
-                  }
-
-                  style={{
-                    background:"#dc2626",
-                    color:"#fff",
-                    border:"none",
-                    padding:"8px 12px",
-                    borderRadius:6
-                  }}
-
-                >
-
-                  🗑 Delete
-
-                </button>
-
-              </td>
+            </td>
 
 
-            </tr>
 
-            )
-          )
+            <td>
+
+
+              <button
+
+                onClick={()=>
+                  deleteDriver(
+                    driver.id
+                  )
+                }
+
+                style={{
+
+                  background:"#dc2626",
+
+                  color:"#fff",
+
+                  border:"none",
+
+                  padding:"8px 12px",
+
+                  borderRadius:6
+
+                }}
+
+              >
+
+                🗑 Delete
+
+              </button>
+
+
+
+            </td>
+
+
+          </tr>
+
+
+        ))
+
         }
+
 
 
         </tbody>
 
 
+
       </table>
+
+
+      </div>
+
 
 
 
     </div>
 
+
   );
+
 
 }
