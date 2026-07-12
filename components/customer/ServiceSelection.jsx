@@ -1,13 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabase";
+import React from "react";
 
 
 export default function ServiceSelection({
 
-  user,
-  selKhet,
-  setSelectedService,
   selectedService,
+  setSelectedService,
   acres,
   setAcres,
   next,
@@ -16,389 +13,197 @@ export default function ServiceSelection({
 }) {
 
 
-  const [services,setServices] = useState([]);
+const services=[
 
-  const [loading,setLoading] = useState(true);
+{
+name:"🌱 Rotavator",
+price:1200
+},
 
-  const [isSubscriber,setIsSubscriber] = useState(false);
+{
+name:"🚜 Cultivator",
+price:1000
+},
 
+{
+name:"🌾 Plough",
+price:1500
+},
 
+{
+name:"🌿 Sowing Service",
+price:1800
+}
 
-  useEffect(()=>{
+];
 
-    loadServices();
 
-    checkSubscription();
 
-  },[]);
+return(
 
+<div className="min-h-screen bg-green-50 p-5">
 
 
+<div className="max-w-xl mx-auto">
 
-  async function loadServices(){
 
-    try{
+<button
 
-      const {
-        data,
-        error
-      } = await supabase
+onClick={back}
 
-      .from("services")
+className="mb-4 bg-white px-4 py-2 rounded-xl shadow"
 
-      .select("*")
+>
 
-      .eq(
-        "active",
-        true
-      )
-      .order(
-        "name"
-      );
+← Back
 
+</button>
 
 
-      if(error)
-        throw error;
 
 
+<div className="bg-white rounded-3xl shadow p-6">
 
-      setServices(data || []);
 
+<h1 className="text-2xl font-bold text-green-700">
 
-    }
-    catch(err){
+Select Service 🚜
 
-      console.log(err);
+</h1>
 
-    }
-    finally{
 
-      setLoading(false);
 
-    }
 
-  }
 
+<div className="grid gap-4 mt-5">
 
 
+{
+services.map((service)=>(
 
 
-  async function checkSubscription(){
+<button
 
+key={service.name}
 
-    if(!user?.id)
-      return;
+onClick={()=>setSelectedService(service)}
 
+className={
 
-    const {
-      data
-    } = await supabase
+"p-5 rounded-2xl text-left shadow border " +
 
-    .from("subscriptions")
+(selectedService?.name===service.name
+?
+"bg-green-100 border-green-600"
+:
+"bg-white")
 
-    .select("id")
+}
 
-    .eq(
-      "user_id",
-      user.id
-    )
+>
 
-    .eq(
-      "status",
-      "active"
-    )
 
-    .maybeSingle();
+<h2 className="text-xl font-bold">
 
+{service.name}
 
+</h2>
 
-    setIsSubscriber(
-      !!data
-    );
 
+<p className="mt-2">
 
-  }
+Normal Rate: ₹{service.price}
 
+</p>
 
 
 
+</button>
 
 
-  return (
+))
 
-    <div className="min-h-screen bg-green-50 p-5">
+}
 
 
-      <div className="bg-white rounded-3xl shadow p-5">
+</div>
 
 
-        <button
-          onClick={back}
-          className="mb-4 bg-gray-200 px-4 py-2 rounded-xl"
-        >
-          ← Back
-        </button>
 
 
 
-        <h1 className="text-2xl font-bold text-green-700">
-          🚜 Select Service
-        </h1>
 
+<label className="block mt-6 font-bold">
 
+Area (Acre)
 
+</label>
 
-        {
-          selKhet &&
 
-          <div className="bg-green-100 rounded-2xl p-4 mt-4">
+<input
 
-            🌾 Farm:
+type="number"
 
-            <b>
-              {" "}
-              {selKhet.name}
-            </b>
+value={acres}
 
-            <p>
-              📍 {selKhet.village}
-            </p>
+onChange={(e)=>setAcres(e.target.value)}
 
-          </div>
+placeholder="Enter acre"
 
-        }
+className="w-full p-4 border rounded-xl mt-2"
 
+/>
 
 
 
 
 
-        <div className="mt-5">
 
-          <h3 className="font-bold">
-            📏 Enter Acres
-          </h3>
+<button
 
+onClick={()=>{
 
-          <input
+if(!selectedService){
 
-            type="number"
+alert("Select service");
 
-            value={acres}
+return;
 
-            onChange={(e)=>
-              setAcres(e.target.value)
-            }
+}
 
-            className="w-full border rounded-xl p-3 mt-2"
 
-          />
+if(!acres){
 
+alert("Enter acre");
 
-        </div>
+return;
 
+}
 
 
+next();
 
+}}
 
+className="w-full mt-6 bg-green-600 text-white p-4 rounded-2xl font-bold"
 
-        <h3 className="font-bold text-xl mt-6 mb-3">
-          🌱 Choose Service
-        </h3>
+>
 
+Continue
 
+</button>
 
 
 
-        {
-          loading
+</div>
 
-          ?
 
-          <p>
-            Loading services...
-          </p>
+</div>
 
-          :
 
-          services.map((service)=>(
+</div>
 
 
-            <div
-
-              key={service.id}
-
-
-              onClick={()=>{
-
-
-                const rate =
-
-                isSubscriber
-
-                ?
-
-                service.price_subscriber
-
-                :
-
-                service.price;
-
-
-
-                setSelectedService({
-
-                  ...service,
-
-                  selected_price:Number(rate)
-
-                });
-
-
-              }}
-
-
-              className={
-
-                `border rounded-2xl p-4 mb-3 cursor-pointer 
-
-                ${
-                selectedService?.id===service.id
-                ?
-                "bg-green-100 border-green-600"
-                :
-                "bg-white"
-                }`
-
-              }
-
-
-            >
-
-              <h3 className="font-bold">
-
-                {service.icon}
-
-                {" "}
-
-                {service.name_hi || service.name}
-
-              </h3>
-
-
-
-              <p>
-
-                💰 ₹
-
-                {
-                isSubscriber
-                ?
-                service.price_subscriber
-                :
-                service.price
-                }
-
-                / Acre
-
-              </p>
-
-
-
-            </div>
-
-
-          ))
-
-        }
-
-
-
-
-
-
-        {
-          selectedService &&
-
-          <div className="bg-green-100 p-4 rounded-2xl mt-5">
-
-
-            <h3 className="font-bold">
-              📋 Summary
-            </h3>
-
-
-            <p>
-              Service:
-              {" "}
-              {selectedService.name_hi || selectedService.name}
-            </p>
-
-
-            <p>
-              Total:
-              {" "}
-              ₹
-              {
-              Number(acres || 0) *
-              Number(selectedService.selected_price || 0)
-              }
-            </p>
-
-
-          </div>
-
-        }
-
-
-
-
-
-
-        <button
-
-          onClick={()=>{
-
-
-            if(!selectedService){
-
-              alert("Service select kare");
-              return;
-
-            }
-
-
-            if(!acres){
-
-              alert("Acres enter kare");
-              return;
-
-            }
-
-
-            next();
-
-
-          }}
-
-          className="w-full bg-green-600 text-white p-4 rounded-2xl mt-6 font-bold"
-
-        >
-
-          Continue →
-
-        </button>
-
-
-
-
-      </div>
-
-
-    </div>
-
-
-  );
+);
 
 }
