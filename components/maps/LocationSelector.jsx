@@ -22,9 +22,9 @@ export default function LocationSelector({ onSelect }) {
 
   async function loadStates() {
 
-    const { data, error } = await supabase
-      .from("villages")
-      .select("state");
+   const { data, error } = await supabase
+  .from("locations")
+  .select("state");
 
     if (error) {
       console.log(error);
@@ -41,9 +41,9 @@ export default function LocationSelector({ onSelect }) {
   async function loadDistricts(selectedState) {
 
     const { data, error } = await supabase
-      .from("villages")
-      .select("district")
-      .eq("state", selectedState);
+  .from("locations")
+  .select("district")
+  .eq("state", selectedState);
 
     if (error) {
       console.log(error);
@@ -60,10 +60,9 @@ export default function LocationSelector({ onSelect }) {
   async function loadTalukas(selectedDistrict) {
 
     const { data, error } = await supabase
-      .from("villages")
-      .select("taluka")
-      .eq("district", selectedDistrict);
-
+  .from("locations")
+  .select("taluka")
+  .eq("district", selectedDistrict);
     if (error) {
       console.log(error);
       return;
@@ -78,12 +77,12 @@ export default function LocationSelector({ onSelect }) {
   async function loadVillages(selectedState, selectedDistrict, selectedTaluka) {
 
     const { data, error } = await supabase
-      .from("villages")
-      .select("village")
-      .eq("state", selectedState)
-      .eq("district", selectedDistrict)
-      .eq("taluka", selectedTaluka)
-      .order("village");
+  .from("locations")
+  .select("village")
+  .eq("state", selectedState)
+  .eq("district", selectedDistrict)
+  .eq("taluka", selectedTaluka)
+  .order("village");
 
     if (error) {
       console.log(error);
