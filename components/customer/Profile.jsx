@@ -1,244 +1,105 @@
-import React, { useState } from "react";
-import SubscriptionStatus from "./SubscriptionStatus";
-import EditProfile from "./EditProfile";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
+import Profile from "../components/customer/Profile";
+import { supabase } from "../lib/supabase";
 
-export default function Profile({
-  user,
-  back,
-}) {
 
+export default function ProfilePage(){
 
-  const [edit,setEdit] = useState(false);
+const router = useRouter();
 
+const [user,setUser]=useState(null);
+const [loading,setLoading]=useState(true);
 
 
-  if(edit){
 
-    return (
+useEffect(()=>{
 
-      <EditProfile
+loadProfile();
 
-        user={user}
+},[]);
 
-        onDone={()=>setEdit(false)}
 
-        back={()=>setEdit(false)}
 
-      />
+async function loadProfile(){
 
-    );
 
-  }
+const {
+data:{
+user
+}
 
+}=await supabase.auth.getUser();
 
 
 
+if(!user){
 
-  return (
+router.replace("/login");
+return;
 
-    <div
+}
 
-      style={{
 
-        padding:20,
 
-        background:"#f5f7fb",
+const {
+data:profile
+}=await supabase
 
-        minHeight:"100vh",
+.from("profiles")
 
-      }}
+.select("*")
 
-    >
+.eq(
+"auth_user_id",
+user.id
+)
 
+.maybeSingle();
 
 
-      <button
 
-        onClick={back}
+setUser({
 
-        style={{
+id:user.id,
 
-          padding:10,
+phone:user.phone,
 
-          marginBottom:20,
+...profile
 
-        }}
+});
 
-      >
 
-        ← Back
 
-      </button>
+setLoading(false);
 
 
+}
 
 
 
-      <h1>
-        👤 Farmer Profile
-      </h1>
+if(loading){
 
+return <div className="p-5">
+Loading...
+</div>
 
+}
 
 
 
-      <button
+return (
 
-        onClick={()=>setEdit(true)}
+<Profile
 
-        style={{
+user={user}
 
-          width:"100%",
+back={()=>router.back()}
 
-          padding:14,
+/>
 
-          marginTop:15,
+);
 
-          background:"#2563eb",
-
-          color:"#fff",
-
-          border:"none",
-
-          borderRadius:10,
-
-        }}
-
-      >
-
-        ✏️ Edit Profile
-
-      </button>
-
-
-
-
-
-
-
-      <div
-
-        style={{
-
-          background:"#fff",
-
-          padding:20,
-
-          borderRadius:12,
-
-          marginTop:20,
-
-        }}
-
-      >
-
-
-
-        <p>
-          👨‍🌾 Name:
-          {" "}
-          {user?.name || "-"}
-        </p>
-
-
-
-
-        <p>
-          📱 Phone:
-          {" "}
-          {user?.phone || "-"}
-        </p>
-
-
-
-
-        <p>
-          🏠 State:
-          {" "}
-          {user?.state || "-"}
-        </p>
-
-
-
-
-        <p>
-          📍 District:
-          {" "}
-          {user?.district || "-"}
-        </p>
-
-
-
-
-        <p>
-          📍 Taluka:
-          {" "}
-          {user?.taluka || "-"}
-        </p>
-
-
-
-
-        <p>
-          🌱 Village:
-          {" "}
-          {user?.village || "-"}
-        </p>
-
-
-
-
-        <p>
-          🚜 Farm Address:
-          {" "}
-          {user?.farm_address || "-"}
-        </p>
-
-
-
-
-        <p>
-          🌾 Acres:
-          {" "}
-          {user?.acres || 0}
-        </p>
-
-
-
-
-        <p>
-          📄 Document Status:
-          {" "}
-          {
-          user?.document_status === "approved"
-          ?
-          "✅ Approved"
-          :
-          "⏳ Pending"
-          }
-        </p>
-
-
-
-      </div>
-
-
-
-
-
-      <SubscriptionStatus
-
-        user={user}
-
-      />
-
-
-
-
-
-    </div>
-
-  );
 
 }
