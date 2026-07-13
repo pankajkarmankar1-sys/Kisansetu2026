@@ -221,6 +221,58 @@ export default function Dashboard({
 
       </div>
 
+{/* ================= SUBSCRIPTION STATUS ================= */}
+
+<div className="bg-white rounded-3xl shadow-xl p-6 mt-6">
+
+  <h2 className="text-xl font-bold text-green-700">
+    🌱 Subscription Status
+  </h2>
+
+  <h3 style={{ marginTop: 10 }}>
+    {user?.subscription_status === "active"
+      ? "✅ Active"
+      : "❌ Not Active"}
+  </h3>
+
+  <button
+    onClick={onSubscription}
+    className="primaryBtn"
+    style={{ marginTop: 15 }}
+  >
+    Activate / View
+  </button>
+
+</div>
+
+{/* ================= NEARBY DRIVERS ================= */}
+
+<div className="bg-white rounded-3xl shadow-xl p-6 mt-6">
+
+  <h2 className="text-xl font-bold text-green-700">
+    🚜 Nearby Drivers
+  </h2>
+
+  <p style={{ marginTop: 10 }}>
+    No Driver Available
+  </p>
+
+</div>
+
+{/* ================= HELP & SUPPORT ================= */}
+
+<div className="bg-white rounded-3xl shadow-xl p-6 mt-6">
+
+  <h2 className="text-xl font-bold text-green-700">
+    ☎ Help & Support
+  </h2>
+
+  <p style={{ marginTop: 10 }}>
+    Need help? Contact KisanSetu Support.
+  </p>
+
+</div>
+
 
       {/* ================= ADMIN ================= */}
 
@@ -234,6 +286,7 @@ export default function Dashboard({
           </button>
         </div>
       )}
+      
 
       {/* ================= DRIVER ================= */}
 
