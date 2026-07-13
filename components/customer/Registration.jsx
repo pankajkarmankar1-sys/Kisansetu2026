@@ -2,503 +2,296 @@ import { useState } from "react";
 import { supabase } from "../../lib/supabase";
 import LocationSelector from "../maps/LocationSelector";
 
-
 export default function Registration({
   phone,
   onDone,
   back,
 }) {
 
+const [name,setName]=useState("");
+const [farmAddress,setFarmAddress]=useState("");
+const [acres,setAcres]=useState("");
+const [role,setRole]=useState("farmer");
+const [location,setLocation]=useState(null);
+const [loading,setLoading]=useState(false);
+const [error,setError]=useState("");
 
-  const [name,setName] = useState("");
 
-  const [farmAddress,setFarmAddress] = useState("");
+async function handleSubmit(e){
 
-  const [acres,setAcres] = useState("");
+e.preventDefault();
 
-  const [role,setRole] = useState("farmer");
+setError("");
 
-  const [location,setLocation] = useState(null);
+if(!name){
+setError("Please enter your name");
+return;
+}
 
-  const [loading,setLoading] = useState(false);
+if(!location){
+setError("Please select location");
+return;
+}
 
-  const [error,setError] = useState("");
 
+try{
 
+setLoading(true);
 
 
+const {data:{user}} =
+await supabase.auth.getUser();
 
-  function handleLocation(data){
 
-    setLocation(data);
+if(!user)
+throw new Error("Login expired");
 
-  }
 
 
+const {error}=await supabase
+.from("profiles")
+.upsert({
 
+auth_user_id:user.id,
 
+phone:phone || user.phone,
 
+role,
 
+name,
 
-  async function handleSubmit(e){
+farm_address:farmAddress,
 
-    e.preventDefault();
+acres:Number(acres||0),
 
+village:location.village || "",
 
-    setError("");
+state:location.state || "",
 
+district:location.district || "",
 
+taluka:location.taluka || "",
 
-    if(!name){
+latitude:location.latitude || location.lat || null,
 
-      setError("Please enter your name");
-      return;
+longitude:location.longitude || location.lng || null,
 
-    }
+document_status:"pending"
 
+},
+{
+onConflict:"auth_user_id"
+});
 
 
-    if(!location){
+if(error) throw error;
 
-      setError("Please select location");
-      return;
 
-    }
+alert("✅ Registration Complete");
 
 
+onDone && onDone();
 
 
+}
+catch(err){
 
-    try{
+setError(err.message);
 
+}
+finally{
 
-      setLoading(true);
+setLoading(false);
 
-
-
-      const {
-        data:{
-          user
-        }
-      } = await supabase.auth.getUser();
-
-
-
-
-
-      if(!user){
-
-        throw new Error(
-          "Login expired"
-        );
-
-      }
-
-
-
-
-
-
-
-      const {
-        error
-      } = await supabase
-
-      .from("profiles")
-
-      .upsert({
-
-        auth_user_id:
-        user.id,
-
-
-        phone:
-        phone || user.phone,
-
-
-        role:
-        role,
-
-
-        name:
-        name,
-
-
-
-        farm_address:
-        farmAddress,
-
-
-
-        acres:
-        Number(acres || 0),
-
-
-
-        village:
-        location.village || "",
-
-
-
-        state:
-        location.state || "",
-
-
-
-        district:
-        location.district || "",
-
-
-
-        taluka:
-        location.taluka || "",
-
-
-
-        latitude:
-        location.latitude ||
-        location.lat ||
-        null,
-
-
-
-        longitude:
-        location.longitude ||
-        location.lng ||
-        null,
-
-
-
-        document_status:
-        "pending"
-
-
-      },
-
-      {
-
-        onConflict:
-        "auth_user_id"
-
-      });
-
-
-
-
-
-      if(error)
-        throw error;
-
-
-
-
-
-      alert(
-        "✅ Registration Complete"
-      );
-
-
-
-
-
-      if(onDone){
-
-        onDone();
-
-      }
-
-
-
-
-
-    }
-    catch(err){
-
-      console.log(err);
-
-      setError(
-        err.message
-      );
-
-    }
-    finally{
-
-      setLoading(false);
-
-    }
-
-
-  }
-
-
-
-
-
-
-
-
-  return (
-
-    <div
-      style={{
-        padding:20,
-        background:"#f0fdf4",
-        minHeight:"100vh"
-      }}
-    >
-
-
-      <div
-
-      style={{
-
-        background:"#fff",
-
-        padding:20,
-
-        borderRadius:20,
-
-        boxShadow:"0 2px 10px #ddd"
-
-      }}
-
-      >
-
-
-      <h2>
-        🌾 KisanSetu Registration
-      </h2>
-
-
-
-
-
-      <form onSubmit={handleSubmit}>
-
-
-        <select
-
-        value={role}
-
-        onChange={(e)=>
-          setRole(e.target.value)
-        }
-
-        style={input}
-
-        >
-
-          <option value="farmer">
-            👨‍🌾 Farmer
-          </option>
-
-
-          <option value="driver">
-            🚜 Driver
-          </option>
-
-
-          <option value="admin">
-            🛠 Admin
-          </option>
-
-
-        </select>
-
-
-
-
-
-        <input
-
-        placeholder="Full Name"
-
-        value={name}
-
-        onChange={(e)=>
-          setName(e.target.value)
-        }
-
-        style={input}
-
-        />
-
-
-
-
-
-        <input
-
-        placeholder="Farm Address"
-
-        value={farmAddress}
-
-        onChange={(e)=>
-          setFarmAddress(e.target.value)
-        }
-
-        style={input}
-
-        />
-
-
-
-
-
-        <input
-
-        type="number"
-
-        placeholder="Acres"
-
-        value={acres}
-
-        onChange={(e)=>
-          setAcres(e.target.value)
-        }
-
-        style={input}
-
-        />
-
-
-
-
-
-        <LocationSelector
-
-        onSelect={handleLocation}
-
-        />
-
-
-
-
-
-
-        {
-          error &&
-
-          <p style={{color:"red"}}>
-
-          {error}
-
-          </p>
-
-        }
-
-
-
-
-
-
-
-        <button
-
-        type="submit"
-
-        disabled={loading}
-
-        style={button}
-
-        >
-
-        {
-          loading
-          ?
-          "Saving..."
-          :
-          "✅ Complete Registration"
-        }
-
-        </button>
-
-
-
-
-
-
-
-        {
-          back &&
-
-          <button
-
-          type="button"
-
-          onClick={back}
-
-          style={{
-
-            ...button,
-
-            background:"#ddd",
-
-            color:"#000"
-
-          }}
-
-          >
-
-          ← Back
-
-          </button>
-
-        }
-
-
-
-
-      </form>
-
-      </div>
-
-
-    </div>
-
-  );
+}
 
 }
 
 
 
+return (
+
+<div className="min-h-screen bg-gradient-to-b from-green-100 to-white p-5">
+
+
+<div className="max-w-md mx-auto bg-white rounded-3xl shadow-xl p-6">
+
+
+<div className="text-center">
+
+
+<div className="text-5xl">
+🌱
+</div>
+
+
+<h1 className="text-3xl font-bold text-green-700 mt-2">
+KisanSetu
+</h1>
+
+
+<p className="text-gray-500">
+Complete your farmer profile
+</p>
+
+
+</div>
+
+
+
+<form onSubmit={handleSubmit}
+className="mt-6 space-y-4">
+
+
+<select
+
+value={role}
+
+onChange={(e)=>setRole(e.target.value)}
+
+className="w-full p-4 rounded-2xl border bg-green-50 font-semibold"
+
+>
+
+<option value="farmer">
+👨‍🌾 Farmer
+</option>
+
+
+<option value="driver">
+🚜 Driver
+</option>
+
+
+<option value="admin">
+🛠 Admin
+</option>
+
+
+</select>
 
 
 
 
-const input={
+<input
 
-width:"100%",
+placeholder="Full Name"
 
-padding:12,
+value={name}
 
-marginBottom:12,
+onChange={(e)=>setName(e.target.value)}
 
-borderRadius:10,
+className="w-full p-4 rounded-2xl border"
 
-border:"1px solid #ccc"
-
-};
+ />
 
 
 
+<input
 
-const button={
+placeholder="Farm Address"
 
-width:"100%",
+value={farmAddress}
 
-padding:14,
+onChange={(e)=>setFarmAddress(e.target.value)}
 
-marginTop:15,
+className="w-full p-4 rounded-2xl border"
 
-background:"#16a34a",
+/>
 
-color:"#fff",
 
-border:"none",
 
-borderRadius:10,
 
-fontWeight:"bold"
+<input
 
-};
+type="number"
+
+placeholder="Farm Area (Acres)"
+
+value={acres}
+
+onChange={(e)=>setAcres(e.target.value)}
+
+className="w-full p-4 rounded-2xl border"
+
+/>
+
+
+
+
+<div className="bg-green-50 rounded-2xl p-3">
+
+<p className="font-bold mb-2">
+📍 Select Farm Location
+</p>
+
+<LocationSelector
+onSelect={(data)=>setLocation(data)}
+/>
+
+</div>
+
+
+
+
+{
+error &&
+<p className="text-red-600 text-sm">
+{error}
+</p>
+}
+
+
+
+<button
+
+disabled={loading}
+
+className="w-full bg-green-600 text-white p-4 rounded-2xl font-bold text-lg shadow"
+
+>
+
+{
+loading
+?
+"Saving Profile..."
+:
+"✅ Create Account"
+}
+
+
+</button>
+
+
+
+{
+back &&
+<button
+
+type="button"
+
+onClick={back}
+
+className="w-full bg-gray-200 p-4 rounded-2xl font-bold"
+
+>
+
+← Back
+
+</button>
+
+}
+
+
+
+</form>
+
+
+</div>
+
+
+</div>
+
+);
+
+}
