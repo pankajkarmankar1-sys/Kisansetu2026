@@ -15,7 +15,7 @@ export default function Dashboard({
   onDriver,
 }) {
   return (
-    <div className="min-h-screen bg-[#F5F7FA] p-4">
+    <div className="dashboard">
 
       {/* ================= HEADER ================= */}
 
