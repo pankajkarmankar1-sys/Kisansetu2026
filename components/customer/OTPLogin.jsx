@@ -1,444 +1,389 @@
 import { useState } from "react";
 import { supabase } from "../../lib/supabase";
 
+
 export default function OTPLogin({
   onSuccess
 }) {
 
-  const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
-  const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState("");
 
+const [phone,setPhone]=useState("");
+const [otp,setOtp]=useState("");
+const [step,setStep]=useState(1);
+const [loading,setLoading]=useState(false);
+const [msg,setMsg]=useState("");
 
 
-  function getFullPhone() {
 
-    if (phone.startsWith("+")) {
-      return phone;
-    }
+function getFullPhone(){
 
-    if (phone.startsWith("91")) {
-      return "+" + phone;
-    }
+if(phone.startsWith("+"))
+return phone;
 
-    return "+91" + phone;
+if(phone.startsWith("91"))
+return "+"+phone;
 
-  }
+return "+91"+phone;
 
+}
 
 
-  async function sendOTP() {
 
-    if (phone.length < 10) {
 
-      setMsg("Enter valid mobile number");
 
-      return;
+async function sendOTP(){
 
-    }
 
+if(phone.length < 10){
 
-    try {
+setMsg("Enter valid mobile number");
+return;
 
-      setLoading(true);
-      setMsg("");
+}
 
 
-      const { error } =
-        await supabase.auth.signInWithOtp({
+try{
 
-          phone: getFullPhone(),
+setLoading(true);
+setMsg("");
 
-          options: {
-            channel: "sms"
-          }
 
-        });
+const {error}=await supabase.auth.signInWithOtp({
 
+phone:getFullPhone(),
 
+options:{
+channel:"sms"
+}
 
-      if (error) {
+});
 
-        throw error;
 
-      }
+if(error)
+throw error;
 
 
+setStep(2);
 
-      setStep(2);
+setMsg("OTP sent successfully");
 
-      setMsg("OTP Sent Successfully");
 
+}
 
-    } catch(err) {
+catch(err){
 
-      console.log(err);
+setMsg(err.message);
 
-      setMsg(err.message);
+}
 
+finally{
 
-    } finally {
+setLoading(false);
 
-      setLoading(false);
+}
 
-    }
+}
 
-  }
 
 
 
 
+async function verifyOTP(){
 
-  async function verifyOTP() {
+try{
 
-    try {
+setLoading(true);
+setMsg("");
 
-      setLoading(true);
-      setMsg("");
 
+const {error}=await supabase.auth.verifyOtp({
 
-      const { error } =
-        await supabase.auth.verifyOtp({
+phone:getFullPhone(),
 
-          phone: getFullPhone(),
+token:otp,
 
-          token: otp,
+type:"sms"
 
-          type:"sms"
+});
 
-        });
 
+if(error)
+throw error;
 
 
-      if(error){
 
-        throw error;
+const {
+data:{user}
+}=await supabase.auth.getUser();
 
-      }
 
 
+if(!user)
+throw new Error("User not found");
 
-      const {
-        data:{
-          user
-        }
-      } =
-      await supabase.auth.getUser();
 
 
+let {data:profile}=await supabase
 
-      if(!user){
+.from("profiles")
 
-        throw new Error("User not found");
+.select("*")
 
-      }
+.eq("auth_user_id",user.id)
 
+.maybeSingle();
 
 
-      let {
-        data:profile
-      } =
-      await supabase
 
-      .from("profiles")
+if(!profile){
 
-      .select("*")
 
-      .eq(
-        "auth_user_id",
-        user.id
-      )
+const {data:newProfile,error:createError}=
 
-      .maybeSingle();
+await supabase
 
+.from("profiles")
 
+.insert([{
 
+auth_user_id:user.id,
 
+phone:getFullPhone(),
 
-      if(!profile){
+role:"farmer",
 
+document_status:"pending"
 
-        const {
-          data:newProfile,
-          error:createError
-        } =
-        await supabase
+}])
 
-        .from("profiles")
+.select()
 
-        .insert([{
+.single();
 
-          auth_user_id:user.id,
 
-          phone:getFullPhone(),
 
-          role:
-  getFullPhone() === "+917020567623"
-    ? "admin"
-    : getFullPhone() === "+917020567624"
-    ? "driver"
-    : "farmer",
+if(createError)
+throw createError;
 
-          document_status:"pending"
 
-        }])
+profile=newProfile;
 
-        .select()
 
-        .single();
+}
 
 
 
+setMsg("Login Success");
 
-        if(createError){
 
-          throw createError;
+onSuccess && onSuccess(profile);
 
-        }
 
 
-        profile = newProfile;
+}
 
+catch(err){
 
-      }
+setMsg(err.message);
 
+}
 
+finally{
 
+setLoading(false);
 
+}
 
-      setMsg("Login Success");
+}
 
 
 
-      if(onSuccess){
 
-        onSuccess(profile);
+return (
 
-      }
+<div className="min-h-screen bg-gradient-to-b from-green-100 to-white flex items-center justify-center p-5">
 
 
+<div className="w-full max-w-md">
 
-    } catch(err){
 
+{/* BRAND */}
 
-      console.log(err);
+<div className="text-center mb-6">
 
-      setMsg(err.message);
 
+<div className="text-6xl">
+🌱
+</div>
 
-    } finally {
 
-      setLoading(false);
+<h1 className="text-4xl font-extrabold text-green-700">
+KisanSetu
+</h1>
 
-    }
 
-  }
+<p className="text-gray-600 mt-2">
+Smart Farming Service Platform
+</p>
 
 
+</div>
 
 
 
-  return (
 
-    <div
 
-      style={{
+<div className="bg-white rounded-3xl shadow-xl p-6">
 
-        maxWidth:400,
 
-        margin:"40px auto",
+<h2 className="text-2xl font-bold text-center">
 
-        padding:20,
+{step===1
+?
+"Login with Mobile"
+:
+"Verify OTP"
+}
 
-        background:"#fff",
+</h2>
 
-        borderRadius:12,
 
-        boxShadow:"0 2px 10px rgba(0,0,0,.1)"
 
-      }}
 
-    >
+<p className="text-center text-gray-500 mt-2">
 
+Secure farmer login
 
-      <h2 style={{
-        textAlign:"center"
-      }}>
-        🚜 KisanSetu Login
-      </h2>
+</p>
 
 
 
 
-      {step === 1 &&
 
-      <>
+{
+step===1 &&
 
-      <input
+<>
 
-        placeholder="+917020567623"
 
-        value={phone}
+<input
 
-        maxLength={13}
+placeholder="Enter Mobile Number"
 
-        onChange={(e)=>{
+value={phone}
 
-          let value = e.target.value;
+maxLength={10}
 
-          value = value.replace(/[^0-9+]/g,"");
+onChange={(e)=>
 
-          setPhone(value);
+setPhone(
+e.target.value.replace(/\D/g,"")
+)
 
-        }}
+}
 
-        style={{
+className="w-full mt-6 p-5 rounded-2xl bg-green-50 border text-lg"
 
-          width:"100%",
+/>
 
-          padding:12,
 
-          marginTop:20
 
-        }}
+<button
 
-      />
+onClick={sendOTP}
 
+disabled={loading}
 
+className="w-full mt-5 bg-green-700 text-white p-5 rounded-2xl font-bold text-lg"
 
-      <button
+>
 
-        onClick={sendOTP}
+{loading?"Sending OTP...":"Send OTP"}
 
-        disabled={loading}
+</button>
 
-        style={{
 
-          width:"100%",
+</>
 
-          padding:12,
+}
 
-          marginTop:20,
 
-          background:"#16a34a",
 
-          color:"#fff",
 
-          border:"none",
 
-          borderRadius:8
+{
+step===2 &&
 
-        }}
+<>
 
-      >
 
-      {loading ? "Sending..." : "Send OTP"}
+<input
 
-      </button>
+placeholder="Enter 6 Digit OTP"
 
+value={otp}
 
-      </>
+maxLength={6}
 
-      }
+onChange={(e)=>
 
+setOtp(
+e.target.value.replace(/\D/g,"")
+)
 
+}
 
+className="w-full mt-6 p-5 rounded-2xl bg-green-50 border text-center text-xl tracking-widest"
 
+/>
 
-      {step === 2 &&
 
-      <>
 
-      <input
+<button
 
-        placeholder="Enter OTP"
+onClick={verifyOTP}
 
-        value={otp}
+disabled={loading}
 
-        maxLength={6}
+className="w-full mt-5 bg-green-700 text-white p-5 rounded-2xl font-bold text-lg"
 
-        onChange={(e)=>
+>
 
-          setOtp(
-            e.target.value.replace(/\D/g,"")
-          )
+{loading?"Checking...":"Verify OTP"}
 
-        }
+</button>
 
-        style={{
 
-          width:"100%",
+</>
 
-          padding:12,
+}
 
-          marginTop:20
 
-        }}
 
-      />
 
 
+{
+msg &&
 
-      <button
+<p className="mt-5 text-center text-sm text-green-700">
 
-        onClick={verifyOTP}
+{msg}
 
-        disabled={loading}
+</p>
 
-        style={{
+}
 
-          width:"100%",
 
-          padding:12,
 
-          marginTop:20,
+</div>
 
-          background:"#16a34a",
 
-          color:"#fff",
 
-          border:"none",
+</div>
 
-          borderRadius:8
 
-        }}
+</div>
 
-      >
-
-      {loading ? "Verifying..." : "Verify OTP"}
-
-      </button>
-
-
-      </>
-
-      }
-
-
-
-
-
-      {
-        msg &&
-
-        <p style={{
-
-          marginTop:20,
-
-          textAlign:"center"
-
-        }}>
-
-        {msg}
-
-        </p>
-      }
-
-
-    </div>
-
-  );
+);
 
 }
