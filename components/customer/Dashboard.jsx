@@ -304,34 +304,35 @@ export default function Dashboard({
       {/* ================= PROFILE MENU ================= */}
 
       <div className="mt-8 space-y-4">
+{/* ================= QUICK ACTIONS ================= */}
 
-        <button
-          onClick={onProfile}
-          className="w-full bg-white rounded-3xl p-5 shadow-xl text-left"
-        >
-          <div className="text-xl font-bold">
-            👤 Profile
-          </div>
+<div className="grid grid-cols-2 gap-4 mt-8">
 
-          <div className="text-gray-500 mt-1">
-            View and edit your profile
-          </div>
-        </button>
+  <button
+    onClick={onProfile}
+    className="bg-white rounded-3xl p-5 shadow-xl"
+  >
+    <div className="text-4xl">👤</div>
+    <h3 className="mt-3 font-bold">Profile</h3>
+    <p className="text-sm text-gray-500">
+      My Account
+    </p>
+  </button>
 
-        <button
-          onClick={onNotifications}
-          className="w-full bg-white rounded-3xl p-5 shadow-xl text-left"
-        >
-          <div className="text-xl font-bold">
-            🔔 Notifications
-          </div>
+  <button
+    onClick={onNotifications}
+    className="bg-white rounded-3xl p-5 shadow-xl"
+  >
+    <div className="text-4xl">🔔</div>
+    <h3 className="mt-3 font-bold">
+      Notifications
+    </h3>
+    <p className="text-sm text-gray-500">
+      View Alerts
+    </p>
+  </button>
 
-          <div className="text-gray-500 mt-1">
-            View all notifications
-          </div>
-        </button>
-
-      </div>
+</div>
 
       {/* ================= LOGOUT ================= */}
 
