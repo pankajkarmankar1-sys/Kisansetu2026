@@ -343,6 +343,7 @@ export default function Dashboard({
         🚪 Logout
       </button>
 
+</div>
       {/* ================= BOTTOM NAVIGATION ================= */}
 
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-2xl">
