@@ -16,35 +16,36 @@ export default function Dashboard({
 
 return (
 
-<div className="min-h-screen bg-gray-50 pb-20">
+<div className="min-h-screen bg-green-50 p-4">
 
 
-{/* HEADER */}
+{/* HEADER CARD */}
 
-<div className="bg-gradient-to-r from-green-700 to-emerald-500 text-white px-5 py-4 rounded-b-3xl">
+<div className="bg-gradient-to-r from-green-700 to-emerald-500 text-white rounded-3xl p-6 shadow-xl">
 
 <div className="flex justify-between items-center">
 
 <div>
 
-<h1 className="text-xl font-bold">
+<h1 className="text-3xl font-extrabold">
 🌱 KisanSetu
 </h1>
 
-<p className="mt-1 text-sm">
+<p className="mt-3 text-xl font-bold">
 Namaste {user?.name || "Kisan"} 👋
 </p>
 
-<p className="text-xs opacity-80">
+<p className="mt-1">
 👨‍🌾 Farmer Account
 </p>
 
 </div>
 
 
-<div className="text-3xl">
+<div className="text-5xl">
 🌾
 </div>
+
 
 </div>
 
@@ -56,10 +57,7 @@ Namaste {user?.name || "Kisan"} 👋
 
 {/* FARM CARD */}
 
-<div className="px-4 mt-4">
-
-
-<div className="bg-white rounded-2xl p-4 shadow-sm border">
+<div className="mt-5 bg-white rounded-3xl p-6 shadow-lg">
 
 
 <div className="flex justify-between">
@@ -67,15 +65,13 @@ Namaste {user?.name || "Kisan"} 👋
 
 <div>
 
-<p className="text-gray-500 text-sm">
-My Farm
-</p>
-
-
-<h2 className="font-bold text-green-700 text-lg">
-{farms.length} Farm Added
+<h2 className="text-xl font-bold text-green-700">
+🏡 My Farm
 </h2>
 
+<p className="mt-2 text-gray-600">
+{farms.length} Farm Added
+</p>
 
 </div>
 
@@ -84,11 +80,11 @@ My Farm
 
 onClick={onAddFarm}
 
-className="bg-green-600 text-white px-4 py-2 rounded-xl text-sm"
+className="bg-green-600 text-white px-5 py-3 rounded-2xl font-bold"
 
 >
 
-+ Add
++ Add Farm
 
 </button>
 
@@ -98,64 +94,53 @@ className="bg-green-600 text-white px-4 py-2 rounded-xl text-sm"
 
 </div>
 
-</div>
 
 
 
 
 
+{/* PREMIUM CARD */}
+
+<div className="mt-5 bg-gradient-to-r from-orange-500 to-yellow-400 rounded-3xl p-6 text-white shadow-xl">
 
 
-{/* SUBSCRIPTION */}
-
-<div className="px-4 mt-4">
-
-
-<div className="bg-gradient-to-r from-orange-500 to-yellow-400 rounded-2xl p-4 text-white">
-
-
-<div className="flex justify-between">
-
-
-<div>
-
-<h2 className="font-bold">
+<h2 className="text-2xl font-bold">
 🌾 KisanSetu Premium
 </h2>
 
-<p className="text-sm">
+
+<p className="text-lg mt-2">
 ₹550 / Acre / Year
 </p>
 
 
+<div className="mt-3">
+
+✓ Tractor Booking
+<br/>
+✓ Priority Service
+<br/>
+✓ Farm Support
+
 </div>
 
-
-<span>
-⭐
-</span>
-
-
-</div>
 
 
 <button
 
 onClick={onSubscription}
 
-className="mt-3 bg-white text-orange-600 px-5 py-2 rounded-xl text-sm font-bold"
+className="mt-5 bg-white text-orange-600 px-7 py-3 rounded-2xl font-bold"
 
 >
 
-Activate
+Activate Now
 
 </button>
 
 
 </div>
 
-
-</div>
 
 
 
@@ -164,63 +149,50 @@ Activate
 
 {/* SERVICES */}
 
-
-<div className="px-4 mt-5">
-
-
-<h2 className="font-bold text-lg">
-🚜 Services
+<h2 className="text-2xl font-bold mt-7">
+🚜 Farm Services
 </h2>
 
 
-<div className="grid grid-cols-3 gap-3 mt-3">
+<div className="grid grid-cols-2 gap-4 mt-4">
 
 
-<Service
+
+<Card
 icon="🚜"
-name="Tractor"
+title="Tractor Service"
+text="Book tractor work"
 click={onBook}
 />
 
 
-<Service
+<Card
 icon="🌱"
-name="Rotavator"
+title="Rotavator"
+text="Farm preparation"
 click={onBook}
 />
 
 
-<Service
+<Card
 icon="🌾"
-name="Cultivator"
+title="Cultivator"
+text="Soil work"
 click={onBook}
 />
 
 
-<Service
-icon="💧"
-name="Spray"
-click={onBook}
-/>
-
-
-<Service
+<Card
 icon="📋"
-name="Booking"
+title="My Bookings"
+text="History"
 click={onBookings}
 />
 
 
-<Service
-icon="🔔"
-name="Alert"
-click={onNotifications}
-/>
-
 
 </div>
 
-</div>
 
 
 
@@ -232,19 +204,21 @@ click={onNotifications}
 {
 user?.role==="admin" &&
 
-<div className="px-4 mt-4">
+<div className="mt-6 bg-purple-100 rounded-3xl p-5">
+
 
 <button
 
 onClick={onAdmin}
 
-className="w-full bg-purple-600 text-white p-3 rounded-xl"
+className="w-full bg-purple-600 text-white p-4 rounded-2xl font-bold"
 
 >
 
 👑 Admin Dashboard
 
 </button>
+
 
 </div>
 
@@ -259,19 +233,21 @@ className="w-full bg-purple-600 text-white p-3 rounded-xl"
 {
 user?.role==="driver" &&
 
-<div className="px-4 mt-4">
+<div className="mt-6 bg-blue-100 rounded-3xl p-5">
+
 
 <button
 
 onClick={onDriver}
 
-className="w-full bg-blue-600 text-white p-3 rounded-xl"
+className="w-full bg-blue-600 text-white p-4 rounded-2xl font-bold"
 
 >
 
 🚜 Driver Panel
 
 </button>
+
 
 </div>
 
@@ -281,44 +257,56 @@ className="w-full bg-blue-600 text-white p-3 rounded-xl"
 
 
 
-{/* BOTTOM MENU */}
-
-<div className="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around py-2">
+{/* PROFILE MENU */}
 
 
-<button onClick={()=>{}}>
-🏠
-<span className="block text-xs">
-Home
-</span>
+<div className="mt-6 space-y-4">
+
+
+<button
+
+onClick={onProfile}
+
+className="w-full bg-white rounded-3xl p-5 shadow-lg text-left font-bold text-lg"
+
+>
+
+👤 Profile
+
 </button>
 
 
-<button onClick={onBook}>
-🚜
-<span className="block text-xs">
-Book
-</span>
+
+<button
+
+onClick={onNotifications}
+
+className="w-full bg-white rounded-3xl p-5 shadow-lg text-left font-bold text-lg"
+
+>
+
+🔔 Notifications
+
 </button>
 
 
-<button onClick={onProfile}>
-👤
-<span className="block text-xs">
-Profile
-</span>
-</button>
 
 
-<button onClick={onLogout}>
-🚪
-<span className="block text-xs">
-Exit
-</span>
+<button
+
+onClick={onLogout}
+
+className="w-full bg-red-600 text-white rounded-3xl p-5 shadow-lg font-bold text-lg"
+
+>
+
+Logout
+
 </button>
 
 
 </div>
+
 
 
 </div>
@@ -329,7 +317,10 @@ Exit
 
 
 
-function Service({icon,name,click}){
+
+
+function Card({icon,title,text,click}){
+
 
 return (
 
@@ -337,23 +328,29 @@ return (
 
 onClick={click}
 
-className="bg-white rounded-xl p-3 shadow-sm border text-center"
+className="bg-white rounded-3xl p-6 shadow-xl text-left"
 
 >
 
 
-<div className="text-2xl">
+<div className="text-5xl">
 {icon}
 </div>
 
 
-<p className="text-xs font-semibold mt-1">
-{name}
+<h3 className="text-lg font-bold mt-3 text-green-700">
+{title}
+</h3>
+
+
+<p className="text-gray-500 mt-1">
+{text}
 </p>
 
 
 </button>
 
 )
+
 
 }
