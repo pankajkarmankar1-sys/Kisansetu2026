@@ -274,9 +274,28 @@ export default function LocationSelector({ onSelect }) {
               <div
                 key={v.village}
                 onClick={() => {
-                  setVillage(v.village);
-                  setSearchVillage(v.village);
-                }}
+  const selected = {
+    state,
+    district,
+    taluka,
+    village: v.village,
+    latitude: "",
+    longitude: "",
+  };
+
+  setVillage(v.village);
+  setSearchVillage(v.village);
+
+  localStorage.setItem(
+    "location",
+    JSON.stringify(selected)
+  );
+
+  if (onSelect) {
+    onSelect(selected);
+  }
+}}
+                
                 style={{
                   padding: 10,
                   cursor: "pointer",
