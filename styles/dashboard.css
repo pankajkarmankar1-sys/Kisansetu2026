@@ -1,0 +1,61 @@
+body{
+  background:#f5f7fa;
+}
+
+.dashboard{
+  max-width:480px;
+  margin:auto;
+  padding:16px;
+}
+
+.header{
+  background:linear-gradient(135deg,#1b5e20,#43a047);
+  color:#fff;
+  border-radius:24px;
+  padding:24px;
+  box-shadow:0 10px 25px rgba(0,0,0,.15);
+}
+
+.card{
+  background:#fff;
+  border-radius:22px;
+  padding:18px;
+  margin-top:18px;
+  box-shadow:0 8px 20px rgba(0,0,0,.08);
+}
+
+.primary-btn{
+  background:#2e7d32;
+  color:#fff;
+  border:none;
+  border-radius:14px;
+  padding:12px 18px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.service-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:14px;
+}
+
+.service-card{
+  background:#fff;
+  border-radius:20px;
+  padding:18px;
+  text-align:center;
+  box-shadow:0 6px 15px rgba(0,0,0,.08);
+}
+
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#fff;
+  display:flex;
+  justify-content:space-around;
+  padding:12px;
+  box-shadow:0 -4px 15px rgba(0,0,0,.1);
+}
