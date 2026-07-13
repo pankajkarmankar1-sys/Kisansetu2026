@@ -1,105 +1,82 @@
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import React from "react";
 
-import Profile from "../components/customer/Profile";
-import { supabase } from "../lib/supabase";
+export default function Profile({ user, back }) {
+  return (
+    <div className="min-h-screen bg-green-50 p-4">
 
+      {/* Header */}
+      <div className="flex items-center mb-6">
+        <button
+          onClick={back}
+          className="bg-white rounded-xl shadow px-4 py-2 mr-3"
+        >
+          ← Back
+        </button>
 
-export default function ProfilePage(){
+        <h1 className="text-2xl font-bold text-green-700">
+          👤 My Profile
+        </h1>
+      </div>
 
-const router = useRouter();
+      {/* Profile Card */}
+      <div className="bg-white rounded-3xl shadow-xl p-6">
 
-const [user,setUser]=useState(null);
-const [loading,setLoading]=useState(true);
+        <div className="text-center">
+          <div className="text-7xl">👨‍🌾</div>
 
+          <h2 className="text-2xl font-bold mt-4">
+            {user?.name || "Farmer"}
+          </h2>
 
+          <p className="text-gray-500 mt-2">
+            {user?.phone || "No Mobile"}
+          </p>
+        </div>
 
-useEffect(()=>{
+        <div className="mt-8 space-y-4">
 
-loadProfile();
+          <div className="bg-green-50 rounded-2xl p-4">
+            <strong>Address</strong>
+            <br />
+            {user?.address || "-"}
+          </div>
 
-},[]);
+          <div className="bg-green-50 rounded-2xl p-4">
+            <strong>State</strong>
+            <br />
+            {user?.state || "-"}
+          </div>
 
+          <div className="bg-green-50 rounded-2xl p-4">
+            <strong>District</strong>
+            <br />
+            {user?.district || "-"}
+          </div>
 
+          <div className="bg-green-50 rounded-2xl p-4">
+            <strong>Taluka</strong>
+            <br />
+            {user?.taluka || "-"}
+          </div>
 
-async function loadProfile(){
+          <div className="bg-green-50 rounded-2xl p-4">
+            <strong>Village</strong>
+            <br />
+            {user?.village || "-"}
+          </div>
 
+          <div className="bg-green-50 rounded-2xl p-4">
+            <strong>Subscription</strong>
+            <br />
+            {user?.subscription_status === "active"
+              ? "✅ Active"
+              : "❌ Not Active"}
+          </div>
 
-const {
-data:{
-user
-}
+        </div>
 
-}=await supabase.auth.getUser();
+      </div>
 
-
-
-if(!user){
-
-router.replace("/login");
-return;
-
-}
-
-
-
-const {
-data:profile
-}=await supabase
-
-.from("profiles")
-
-.select("*")
-
-.eq(
-"auth_user_id",
-user.id
-)
-
-.maybeSingle();
-
-
-
-setUser({
-
-id:user.id,
-
-phone:user.phone,
-
-...profile
-
-});
-
-
-
-setLoading(false);
-
-
-}
-
-
-
-if(loading){
-
-return <div className="p-5">
-Loading...
-</div>
-
-}
-
-
-
-return (
-
-<Profile
-
-user={user}
-
-back={()=>router.back()}
-
-/>
-
-);
-
-
+    </div>
+  );
 }
