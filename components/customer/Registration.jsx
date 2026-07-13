@@ -2,11 +2,13 @@ import { useState } from "react";
 import { supabase } from "../../lib/supabase";
 import LocationSelector from "../maps/LocationSelector";
 
+
 export default function Registration({
   phone,
   onDone,
   back,
 }) {
+
 
 const [name,setName]=useState("");
 const [farmAddress,setFarmAddress]=useState("");
@@ -15,6 +17,7 @@ const [role,setRole]=useState("farmer");
 const [location,setLocation]=useState(null);
 const [loading,setLoading]=useState(false);
 const [error,setError]=useState("");
+
 
 
 async function handleSubmit(e){
@@ -28,10 +31,12 @@ setError("Please enter your name");
 return;
 }
 
+
 if(!location){
-setError("Please select location");
+setError("Please select farm location");
 return;
 }
+
 
 
 try{
@@ -41,6 +46,7 @@ setLoading(true);
 
 const {data:{user}} =
 await supabase.auth.getUser();
+
 
 
 if(!user)
@@ -84,7 +90,10 @@ onConflict:"auth_user_id"
 });
 
 
-if(error) throw error;
+
+if(error)
+throw error;
+
 
 
 alert("✅ Registration Complete");
@@ -94,11 +103,13 @@ onDone && onDone();
 
 
 }
+
 catch(err){
 
 setError(err.message);
 
 }
+
 finally{
 
 setLoading(false);
@@ -109,15 +120,18 @@ setLoading(false);
 
 
 
+
 return (
 
-<div className="min-h-screen bg-gradient-to-b from-green-100 to-white p-5">
+<div className="min-h-screen bg-green-50 p-4">
 
 
-<div className="max-w-md mx-auto bg-white rounded-3xl shadow-xl p-6">
+<div className="max-w-md mx-auto">
 
 
-<div className="text-center">
+{/* HEADER */}
+
+<div className="bg-gradient-to-r from-green-700 to-emerald-500 text-white rounded-3xl p-6 shadow-xl">
 
 
 <div className="text-5xl">
@@ -125,13 +139,13 @@ return (
 </div>
 
 
-<h1 className="text-3xl font-bold text-green-700 mt-2">
+<h1 className="text-3xl font-extrabold mt-3">
 KisanSetu
 </h1>
 
 
-<p className="text-gray-500">
-Complete your farmer profile
+<p className="mt-2">
+Create your farmer profile
 </p>
 
 
@@ -139,37 +153,96 @@ Complete your farmer profile
 
 
 
-<form onSubmit={handleSubmit}
-className="mt-6 space-y-4">
 
 
-<select
+<form
+onSubmit={handleSubmit}
+className="mt-5 space-y-5"
+>
 
-value={role}
 
-onChange={(e)=>setRole(e.target.value)}
 
-className="w-full p-4 rounded-2xl border bg-green-50 font-semibold"
+
+
+{/* ROLE */}
+
+<div className="bg-white rounded-3xl p-5 shadow">
+
+
+<h2 className="font-bold text-lg mb-3">
+Choose Account Type
+</h2>
+
+
+<div className="grid grid-cols-3 gap-2">
+
+
+{
+[
+["farmer","👨‍🌾","Farmer"],
+["driver","🚜","Driver"],
+["admin","🛠","Admin"]
+
+].map((item)=>(
+
+
+<button
+
+type="button"
+
+key={item[0]}
+
+onClick={()=>setRole(item[0])}
+
+className={
+
+role===item[0]
+
+?
+"bg-green-600 text-white rounded-2xl p-3"
+
+:
+
+"bg-green-50 rounded-2xl p-3"
+
+}
 
 >
 
-<option value="farmer">
-👨‍🌾 Farmer
-</option>
+<div>
+{item[1]}
+</div>
+
+<div className="text-xs">
+{item[2]}
+</div>
 
 
-<option value="driver">
-🚜 Driver
-</option>
+</button>
 
 
-<option value="admin">
-🛠 Admin
-</option>
+))
+
+}
 
 
-</select>
+</div>
 
+
+</div>
+
+
+
+
+
+{/* DETAILS */}
+
+<div className="bg-white rounded-3xl p-5 shadow">
+
+
+<h2 className="font-bold text-lg mb-3">
+👤 Personal Details
+</h2>
 
 
 
@@ -181,9 +254,10 @@ value={name}
 
 onChange={(e)=>setName(e.target.value)}
 
-className="w-full p-4 rounded-2xl border"
+className="w-full p-4 rounded-2xl bg-gray-50 border mb-3"
 
- />
+/>
+
 
 
 
@@ -195,10 +269,9 @@ value={farmAddress}
 
 onChange={(e)=>setFarmAddress(e.target.value)}
 
-className="w-full p-4 rounded-2xl border"
+className="w-full p-4 rounded-2xl bg-gray-50 border mb-3"
 
 />
-
 
 
 
@@ -212,34 +285,54 @@ value={acres}
 
 onChange={(e)=>setAcres(e.target.value)}
 
-className="w-full p-4 rounded-2xl border"
+className="w-full p-4 rounded-2xl bg-gray-50 border"
 
 />
 
-
-
-
-<div className="bg-green-50 rounded-2xl p-3">
-
-<p className="font-bold mb-2">
-📍 Select Farm Location
-</p>
-
-<LocationSelector
-onSelect={(data)=>setLocation(data)}
-/>
 
 </div>
 
 
 
 
+
+
+{/* LOCATION */}
+
+<div className="bg-white rounded-3xl p-5 shadow">
+
+
+<h2 className="font-bold text-lg mb-3">
+📍 Farm Location
+</h2>
+
+
+<LocationSelector
+
+onSelect={(data)=>setLocation(data)}
+
+/>
+
+
+</div>
+
+
+
+
+
+
 {
 error &&
-<p className="text-red-600 text-sm">
+
+<div className="bg-red-100 text-red-600 p-3 rounded-xl">
+
 {error}
-</p>
+
+</div>
+
 }
+
+
 
 
 
@@ -247,16 +340,18 @@ error &&
 
 disabled={loading}
 
-className="w-full bg-green-600 text-white p-4 rounded-2xl font-bold text-lg shadow"
+className="w-full bg-green-700 text-white p-5 rounded-3xl font-bold text-lg shadow-xl"
 
 >
 
 {
+
 loading
 ?
-"Saving Profile..."
+"Saving..."
 :
-"✅ Create Account"
+"✅ Complete Registration"
+
 }
 
 
@@ -264,15 +359,18 @@ loading
 
 
 
+
+
 {
 back &&
+
 <button
 
 type="button"
 
 onClick={back}
 
-className="w-full bg-gray-200 p-4 rounded-2xl font-bold"
+className="w-full bg-white p-4 rounded-3xl font-bold shadow"
 
 >
 
@@ -283,7 +381,6 @@ className="w-full bg-gray-200 p-4 rounded-2xl font-bold"
 }
 
 
-
 </form>
 
 
@@ -291,6 +388,7 @@ className="w-full bg-gray-200 p-4 rounded-2xl font-bold"
 
 
 </div>
+
 
 );
 
