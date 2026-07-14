@@ -1,202 +1,216 @@
 import React from "react";
 
+
 export default function BookingSuccess({
   bookingData,
   onDone,
 }) {
 
 
-  return (
+return(
 
-    <div
-      style={{
-        padding:20,
-        textAlign:"center",
-        background:"#F8FAFC",
-        minHeight:"100vh",
-      }}
-    >
+<div className="min-h-screen bg-green-50 p-5">
 
 
-      <h1>
-        🎉 Booking Confirmed
-      </h1>
+<div className="max-w-xl mx-auto bg-white rounded-3xl shadow-xl p-6 text-center">
 
 
 
-      <p>
-        Aapki service booking successfully create ho gayi hai.
-      </p>
+<div className="text-7xl">
+🎉
+</div>
 
 
 
+<h1 className="text-3xl font-bold text-green-700 mt-4">
 
+Booking Confirmed
 
-      <div
-        style={{
-          background:"#fff",
-          padding:20,
-          borderRadius:12,
-          marginTop:20,
-          textAlign:"left",
-          boxShadow:"0 2px 8px #ddd"
-        }}
-      >
+</h1>
 
 
 
-        <p>
-          🚜 <b>Service:</b>
-          {" "}
-          {
-          bookingData?.service_name ||
-          bookingData?.selectedService?.name_hi ||
-          bookingData?.selectedService?.name ||
-          "-"
-          }
-        </p>
 
+<p className="text-gray-600 mt-3">
 
+Aapki KisanSetu service booking successfully create ho gayi hai.
 
+</p>
 
 
-        <p>
-          🌾 <b>Acres:</b>
-          {" "}
-          {
-          bookingData?.acres || 0
-          }
-        </p>
 
 
 
 
 
-        <p>
-          💰 <b>Total Amount:</b>
-          {" "}
-          ₹
-          {
-          bookingData?.amount ||
-          bookingData?.total_amount ||
-          0
-          }
-        </p>
+<div className="bg-green-50 rounded-3xl p-5 mt-6 text-left">
 
 
 
+<p>
+🚜 <b>Service:</b>
 
+{" "}
 
-        <p>
-          📅 <b>Booking Date:</b>
-          {" "}
-          {
-          bookingData?.booking_date ||
-          bookingData?.date ||
-          "-"
-          }
-        </p>
+{
+bookingData?.service_name ||
+bookingData?.selectedService?.name ||
+"-"
+}
 
+</p>
 
 
 
 
-        <p>
-          👤 <b>Customer:</b>
-          {" "}
-          {
-          bookingData?.customer_name ||
-          "Kisan"
-          }
-        </p>
 
+<p className="mt-3">
 
+🌾 <b>Area:</b>
 
+{" "}
 
+{bookingData?.acres || 0} Acre
 
-        <p>
-          📞 <b>Mobile:</b>
-          {" "}
-          {
-          bookingData?.customer_phone ||
-          "-"
-          }
-        </p>
+</p>
 
 
 
 
 
-        <p>
-          📍 <b>Village:</b>
-          {" "}
-          {
-          bookingData?.village ||
-          bookingData?.state ||
-          "-"
-          }
-        </p>
 
+<p className="mt-3">
 
+💰 <b>Total Amount:</b>
 
+{" "}
 
+₹{bookingData?.amount || 0}
 
-        <p>
-          💳 <b>Payment Status:</b>
-          {" "}
-          {
-          bookingData?.payment_status ||
-          "Pending"
-          }
-        </p>
+</p>
 
 
 
 
 
-        <p>
-          📌 <b>Status:</b>
-          {" "}
-          {
-          bookingData?.status ||
-          "Pending"
-          }
-        </p>
 
+<p className="mt-3">
 
+📅 <b>Date:</b>
 
-      </div>
+{" "}
 
+{
+bookingData?.booking_date ||
+bookingData?.date ||
+"-"
+}
 
+</p>
 
 
 
-      <button
 
-        onClick={onDone}
 
-        style={{
-          marginTop:20,
-          width:"100%",
-          padding:14,
-          background:"#16a34a",
-          color:"#fff",
-          border:"none",
-          borderRadius:10,
-          fontSize:18
-        }}
 
-      >
 
-        🏠 Go Home
+<p className="mt-3">
 
-      </button>
+📍 <b>Farm:</b>
 
+{" "}
 
+{
+bookingData?.farm_name ||
+bookingData?.selKhet?.name ||
+"-"
+}
 
+</p>
 
-    </div>
 
-  );
+
+
+
+
+
+<p className="mt-3">
+
+👤 <b>Customer:</b>
+
+{" "}
+
+{
+bookingData?.customer_name ||
+"Kisan"
+}
+
+</p>
+
+
+
+
+
+
+
+<p className="mt-3">
+
+💳 <b>Payment:</b>
+
+{" "}
+
+{
+bookingData?.payment_status ||
+"Paid"
+}
+
+</p>
+
+
+
+
+
+
+<p className="mt-3 font-bold text-green-700">
+
+📌 Status: Pending Driver Assignment
+
+</p>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<button
+
+onClick={onDone}
+
+className="w-full bg-green-600 text-white p-4 rounded-2xl mt-6 font-bold text-lg"
+
+>
+
+🏠 Go Home
+
+</button>
+
+
+
+
+
+</div>
+
+
+</div>
+
+
+);
+
 
 }
