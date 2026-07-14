@@ -8,5 +8,9 @@ export default function Home() {
     router.replace("/dashboard");
   }, [router]);
 
-  return <h2>Loading KisanSetu...</h2>;
+  return (
+    <div style={{ padding: 20 }}>
+      <h2>Loading KisanSetu...</h2>
+    </div>
+  );
 }
