@@ -30,7 +30,6 @@ export default function DashboardPage() {
 
     try{
 
-
       const {
         data:{
           user
@@ -48,10 +47,7 @@ export default function DashboardPage() {
 
 
 
-
-      const {
-        data:profile
-      } = await supabase
+      const { data: profile } = await supabase
       .from("profiles")
       .select(`
         role,
@@ -72,9 +68,26 @@ export default function DashboardPage() {
 
 
 
-      const {
-        data:subscription
-      } = await supabase
+      if(profile?.role === "admin"){
+
+        router.replace("/admin");
+        return;
+
+      }
+
+
+      if(profile?.role === "driver"){
+
+        router.replace("/driver");
+        return;
+
+      }
+
+
+
+
+
+      const { data: subscription } = await supabase
       .from("subscriptions")
       .select(`
         status,
@@ -96,9 +109,7 @@ export default function DashboardPage() {
 
 
 
-      const {
-        data:farmData
-      } = await supabase
+      const { data:farmData } = await supabase
       .from("khets")
       .select("*")
       .eq(
@@ -119,24 +130,18 @@ export default function DashboardPage() {
       );
 
 
-if (profile?.role === "admin") {
-  router.replace("/admin");
-  return;
-}
 
-if (profile?.role === "driver") {
-  router.replace("/driver");
-  return;
-}
 
 
       setUser({
 
         id:user.id,
 
+
         role:
         profile?.role ||
         "farmer",
+
 
 
         name:
@@ -144,9 +149,11 @@ if (profile?.role === "driver") {
         "Kisan",
 
 
+
         phone:
         profile?.phone ||
         user.phone,
+
 
 
         document_status:
@@ -154,14 +161,17 @@ if (profile?.role === "driver") {
         "pending",
 
 
+
         aadhaar_front:
         profile?.aadhaar_front ||
         null,
 
 
+
         aadhaar_back:
         profile?.aadhaar_back ||
         null,
+
 
 
         satbara_7_12:
@@ -171,7 +181,6 @@ if (profile?.role === "driver") {
 
 
         subscription_status:
-
         subscription
         ?
         "active"
@@ -181,7 +190,6 @@ if (profile?.role === "driver") {
 
 
         subscription_amount:
-
         subscription?.amount || 0
 
 
@@ -207,11 +215,12 @@ if (profile?.role === "driver") {
 
 
 
+
   async function logout(){
 
     await supabase.auth.signOut();
 
-    router.replace("/");
+    router.replace("/login");
 
   }
 
@@ -219,24 +228,32 @@ if (profile?.role === "driver") {
 
 
 
-  if (loading) {
-  return (
-    <div
+  if(loading){
+
+    return(
+
+      <div
       style={{
-        height: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        background: "#F4F7F6",
-        fontSize: "24px",
-        fontWeight: "bold",
-        color: "#2E7D32",
+        height:"100vh",
+        display:"flex",
+        justifyContent:"center",
+        alignItems:"center",
+        background:"#F4F7F6",
+        fontSize:"24px",
+        fontWeight:"bold",
+        color:"#2E7D32"
       }}
-    >
-      🌾 KisanSetu Loading...
-    </div>
-  );
+      >
+
+        🌾 KisanSetu Loading...
+
+      </div>
+
+    );
+
   }
+
+
 
 
 
@@ -244,24 +261,24 @@ if (profile?.role === "driver") {
 
   if(showAddFarm){
 
-    return (
+    return(
 
       <AddFarm
 
-        onSaved={()=>{
+      onSaved={()=>{
 
-          setShowAddFarm(false);
+        setShowAddFarm(false);
 
-          loadUser();
+        loadUser();
 
-        }}
+      }}
 
 
-        back={()=>{
+      back={()=>{
 
-          setShowAddFarm(false);
+        setShowAddFarm(false);
 
-        }}
+      }}
 
       />
 
@@ -273,27 +290,111 @@ if (profile?.role === "driver") {
 
 
 
-  return (
-<Dashboard
-  user={user}
-  farms={farms}
-  subscriptionStatus={user?.subscription_status}
-  documentStatus={user?.document_status}
-  subscriptionAmount={user?.subscription_amount}
-  onAdmin={() => router.push("/admin")}
-  onDriver={() => router.push("/driver")}
-  onAddFarm={() => setShowAddFarm(true)}
-  onBook={() => {
-    if (user?.document_status !== "approved") {
-      alert("Documents approval ke baad booking open hogi");
-      return;
+
+
+  return(
+
+    <Dashboard
+
+    user={user}
+
+    farms={farms}
+
+
+    subscriptionStatus={
+      user?.subscription_status
     }
-    router.push("/book");
-  }}
-  onSubscription={() => router.push("/subscription")}
-  onBookings={() => router.push("/bookings")}
-  onProfile={() => router.push("/profile")}
-  onNotifications={() => router.push("/notifications")}
-  onLogout={logout}
-/>
-    
+
+
+    documentStatus={
+      user?.document_status
+    }
+
+
+    subscriptionAmount={
+      user?.subscription_amount
+    }
+
+
+    onAdmin={()=>{
+      router.push("/admin");
+    }}
+
+
+
+    onDriver={()=>{
+      router.push("/driver");
+    }}
+
+
+
+    onAddFarm={()=>{
+
+      setShowAddFarm(true);
+
+    }}
+
+
+
+    onBook={()=>{
+
+
+      if(user?.document_status !== "approved"){
+
+        alert(
+          "Documents approval ke baad booking open hogi"
+        );
+
+        return;
+
+      }
+
+
+      router.push("/book");
+
+
+    }}
+
+
+
+    onSubscription={()=>{
+
+      router.push("/subscription");
+
+    }}
+
+
+
+    onBookings={()=>{
+
+      router.push("/bookings");
+
+    }}
+
+
+
+    onProfile={()=>{
+
+      router.push("/profile");
+
+    }}
+
+
+
+    onNotifications={()=>{
+
+      router.push("/notifications");
+
+    }}
+
+
+
+    onLogout={logout}
+
+
+    />
+
+  );
+
+
+}
