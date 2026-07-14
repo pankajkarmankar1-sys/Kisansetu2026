@@ -6,242 +6,238 @@ import BookService from "../components/customer/BookService";
 
 export default function BookPage(){
 
+const router = useRouter();
 
-  const router = useRouter();
 
+const [user,setUser] = useState(null);
+const [selKhet,setSelKhet] = useState(null);
+const [loading,setLoading] = useState(true);
 
-  const [user,setUser] = useState(null);
 
-  const [selKhet,setSelKhet] = useState(null);
 
-  const [loading,setLoading] = useState(true);
+useEffect(()=>{
 
+loadUser();
 
+},[]);
 
 
 
-  useEffect(()=>{
 
-    loadUser();
 
-  },[]);
+async function loadUser(){
 
+try{
 
 
+const {
+data:{
+user:authUser
+}
+}=await supabase.auth.getUser();
 
 
 
+if(!authUser){
 
-  async function loadUser(){
+router.replace("/login");
+return;
 
+}
 
-    try{
 
 
-      const {
+setUser(authUser);
 
-        data:{
-          user:authUser
 
-        }
 
-      } = await supabase.auth.getUser();
 
 
+const {
+data:profile
+}=await supabase
 
+.from("profiles")
 
+.select(`
+document_status,
+role
+`)
 
+.eq(
+"auth_user_id",
+authUser.id
+)
 
-      if(!authUser){
+.maybeSingle();
 
-        router.replace("/login");
 
-        return;
 
-      }
 
 
 
+if(profile?.role==="admin"){
 
-      setUser(authUser);
+router.replace("/admin");
+return;
 
+}
 
 
 
 
 
+if(profile?.role==="driver"){
 
-      const {
+router.replace("/driver");
+return;
 
-        data:profile,
+}
 
-        error
 
-      } = await supabase
 
-      .from("profiles")
 
-      .select(`
 
-        document_status,
 
-        role
+if(
+!profile ||
+profile.document_status !== "approved"
+){
 
-      `)
+alert(
+"Booking ke liye pehle documents approve karwaye"
+);
 
-      .eq(
 
-        "auth_user_id",
+router.replace("/documents");
 
-        authUser.id
+return;
 
-      )
+}
 
-      .maybeSingle();
 
 
 
 
 
+const savedFarm =
+localStorage.getItem(
+"selectedFarm"
+);
 
-      if(error)
-        throw error;
 
 
+if(savedFarm){
 
+setSelKhet(
+JSON.parse(savedFarm)
+);
 
+}
 
 
 
-      if(
 
-        !profile ||
 
-        profile.document_status !== "approved"
+}
 
-      ){
+catch(err){
 
-        router.replace("/documents");
+console.log(err);
 
-        return;
+router.replace("/login");
 
-      }
+}
 
 
+finally{
 
+setLoading(false);
 
+}
 
 
+}
 
-      const savedFarm =
 
-      localStorage.getItem(
-        "selectedFarm"
-      );
 
 
 
 
 
 
-      if(savedFarm){
+function handleNext(){
 
 
-        setSelKhet(
+if(!selKhet){
 
-          JSON.parse(savedFarm)
 
-        );
+alert(
+"Pehle apna Khet select kare"
+);
 
 
-      }
+return;
 
 
+}
 
 
-    }
 
-    catch(err){
+router.push(
+"/payment"
+);
 
-      console.log(err.message);
 
-      router.replace("/");
 
+}
 
-    }
 
-    finally{
 
-      setLoading(false);
 
-    }
 
 
-  }
 
 
+if(loading){
 
 
+return(
 
+<div className="p-6 text-xl font-bold text-green-700">
 
+🌾 Loading Booking...
 
+</div>
 
-  function handleNext(){
+);
 
 
-    router.push(
-      "/dashboard"
-    );
+}
 
 
-  }
 
 
 
 
+return(
 
+<BookService
 
+user={user}
 
-  if(loading){
+selKhet={selKhet}
 
+setSelKhet={setSelKhet}
 
-    return (
+onNext={handleNext}
 
-      <div style={{padding:20}}>
+back={()=>router.back()}
 
-        Loading Booking...
+/>
 
-      </div>
 
-    );
-
-  }
-
-
-
-
-
-
-  return (
-
-    <BookService
-
-      user={user}
-
-      selKhet={selKhet}
-
-      setSelKhet={setSelKhet}
-
-
-      onNext={handleNext}
-
-
-      back={()=>router.back()}
-
-
-    />
-
-  );
+);
 
 
 }
