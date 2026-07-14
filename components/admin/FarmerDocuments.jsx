@@ -17,19 +17,19 @@ export default function FarmerDocuments(){
     loadDocuments();
 
     const channel = supabase
-      .channel("farmer-documents")
-      .on(
-        "postgres_changes",
-        {
-          event:"*",
-          schema:"public",
-          table:"profiles"
-        },
-        ()=>{
-          loadDocuments();
-        }
-      )
-      .subscribe();
+    .channel("farmer-verification")
+    .on(
+      "postgres_changes",
+      {
+        event:"*",
+        schema:"public",
+        table:"profiles"
+      },
+      ()=>{
+        loadDocuments();
+      }
+    )
+    .subscribe();
 
 
     return ()=>{
@@ -59,7 +59,18 @@ export default function FarmerDocuments(){
 
       .from("profiles")
 
-      .select("*")
+      .select(`
+        id,
+        auth_user_id,
+        name,
+        phone,
+        village,
+        document_status,
+        aadhaar_front,
+        aadhaar_back,
+        satbara_7_12,
+        created_at
+      `)
 
       .eq(
         "role",
@@ -76,13 +87,11 @@ export default function FarmerDocuments(){
 
 
       if(error)
-        throw error;
+      throw error;
 
 
 
-      setFarmers(
-        data || []
-      );
+      setFarmers(data || []);
 
 
     }
@@ -104,11 +113,12 @@ export default function FarmerDocuments(){
 
 
 
+
+
   async function updateStatus(
     farmer,
     status
   ){
-
 
     try{
 
@@ -126,6 +136,7 @@ export default function FarmerDocuments(){
 
 
 
+
       const {
         error
       } = await supabase
@@ -136,25 +147,20 @@ export default function FarmerDocuments(){
 
         document_status:status,
 
-
         document_reject_reason:
-
-          status==="rejected"
-          ?
-          reason
-          :
-          null,
+        status==="rejected"
+        ?
+        reason
+        :
+        null,
 
 
         verified_by:
-
-          user?.id || null,
+        user?.id || null,
 
 
         verified_at:
-
-          new Date().toISOString()
-
+        new Date().toISOString()
 
       })
 
@@ -166,8 +172,9 @@ export default function FarmerDocuments(){
 
 
 
+
       if(error)
-        throw error;
+      throw error;
 
 
 
@@ -178,43 +185,42 @@ export default function FarmerDocuments(){
 
       .from("notifications")
 
-      .insert([{
+      .insert({
 
         user_id:
-          farmer.auth_user_id,
+        farmer.auth_user_id,
 
 
         title:
-
-          status==="approved"
-          ?
-          "Documents Approved"
-          :
-          "Documents Rejected",
-
+        status==="approved"
+        ?
+        "✅ Documents Approved"
+        :
+        "❌ Documents Rejected",
 
 
         message:
+        status==="approved"
+        ?
+        "Your documents are approved. Now you can book KisanSetu services."
+        :
+        `Reject Reason: ${reason}`
 
-          status==="approved"
-          ?
-          "Your documents are approved. You can now book services."
-          :
-          `Rejected Reason: ${reason}`
-
-      }]);
-
+      });
 
 
 
 
-      alert("Status Updated");
+
+      alert(
+        "Farmer Status Updated"
+      );
+
 
 
       setReason("");
 
       setSelectedId(null);
-
 
       loadDocuments();
 
@@ -243,7 +249,11 @@ export default function FarmerDocuments(){
 
   if(loading){
 
-    return <h3>Loading Documents...</h3>;
+    return(
+      <h3>
+        Loading Farmer Documents...
+      </h3>
+    );
 
   }
 
@@ -252,238 +262,194 @@ export default function FarmerDocuments(){
 
 
 
-  return(
 
-    <div
+return(
 
-      style={{
-        background:"#fff",
-        padding:20,
-        borderRadius:12
-      }}
+<div
+style={{
+background:"#fff",
+padding:20,
+borderRadius:12
+}}
+>
 
-    >
 
+<h2>
+📄 Farmer Verification
+</h2>
 
-      <h2>
-        📄 Farmer Verification
-      </h2>
 
 
+{
+farmers.map((farmer)=>(
 
 
-      {
-        farmers.length === 0 ?
+<div
+key={farmer.id}
+style={{
+border:"1px solid #ddd",
+padding:15,
+marginTop:15,
+borderRadius:10
+}}
+>
 
-        <p>
-          No Farmers Found
-        </p>
 
+<h3>
+👨‍🌾 {farmer.name || "Farmer"}
+</h3>
 
-        :
 
+<p>
+📱 {farmer.phone || "-"}
+</p>
 
-        farmers.map((farmer)=>(
 
+<p>
+📍 {farmer.village || "-"}
+</p>
 
-          <div
 
-            key={farmer.id}
+<p>
+📄 Status:
+<b>
+{" "}
+{farmer.document_status || "pending"}
+</b>
+</p>
 
-            style={{
-              border:"1px solid #ddd",
-              padding:15,
-              marginTop:15,
-              borderRadius:10
-            }}
 
-          >
 
+<p>
+🪪 Aadhaar Front:
+{" "}
+{farmer.aadhaar_front
+?
+<a href={farmer.aadhaar_front} target="_blank">
+View
+</a>
+:
+"-"
+}
+</p>
 
-            <h3>
-              👨‍🌾 {farmer.name || "Farmer"}
-            </h3>
 
 
-            <p>
-              📱 {farmer.phone || "-"}
-            </p>
+<p>
+📜 7/12:
+{" "}
+{farmer.satbara_7_12
+?
+<a href={farmer.satbara_7_12} target="_blank">
+View
+</a>
+:
+"-"
+}
+</p>
 
 
-            <p>
-              📍 {farmer.village || "-"}
-            </p>
 
 
-            <p>
-              📄 Status :
-              <b>
-                {farmer.document_status || "Pending"}
-              </b>
-            </p>
 
+<button
+disabled={actionLoading}
+onClick={()=>updateStatus(farmer,"approved")}
+style={{
+background:"#16a34a",
+color:"#fff",
+padding:10,
+border:"none",
+borderRadius:8,
+marginRight:10
+}}
+>
+✅ Approve
+</button>
 
 
 
 
-            {
-              farmer.document_url &&
 
-              <p>
+<button
+disabled={actionLoading}
+onClick={()=>setSelectedId(farmer.id)}
+style={{
+background:"#dc2626",
+color:"#fff",
+padding:10,
+border:"none",
+borderRadius:8
+}}
+>
+❌ Reject
+</button>
 
-                <a
 
-                  href={farmer.document_url}
 
-                  target="_blank"
 
-                  rel="noreferrer"
 
-                >
 
-                  📄 View Uploaded Document
+{
+selectedId===farmer.id &&
 
-                </a>
+<div style={{marginTop:15}}>
 
 
-              </p>
+<input
 
-            }
+placeholder="Reject Reason"
 
+value={reason}
 
+onChange={(e)=>setReason(e.target.value)}
 
+style={{
+width:"100%",
+padding:10,
+borderRadius:8
+}}
 
+/>
 
-            <div style={{marginTop:15}}>
 
 
-              <button
+<button
 
-                disabled={actionLoading}
+onClick={()=>updateStatus(farmer,"rejected")}
 
-                onClick={()=>updateStatus(
-                  farmer,
-                  "approved"
-                )}
+style={{
+marginTop:10,
+background:"#f59e0b",
+color:"#fff",
+padding:10,
+border:"none",
+borderRadius:8
+}}
 
-                style={{
-                  background:"#16a34a",
-                  color:"#fff",
-                  padding:10,
-                  border:"none",
-                  borderRadius:8,
-                  marginRight:10
-                }}
+>
+Submit Reject
+</button>
 
-              >
 
-                ✅ Approve
+</div>
 
-              </button>
+}
 
 
 
+</div>
 
 
-              <button
+))
 
-                disabled={actionLoading}
+}
 
-                onClick={()=>setSelectedId(
-                  farmer.id
-                )}
 
-                style={{
-                  background:"#dc2626",
-                  color:"#fff",
-                  padding:10,
-                  border:"none",
-                  borderRadius:8
-                }}
 
-              >
+</div>
 
-                ❌ Reject
-
-              </button>
-
-
-
-
-
-              {
-                selectedId===farmer.id &&
-
-                <div style={{marginTop:15}}>
-
-
-                  <input
-
-                    placeholder="Reject reason"
-
-                    value={reason}
-
-                    onChange={(e)=>
-                      setReason(
-                        e.target.value
-                      )
-                    }
-
-                    style={{
-                      width:"100%",
-                      padding:10,
-                      borderRadius:8
-                    }}
-
-                  />
-
-
-
-                  <button
-
-                    onClick={()=>updateStatus(
-                      farmer,
-                      "rejected"
-                    )}
-
-                    style={{
-                      marginTop:10,
-                      padding:10,
-                      background:"#f59e0b",
-                      color:"#fff",
-                      border:"none",
-                      borderRadius:8
-                    }}
-
-                  >
-
-                    Submit Reject
-
-                  </button>
-
-
-
-                </div>
-
-              }
-
-
-
-            </div>
-
-
-          </div>
-
-
-        ))
-
-      }
-
-
-
-    </div>
-
-  );
+);
 
 
 }
