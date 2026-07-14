@@ -6,11 +6,21 @@ export default function Home() {
 
   useEffect(() => {
     router.replace("/dashboard");
-  }, [router]);
+  }, []);
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Loading KisanSetu...</h2>
+    <div
+      style={{
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "column",
+        background: "#F4F7F6",
+      }}
+    >
+      <h1 style={{ color: "#2E7D32" }}>🌾 KisanSetu</h1>
+      <p>Loading Dashboard...</p>
     </div>
   );
 }
