@@ -5,448 +5,599 @@ import { supabase } from "../../lib/supabase";
 export default function DriverBookings({ driver }) {
 
 
-  const [bookings,setBookings] = useState([]);
+const [bookings,setBookings] = useState([]);
 
-  const [loading,setLoading] = useState(true);
+const [loading,setLoading] = useState(true);
 
+const [otp,setOtp] = useState("");
 
 
 
-  useEffect(()=>{
 
-    if(driver?.id){
 
-      loadBookings();
+useEffect(()=>{
 
-    }
+if(driver?.id){
 
-  },[driver]);
+loadBookings();
 
+}
 
+},[driver]);
 
 
 
 
-  async function loadBookings(){
 
-    try{
 
+async function loadBookings(){
 
-      setLoading(true);
 
+try{
 
 
-      const {
-        data,
-        error
-      } = await supabase
+setLoading(true);
 
-      .from("bookings")
 
-      .select("*")
 
-      .or(
-        `driver_id.eq.${driver.id},driver_id.is.null`
-      )
+const {
 
-      .order(
-        "created_at",
-        {
-          ascending:false
-        }
-      );
+data,
 
+error
 
+}=await supabase
 
+.from("bookings")
 
+.select("*")
 
-      if(error)
-        throw error;
+.or(
+`driver_id.eq.${driver.id},driver_id.is.null`
+)
 
+.order(
+"created_at",
+{
+ascending:false
+}
+);
 
 
 
-      setBookings(
-        data || []
-      );
 
 
+if(error)
+throw error;
 
-    }
-    catch(err){
 
-      console.log(
-        err.message
-      );
 
-    }
-    finally{
+setBookings(data || []);
 
-      setLoading(false);
 
-    }
 
 
-  }
+}
+catch(err){
 
+console.log(
+"Booking Error:",
+err.message
+);
 
+}
 
+finally{
 
+setLoading(false);
 
+}
 
 
-  async function updateStatus(id,status){
+}
 
 
-    try{
 
 
-      const {
-        error
-      } = await supabase
 
-      .from("bookings")
 
-      .update({
 
-        status:status,
 
-        driver_id:
-        driver.id
+async function acceptBooking(id){
 
-      })
 
-      .eq(
-        "id",
-        id
-      );
+try{
 
 
+const {
 
+error
 
+}=await supabase
 
-      if(error)
-        throw error;
+.from("bookings")
 
+.update({
 
+driver_id:driver.id,
 
+status:"Accepted",
 
+work_status:"Assigned"
 
-      alert(
-        "✅ Booking Updated"
-      );
+})
 
+.eq(
+"id",
+id
+)
 
+.is(
+"driver_id",
+null
+);
 
-      loadBookings();
 
 
 
-    }
-    catch(err){
 
-      alert(
-        err.message
-      );
+if(error)
+throw error;
 
-    }
 
 
-  }
 
+alert(
+"✅ Booking Accepted"
+);
 
 
 
+loadBookings();
 
 
 
+}
+catch(err){
 
+alert(err.message);
+
+}
+
+
+}
+
+
+
+
+
+
+
+
+async function completeWork(booking){
+
+
+if(otp !== "1234"){
+
+
+alert(
+"Wrong OTP"
+);
+
+
+return;
+
+
+}
+
+
+
+try{
+
+
+const {
+
+error
+
+}=await supabase
+
+.from("bookings")
+
+.update({
+
+status:"Completed",
+
+work_status:"Completed",
+
+otp_verified:true
+
+})
+
+.eq(
+"id",
+booking.id
+);
+
+
+
+
+
+if(error)
+throw error;
+
+
+
+
+alert(
+"🎉 Work Completed"
+);
+
+
+
+setOtp("");
+
+loadBookings();
+
+
+
+}
+catch(err){
+
+alert(err.message);
+
+}
+
+
+}
   if(loading){
 
-    return (
+return(
 
-      <div style={{padding:20}}>
+<div className="p-5 text-xl font-bold text-green-700">
 
-        Loading Bookings...
+🚜 Loading Bookings...
 
-      </div>
+</div>
 
-    );
+);
 
-  }
+}
 
 
 
 
 
 
+return(
 
-  return (
+<div className="min-h-screen bg-green-50 p-5">
 
-    <div
 
-      style={{
 
-        padding:15,
+<h2 className="text-2xl font-bold text-green-700 mb-5">
 
-        background:"#f5f7fb",
+🚜 Customer Bookings
 
-        minHeight:"100vh"
+</h2>
 
-      }}
 
-    >
 
 
 
-      <h2>
-        🚜 Available Bookings
-      </h2>
 
+{
+bookings.length===0 &&
 
+<div className="bg-white rounded-3xl p-6 shadow">
 
+No Booking Available
 
+</div>
 
-      {
-        bookings.length===0 &&
+}
 
-        <p>
-          No booking available
-        </p>
 
-      }
 
 
 
 
 
 
+{
+bookings.map((booking)=>(
 
-      {
-        bookings.map((booking)=>(
 
+<div
 
+key={booking.id}
 
-          <div
+className="bg-white rounded-3xl shadow-xl p-6 mb-5"
 
-          key={booking.id}
+>
 
-          style={{
 
-            background:"#fff",
 
-            padding:18,
+<h3 className="text-xl font-bold text-green-700">
 
-            borderRadius:15,
+🚜 {booking.service_name}
 
-            marginBottom:15,
+</h3>
 
-            boxShadow:"0 2px 8px #ddd"
 
-          }}
 
-          >
 
 
 
-          <h3>
+<p className="mt-3">
 
-          🚜 {booking.service_name}
+👨‍🌾 Customer:
 
-          </h3>
+<b>
 
+{" "}
 
+{booking.customer_name || "-"}
 
+</b>
 
-          <p>
-          👨‍🌾 Customer:
-          {" "}
-          {booking.customer_name}
-          </p>
+</p>
 
 
 
 
-          <p>
-          📞 Mobile:
-          {" "}
-          {booking.customer_phone}
-          </p>
 
+<p className="mt-2">
 
+📞 Mobile:
 
+<b>
 
-          <p>
-          📍 Village:
-          {" "}
-          {booking.village || "-"}
-          </p>
+{" "}
 
+{booking.customer_phone || "-"}
 
+</b>
 
+</p>
 
-          <p>
-          🏠 Address:
-          {" "}
-          {booking.farm_address || "-"}
-          </p>
 
 
 
 
-          <p>
-          🌾 Acres:
-          {" "}
-          {booking.acres}
-          </p>
 
+<p className="mt-2">
 
+📍 Village:
 
+<b>
 
-          <p>
-          📅 Date:
-          {" "}
-          {booking.booking_date}
-          </p>
+{" "}
 
+{booking.village || "-"}
 
+</b>
 
+</p>
 
-          <p>
-          📝 Note:
-          {" "}
-          {booking.note || "-"}
-          </p>
 
 
 
 
-          <p>
-          💰 Amount:
-          {" "}
-          ₹{booking.amount}
-          </p>
 
+<p className="mt-2">
 
+🌾 Acre:
 
+<b>
 
-          <p>
-          Status:
-          {" "}
-          <b>
-          {booking.status}
-          </b>
-          </p>
+{" "}
 
+{booking.acres}
 
+</b>
 
+</p>
 
 
 
 
-          {
-            booking.status==="Pending" &&
 
 
-            <button
 
-            onClick={()=>updateStatus(
-              booking.id,
-              "Accepted"
-            )}
+<p className="mt-2">
 
-            style={{
+📅 Date:
 
-              width:"100%",
+<b>
 
-              padding:12,
+{" "}
 
-              background:"#16a34a",
+{booking.booking_date}
 
-              color:"#fff",
+</b>
 
-              border:"none",
+</p>
 
-              borderRadius:10,
 
-              fontWeight:"bold"
 
-            }}
 
-            >
 
-            ✅ Accept Booking
 
-            </button>
 
+<p className="mt-2">
 
-          }
+💰 Amount:
 
+<b>
 
+{" "}
 
+₹{booking.amount}
 
+</b>
 
+</p>
 
 
-          {
-            booking.status==="Accepted" &&
 
 
-            <button
 
-            onClick={()=>updateStatus(
-              booking.id,
-              "Completed"
-            )}
 
-            style={{
 
-              width:"100%",
+<p className="mt-2">
 
-              padding:12,
+Status:
 
-              background:"#2563eb",
+<b>
 
-              color:"#fff",
+{" "}
 
-              border:"none",
+{booking.status}
 
-              borderRadius:10,
+</b>
 
-              marginTop:10,
+</p>
 
-              fontWeight:"bold"
 
-            }}
 
-            >
 
-            🚜 Mark Completed
 
-            </button>
 
 
-          }
+{
+booking.status==="Pending"
+&&
 
 
+<button
 
+onClick={()=>acceptBooking(booking.id)}
 
+className="w-full bg-green-600 text-white p-4 rounded-2xl mt-5 font-bold"
 
+>
 
+✅ Accept Booking
 
-          </div>
+</button>
 
+}
 
-        ))
 
-      }
 
 
 
 
 
-    </div>
 
-  );
+{
+booking.status==="Accepted"
+&&
+
+
+<div className="mt-5 bg-blue-50 rounded-2xl p-4">
+
+
+<h3 className="font-bold">
+
+🔐 Work Completion OTP
+
+</h3>
+
+
+
+
+<p className="text-gray-600 mt-2">
+
+Customer se OTP lekar enter kare
+
+</p>
+
+
+
+
+<input
+
+type="number"
+
+value={otp}
+
+onChange={(e)=>
+setOtp(e.target.value)
+}
+
+placeholder="Enter OTP"
+
+className="w-full p-3 rounded-xl border mt-3"
+
+/>
+
+
+
+
+
+
+
+<button
+
+onClick={()=>completeWork(booking)}
+
+className="w-full bg-blue-600 text-white p-4 rounded-2xl mt-4 font-bold"
+
+>
+
+🚜 Complete Work
+
+</button>
+
+
+
+
+</div>
+
+
+}
+
+
+
+
+
+
+
+
+{
+booking.status==="Completed"
+
+&&
+
+<div className="mt-5 bg-green-100 p-4 rounded-2xl font-bold text-green-700">
+
+✅ Work Completed Successfully
+
+</div>
+
+}
+
+
+
+
+
+</div>
+
+
+
+))
+
+}
+
+
+
+
+
+</div>
+
+
+);
+
 
 }
