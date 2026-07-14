@@ -274,105 +274,26 @@ if (profile?.role === "driver") {
 
 
   return (
-
-    <Dashboard
+<Dashboard
   user={user}
   farms={farms}
   subscriptionStatus={user?.subscription_status}
   documentStatus={user?.document_status}
   subscriptionAmount={user?.subscription_amount}
-  onAdmin={() => {
-    router.push("/admin");
+  onAdmin={() => router.push("/admin")}
+  onDriver={() => router.push("/driver")}
+  onAddFarm={() => setShowAddFarm(true)}
+  onBook={() => {
+    if (user?.document_status !== "approved") {
+      alert("Documents approval ke baad booking open hogi");
+      return;
+    }
+    router.push("/book");
   }}
-  ...
+  onSubscription={() => router.push("/subscription")}
+  onBookings={() => router.push("/bookings")}
+  onProfile={() => router.push("/profile")}
+  onNotifications={() => router.push("/notifications")}
+  onLogout={logout}
 />
-
-
-      onDriver={()=>{
-
-        router.push("/driver");
-
-      }}
-
-
-
-
-      onAddFarm={()=>{
-
-        setShowAddFarm(true);
-
-      }}
-
-
-
-
-      onBook={()=>{
-
-
-        if(
-          user?.document_status !== "approved"
-        ){
-
-          alert(
-            "Documents approval ke baad booking open hogi"
-          );
-
-          return;
-
-        }
-
-
-        router.push("/book");
-
-
-      }}
-
-
-
-
-      onSubscription={()=>{
-
-        router.push("/subscription");
-
-      }}
-
-
-
-
-      onBookings={()=>{
-
-        router.push("/bookings");
-
-      }}
-
-
-
-
-      onProfile={()=>{
-
-        router.push("/profile");
-
-      }}
-
-
-
-
-      onNotifications={()=>{
-
-        router.push("/notifications");
-
-      }}
-
-
-
-
-      onLogout={logout}
-
-
-
-    />
-
-  );
-
-
-}
+    
