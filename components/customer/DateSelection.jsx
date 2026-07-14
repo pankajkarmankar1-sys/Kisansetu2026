@@ -14,206 +14,207 @@ export default function DateSelection({
 
 
 
-  const minDate =
-    new Date();
+const minDate = new Date();
 
+minDate.setDate(
+  minDate.getDate()+1
+);
 
-  minDate.setDate(
-    minDate.getDate()+1
-  );
 
 
+function handleNext(){
 
 
+if(!date){
 
-  function handleNext(){
+alert(
+"Booking date select kare"
+);
 
+return;
 
-    if(!date){
+}
 
-      alert(
-        "Booking date select kare"
-      );
 
-      return;
+next();
 
-    }
 
+}
 
-    next();
 
 
-  }
 
 
+return(
 
+<div className="min-h-screen bg-green-50 p-5">
 
 
+<div className="max-w-xl mx-auto bg-white rounded-3xl shadow-xl p-6">
 
 
-  return (
 
-    <div className="min-h-screen bg-green-50 p-5">
+<h1 className="text-2xl font-bold text-green-700">
 
+📅 Select Service Date
 
-      <div className="bg-white rounded-3xl shadow p-6">
+</h1>
 
 
 
-        <h1 className="text-2xl font-bold text-green-700">
+<p className="text-gray-500 mt-2">
 
-          📅 Select Booking Date
+Choose when you need KisanSetu service
 
-        </h1>
+</p>
 
 
 
 
-        <div className="mt-5 bg-green-100 rounded-2xl p-5">
 
 
-          <label className="font-bold">
 
-            🚜 Service Date
+<div className="mt-6 bg-green-50 rounded-2xl p-5">
 
-          </label>
 
+<label className="font-bold">
 
+🚜 Service Date
 
-          <input
+</label>
 
-            type="date"
 
-            min={
-              minDate
-              .toISOString()
-              .split("T")[0]
-            }
 
 
-            value={date}
+<input
 
+type="date"
 
-            onChange={(e)=>
-              setDate(e.target.value)
-            }
+min={
+minDate
+.toISOString()
+.split("T")[0]
+}
 
 
-            className="w-full mt-3 p-3 rounded-xl border"
+value={date}
 
-          />
 
+onChange={(e)=>
+setDate(e.target.value)
+}
 
-        </div>
 
+className="w-full mt-3 p-4 rounded-xl border"
 
+/>
 
 
 
+</div>
 
 
-        <div className="mt-5">
 
 
-          <label className="font-bold">
 
-            📝 Customer Note
 
-          </label>
 
 
-          <textarea
+<div className="mt-6">
 
 
-            rows="4"
+<label className="font-bold">
 
+📝 Driver Message
 
-            placeholder="Driver ke liye message (optional)"
+</label>
 
 
-            value={note}
 
+<textarea
 
-            onChange={(e)=>
-              setNote(e.target.value)
-            }
+rows="4"
 
+value={note}
 
-            className="w-full mt-3 p-3 rounded-xl border"
+onChange={(e)=>
+setNote(e.target.value)
+}
 
-          />
 
+placeholder="Driver ke liye koi information..."
 
-        </div>
+className="w-full mt-3 p-4 rounded-xl border"
 
+/>
 
 
 
+</div>
 
 
 
-        <div className="flex gap-3 mt-6">
 
 
 
-          <button
 
-            onClick={back}
 
-            className="flex-1 bg-gray-200 p-3 rounded-xl font-bold"
+<div className="flex gap-3 mt-6">
 
-          >
 
-            ← Back
 
-          </button>
+<button
 
+onClick={back}
 
+className="flex-1 bg-gray-200 p-4 rounded-xl font-bold"
 
+>
 
+← Back
 
-          <button
+</button>
 
-            onClick={handleNext}
 
-            disabled={!date}
 
 
-            className={`flex-1 p-3 rounded-xl font-bold text-white ${
-              
-              date
 
-              ?
+<button
 
-              "bg-green-600"
+onClick={handleNext}
 
-              :
+className={`flex-1 p-4 rounded-xl font-bold text-white ${
+date
+?
+"bg-green-600"
+:
+"bg-gray-400"
+}`}
 
-              "bg-gray-400"
+disabled={!date}
 
-            }`}
+>
 
-          >
+Continue →
 
-            Continue →
+</button>
 
-          </button>
 
 
 
+</div>
 
-        </div>
 
 
 
 
-      </div>
+</div>
 
 
+</div>
 
-    </div>
 
+);
 
-  );
 
 }
