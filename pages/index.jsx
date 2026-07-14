@@ -1,50 +1,12 @@
 import { useEffect } from "react";
-import { supabase } from "../lib/supabase";
-
+import { useRouter } from "next/router";
 
 export default function Home() {
-
+  const router = useRouter();
 
   useEffect(() => {
+    router.replace("/dashboard");
+  }, [router]);
 
-    checkConnection();
-
-  }, []);
-
-
-
-  async function checkConnection() {
-
-    const { data, error } = await supabase
-      .from("users")
-      .select("*")
-      .limit(1);
-
-
-    if (error) {
-
-      console.log("Supabase Error:", error.message);
-
-    } else {
-
-      console.log("Supabase Connected:", data);
-
-    }
-
-  }
-
-
-
-  return (
-
-    <div>
-
-      <h1>
-        KisanSetu Supabase Test
-      </h1>
-
-    </div>
-
-  );
-
+  return <h2>Loading KisanSetu...</h2>;
 }
