@@ -119,7 +119,15 @@ export default function DashboardPage() {
       );
 
 
+if (profile?.role === "admin") {
+  router.replace("/admin");
+  return;
+}
 
+if (profile?.role === "driver") {
+  router.replace("/driver");
+  return;
+}
 
 
       setUser({
@@ -211,14 +219,23 @@ export default function DashboardPage() {
 
 
 
-  if(loading){
-
-    return (
-      <h2>
-        Loading...
-      </h2>
-    );
-
+  if (loading) {
+  return (
+    <div
+      style={{
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        background: "#F4F7F6",
+        fontSize: "24px",
+        fontWeight: "bold",
+        color: "#2E7D32",
+      }}
+    >
+      🌾 KisanSetu Loading...
+    </div>
+  );
   }
 
 
@@ -259,21 +276,16 @@ export default function DashboardPage() {
   return (
 
     <Dashboard
-
-
-      user={user}
-
-
-      farms={farms}
-
-
-
-      onAdmin={()=>{
-
-        router.push("/admin");
-
-      }}
-
+  user={user}
+  farms={farms}
+  subscriptionStatus={user?.subscription_status}
+  documentStatus={user?.document_status}
+  subscriptionAmount={user?.subscription_amount}
+  onAdmin={() => {
+    router.push("/admin");
+  }}
+  ...
+/>
 
 
       onDriver={()=>{
